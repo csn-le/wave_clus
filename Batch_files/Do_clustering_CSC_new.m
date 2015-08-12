@@ -91,13 +91,22 @@ for k=1:length(channels)
         
         %Gets the gain and converts the data to micro V.
         eval(['scale_factor=textread(''CSC' num2str(channel) '.Ncs'',''%s'',43);']);
-        x = x*str2num(scale_factor{43})*1e6;
+        if(str2num(scale_factor{41})*1e6 > 0.5)
+            num_scale_factor=str2num(scale_factor{43});
+        else
+            num_scale_factor=str2num(scale_factor{41});
+        end
+        x=x*num_scale_factor*1e6;
         
         %Filters and gets threshold
         [b,a]=ellip(2,0.1,40,[handles.par.sort_fmin handles.par.sort_fmax]*2/(sr));
         xf=filtfilt(b,a,x);
         thr = handles.par.stdmin * median(abs(xf))/0.6745;
         thrmax = handles.par.stdmax * median(abs(xf))/0.6745;
+        if strmatch(handles.par.detection,'neg');
+            thr = -thr;
+            thrmax = -thrmax;
+        end
                 
         % CALCULATES INPUTS TO THE CLUSTERING ALGORITHM. 
         inspk = wave_features(spikes,handles);              %takes wavelet coefficients.

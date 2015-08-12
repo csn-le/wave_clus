@@ -2,7 +2,7 @@ function par=set_parameters(filename,handles)
 
 % SPC PARAMETERS
 par.mintemp = 0.00;                  % minimum temperature for SPC
-par.maxtemp = 0.251;                 % maximum temperature for SPC
+par.maxtemp = 0.201;                 % maximum temperature for SPC %0.251???
 par.tempstep = 0.01;                 % temperature steps
 par.SWCycles = 100;                  % SPC iterations for each temperature
 par.KNearNeighb=11;                  % number of nearest neighbors for SPC
@@ -17,22 +17,21 @@ par.temp_plot = 'log';               % temperature plot in log scale
 par.fname = 'data';                  % filename for interaction with SPC
 
 % DETECTION PARAMETERS
-% par.sr = 21000;                        % sampling rate (in Hz).
-par.sr = 20000;                        % sampling rate (in Hz).
+par.sr = 30000;                        % sampling rate (in Hz). %21000???
 par.tmax = 'all';                      % maximum time to load
-par.w_pre = 20;                        % number of pre-event data points stored (default 20)
-par.w_post = 44;                       % number of post-event data points stored (default 44))
+par.w_pre = 15;                        % number of pre-event data points stored (default 20)
+par.w_post = 33;                       % number of post-event data points stored (default 44))
 ref = 3;                             % detector dead time (in ms)
 par.ref = floor(ref *par.sr/1000);     % conversion to datapoints
 par.stdmin = 5;                      % minimum threshold for detection
 par.stdmax = 50;                       % maximum threshold for detection
-par.detect_fmin = 400;                 % high pass filter for detection
+par.detect_fmin = 300;                 % high pass filter for detection
 par.detect_fmax = 3000;                 % low pass filter for detection (default 1000)
-par.sort_fmin = 400;                   % high pass filter for sorting 
+par.sort_fmin = 300;                   % high pass filter for sorting 
 par.sort_fmax = 3000;                   % low pass filter for sorting (default 3000)
 % par.detection = 'pos';                % type of threshold
 % par.detection = 'neg';
-par.detection = 'both';
+par.detection = 'neg';
 par.segments = 1;                    % nr. of segments in which the data is cutted.
 
 % INTERPOLATION PARAMETERS

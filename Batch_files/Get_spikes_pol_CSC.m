@@ -85,7 +85,7 @@ for k=1:length(polytrodes)
         [spikes, index] = amp_detect_pol(x,handles); clear x;
         size(spikes,1)
         % JOIN SEGMENTS
-        index=(index+tsmin(j))*1e6/sr;
+        index=index*1e6/sr+tsmin(j);
         index_all = [index_all index]; clear index;
         if length(spikes)~=0
             for i=1:length(channels)

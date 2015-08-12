@@ -11,8 +11,8 @@ handles.par.stdmin = 5;                     %minimum threshold (default 5)
 handles.par.stdmax = 100;                    %maximum threshold (default 50)
 handles.par.interpolation = 'y';            %interpolation for alignment (default 'y')
 handles.par.int_factor = 2;                 %interpolation factor (default 2)
-handles.par.detect_fmin = 300;              %high pass filter for detection (default 300)
-handles.par.detect_fmax = 3000;             %low pass filter for detection (default 3000)
+handles.par.detect_fmin = 1000;              %high pass filter for detection (default 300)
+handles.par.detect_fmax = 3000;             %low pass filter for detection (default 1000)
 handles.par.sort_fmin = 300;                %high pass filter for sorting (default 300)
 handles.par.sort_fmax = 3000;               %low pass filter for sorting (default 3000)
 handles.par.segments = 10;                  %length of segments in which the data is cutted 
@@ -57,7 +57,7 @@ for k=1:length(polytrodes)
         [spikes, index] = amp_detect_pol(x,handles); clear x;
        
         % JOIN SEGMENTS
-        index=(index+tsmin)*1e6/sr;
+        index=index*1e6/sr+tsmin;
         index_all = [index_all index]; clear index;
         if length(spikes)~=0
             for i=1:length(channels)

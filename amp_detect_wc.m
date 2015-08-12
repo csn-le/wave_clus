@@ -15,7 +15,7 @@ fmin_detect = handles.par.detect_fmin;
 fmax_detect = handles.par.detect_fmax;
 fmin_sort = handles.par.sort_fmin;
 fmax_sort = handles.par.sort_fmax;
-
+x=double(x);
 % HIGH-PASS FILTER OF THE DATA
 xf=zeros(length(x),1);
 if exist('ellip')                         %Checks for the signal processing toolbox

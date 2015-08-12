@@ -12,13 +12,13 @@ end
 
 handles.par.w_pre=20;                       %number of pre-event data points stored (default 20)
 handles.par.w_post=44;                      %number of post-event data points stored (default 44)
-handles.par.detection = 'pos';              %type of threshold (default 'pos')
+handles.par.detection = 'pos';              %type of threshold ('pos', 'neg', 'both', default 'pos')
 handles.par.stdmin = 5;                     %minimum threshold (default 5)
 handles.par.stdmax = 50;                    %maximum threshold (default 50)
 handles.par.interpolation = 'y';            %interpolation for alignment (default 'y')
 handles.par.int_factor = 2;                 %interpolation factor (default 2)
 handles.par.detect_fmin = 300;              %high pass filter for detection (default 300)
-handles.par.detect_fmax = 1000;             %low pass filter for detection (default 1000)
+handles.par.detect_fmax = 3000;             %low pass filter for detection (default 1000)
 handles.par.sort_fmin = 300;                %high pass filter for sorting (default 300)
 handles.par.sort_fmax = 3000;               %low pass filter for sorting (default 3000)
 handles.par.segments_length = 5;            %length of segments in which the data is cutted (default 5min)
@@ -53,7 +53,11 @@ for k= 1:length(channels)
         TimeStamps(ind+1)=TimeStamps(ind)+dt;
         clear tsdiff;
         dt=min(diff(TimeStamps));
-        if dt<=0, error('automated correction of corrupt TimeStamps failed - try manually!'); end
+        if(dt<=0)
+            disp('loading TimeStamps from channel 1');
+            load('TimeStamps_ch1.mat'); 
+        end
+        %if dt<=0, error('automated correction of corrupt TimeStamps failed - try manually!'); end
     end
 	sr = 512*1e6/dt;
 	min_ref_per=1.5;                                    %detector dead time (in ms)
@@ -78,14 +82,20 @@ for k= 1:length(channels)
     
     %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.
     eval(['scale_factor=textread(''CSC' num2str(channel) '.Ncs'',''%s'',43);']);
+    if(str2num(scale_factor{41})*1e6 > 0.5)
+        num_scale_factor=str2num(scale_factor{43});
+    else
+        num_scale_factor=str2num(scale_factor{41});
+    end
     
     for j=1:length(tsmin)
         % LOAD CSC DATA
         Samples=fread(f,512*(recmax(j)-recmin(j)+1),'512*int16=>int16',8+4+4+4);
         x=double(Samples(:))'; clear Samples;
-        x=x*str2num(scale_factor{43})*1e6;
+        x=x*num_scale_factor*1e6;
         if(handles.par.notchfilter==1)
             [b,a]=ellip(2,0.5,20,[1999 2001]*2/sr,'stop');
+            %[b,a]=ellip(2,0.5,20,[59 61]*2/sr,'stop');
             x=filtfilt(b,a,x);
         end
         

@@ -35,12 +35,18 @@ fclose(fid);
 [str,maxsize,endian]=computer;
 handles.par.system=str;
 switch handles.par.system
-    case {'PCWIN','PCWIN64'}    
+    case {'PCWIN'}    
         if exist([pwd '\cluster.exe'])==0
             directory = which('cluster.exe');
             copyfile(directory,pwd);
         end
         dos(sprintf('cluster.exe %s.run',fname));
+    case {'PCWIN64'}    
+        if exist([pwd '\cluster_64.exe'])==0
+            directory = which('cluster_64.exe');
+            copyfile(directory,pwd);
+        end
+        dos(sprintf('cluster_64.exe %s.run',fname));
     case {'MAC'}
         if exist([pwd '/cluster_mac.exe'])==0
             directory = which('cluster_mac.exe');
@@ -55,7 +61,7 @@ switch handles.par.system
         end
         run_maci = sprintf('./cluster_maci.exe %s.run',fname);
 	    unix(run_maci);
-   otherwise  %(GLNX86, GLNXA64, GLNXI64 correspond to linux)
+    otherwise  %(GLNX86, GLNXA64, GLNXI64 correspond to linux)
         if exist([pwd '/cluster_linux.exe'])==0
             directory = which('cluster_linux.exe');
             copyfile(directory,pwd);

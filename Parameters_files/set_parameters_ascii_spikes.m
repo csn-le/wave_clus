@@ -6,7 +6,7 @@ par.system = 'windows';
 
 % SPC PARAMETERS
 par.mintemp = 0.00;                  % minimum temperature for SPC
-par.maxtemp = 0.251;                 % maximum temperature for SPC
+par.maxtemp = 0.201;                 % maximum temperature for SPC
 par.tempstep = 0.01;                 % temperature steps
 par.SWCycles = 100;                  % SPC iterations for each temperature
 par.KNearNeighb=11;                  % number of nearest neighbors for SPC
@@ -22,7 +22,7 @@ par.fname = 'data';                  % filename for interaction with SPC
 
 % % DETECTION PARAMETERS
 par.tmax= 'all';                       % maximum time to load
-par.sr= 34375;                         % sampling rate     
+par.sr= 30000;                         % sampling rate
 par.w_pre = 29;                          % number of pre-event data points stored 
 par.w_post = 61;                         % number of post-event data points stored 
 par.alignment_window = 10;             % number of points around the sample expected to be the maximum 
@@ -31,7 +31,7 @@ par.alignment_window = 10;             % number of points around the sample expe
 % par.stdmin = 5;                      % minimum threshold for detection
 % par.stdmax = 20;                     % maximum threshold for detection
 % par.detection = 'neg';               % type of threshold
-par.detection = 'neg';
+par.detection = 'both';
 % % par.detection = 'both';
 % 
 % % INTERPOLATION PARAMETERS

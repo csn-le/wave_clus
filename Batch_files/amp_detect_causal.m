@@ -1,4 +1,4 @@
-function [spikes,thr,index] = amp_detect(x,handles);
+function [spikes,thr,index] = amp_detect_causal(x,handles);
 % Detect spikes with amplitude thresholding. Uses median estimation.
 % Detection is done with filters set by fmin_detect and fmax_detect. Spikes
 % are stored for sorting using fmin_sort and fmax_sort. This trick can
@@ -18,7 +18,7 @@ fmax_sort = handles.par.sort_fmax;
 
 % HIGH-PASS FILTER OF THE DATA
 xf=zeros(length(x),1);
-if exist('ellip','file')                         %Checks for the signal processing toolbox
+if exist('ellip')                         %Checks for the signal processing toolbox
     [b,a]=ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
     xf_detect=filtfilt(b,a,x);
     [b,a]=ellip(2,0.1,40,[fmin_sort fmax_sort]*2/sr);
@@ -27,7 +27,7 @@ else
     xf=fix_filter(x);                   %Does a bandpass filtering between [300 3000] without the toolbox.
     xf_detect = xf;
 end
-% lx=length(xf);
+lx=length(xf);
 
 clear x;
 
@@ -44,7 +44,7 @@ switch detect
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
-                [~,iaux]=max((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                [maxi iaux]=max((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
                 nspk = nspk + 1;
                 index(nspk) = iaux + xaux(i) -1;
                 xaux0 = index(nspk);
@@ -56,7 +56,7 @@ switch detect
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
-                [~,iaux]=min((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                [maxi iaux]=min((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
                 nspk = nspk + 1;
                 index(nspk) = iaux + xaux(i) -1;
                 xaux0 = index(nspk);
@@ -68,7 +68,7 @@ switch detect
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
-                [~,iaux]=max(abs(xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                [maxi iaux]=max(abs(xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
                 nspk = nspk + 1;
                 index(nspk) = iaux + xaux(i) -1;
                 xaux0 = index(nspk);

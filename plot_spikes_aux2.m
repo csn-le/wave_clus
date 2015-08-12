@@ -43,7 +43,7 @@ multi_isi= sum(N(1:3));
 eval(['[N,X]=hist(times,0:par.bin_step' num2str(axes_nr-1) ':par.nbins' num2str(axes_nr-1) ');']);
 bar(X(1:end-1),N(1:end-1))
 eval(['xlim([0 par.nbins' num2str(axes_nr-1) ']);']);
-eval(['set(get(gca,''children''),''facecolor'',''' colors(axes_nr) ''',''edgecolor'',''' colors(axes_nr) ''',''linewidth'',0.01);']);    
+%eval(['set(get(gca,''children''),''facecolor'',''' colors(axes_nr) ''',''edgecolor'',''' colors(axes_nr) ''',''linewidth'',0.01);']);
 title([num2str(multi_isi) ' in < 3ms'])
 xlabel('ISI (ms)');
 

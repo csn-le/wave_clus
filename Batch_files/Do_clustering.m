@@ -2,7 +2,7 @@
 % Does clustering on all files in Files.txt
 % Runs after Get_spikes.
 
-function do_clustering
+function Do_clustering
 
 
 print2file = 1;                              % for saving printouts.
@@ -10,9 +10,9 @@ print2file = 1;                              % for saving printouts.
 
 handles.par.w_pre = 20;                       % number of pre-event data points stored
 handles.par.w_post = 44;                      % number of post-event data points stored
-handles.par.detection = 'pos';              % type of threshold
-%handles.par.detection = 'neg';              % type of threshold
-% handles.par.detection = 'both';              % type of threshold
+% handles.par.detection = 'pos';              % type of threshold
+% handles.par.detection = 'neg';              % type of threshold
+handles.par.detection = 'both';              % type of threshold
 handles.par.stdmin = 5.00;                  % minimum threshold
 handles.par.stdmax = 50;                    % maximum threshold
 handles.par.interpolation = 'y';            % interpolation for alignment
@@ -28,7 +28,7 @@ handles.par.template_sdnum = 3;             % max radius of cluster in std devs.
 handles.par.permut = 'y';                   % for selection of random 'par.max_spk' spikes before starting templ. match. 
 % handles.par.permut = 'n';                 % for selection of the first 'par.max_spk' spikes before starting templ. match.
 
-handles.par.features = 'wav';               % choice of spike features (wav)
+handles.par.features = 'wav';               % choice of spike features
 handles.par.inputs = 10;                    % number of inputs to the clustering (def. 10)
 handles.par.scales = 4;                     % scales for wavelet decomposition
 if strcmp(handles.par.features,'pca');      % number of inputs to the clustering for pca
@@ -42,7 +42,7 @@ handles.par.num_temp = floor(...
 (handles.par.maxtemp - ...
 handles.par.mintemp)/handles.par.tempstep); % total number of temperatures 
 handles.par.stab = 0.8;                     % stability condition for selecting the temperature
-handles.par.SWCycles = 100;                 % number of montecarlo iterations (100)
+handles.par.SWCycles = 100;                 % number of montecarlo iterations
 handles.par.KNearNeighb = 11;               % number of nearest neighbors
 handles.par.randomseed = 0;                 % if 0, random seed is taken as the clock value
 %handles.par.randomseed = 147;              % If not 0, random seed   
@@ -55,7 +55,7 @@ handles.par.temp_plot = 'log';              % temperature plot in log scale
 handles.par.force_auto = 'y';               % automatically force membership if temp>3.
 handles.par.max_spikes = 5000;              % maximum number of spikes to plot.
 
-handles.par.sr = 21000;                     % sampling frequency, in Hz.
+handles.par.sr = 24000;                     % sampling frequency, in Hz.
 
 figure
 set(gcf,'PaperOrientation','Landscape','PaperPosition',[0.25 0.25 10.5 8]) 
@@ -63,6 +63,7 @@ set(gcf,'PaperOrientation','Landscape','PaperPosition',[0.25 0.25 10.5 8])
 files = textread('Files.txt','%s');
 
 for k=1:length(files)
+    clf
     tic
     file_to_cluster = files(k)
 
@@ -94,13 +95,14 @@ for k=1:length(files)
             eval(['load ' char(file_to_cluster) ]); 
         end;
     end; 
-    
+
     % LOAD SPIKES
     handles.par.fname = ['data_' char(file_to_cluster)];   %filename for interaction with SPC
     nspk = size(spikes,1);
     naux = min(handles.par.max_spk,size(spikes,1));
     handles.par.min_clus = max(handles.par.min_clus_abs,handles.par.min_clus_rel*naux);
     
+if nspk>15    
     % CALCULATES INPUTS TO THE CLUSTERING ALGORITHM. 
     inspk = wave_features(spikes,handles);              %takes wavelet coefficients.
     
@@ -241,7 +243,7 @@ for k=1:length(files)
         [n,c]=hist(xa,0:1:100);
         bar(c(1:end-1),n(1:end-1))
         xlim([0 100])
-        % set(get(gca,'children'),'facecolor','b','linewidth',0.01)    
+        set(get(gca,'children'),'facecolor','b','linewidth',0.01)    
         xlabel([num2str(sum(n(1:3))) ' in < 3ms'])
         title([num2str(length(class1)) ' spikes']);
         cluster(class1(:),1)=1;
@@ -264,7 +266,7 @@ for k=1:length(files)
             [n,c]=hist(xa,0:1:100);
             bar(c(1:end-1),n(1:end-1))
             xlim([0 100])
-            % set(get(gca,'children'),'facecolor','r','linewidth',0.01)    
+            set(get(gca,'children'),'facecolor','r','linewidth',0.01)    
             xlabel([num2str(sum(n(1:3))) ' in < 3ms'])
             cluster(class2(:),1)=2;
             title([num2str(length(class2)) ' spikes']);
@@ -287,7 +289,7 @@ for k=1:length(files)
             [n,c]=hist(xa,0:1:100);
             bar(c(1:end-1),n(1:end-1))
             xlim([0 100])
-            % set(get(gca,'children'),'facecolor','g','linewidth',0.01)    
+            set(get(gca,'children'),'facecolor','g','linewidth',0.01)    
             xlabel([num2str(sum(n(1:3))) ' in < 3ms'])
             cluster(class3(:),1)=3;
             title([num2str(length(class3)) ' spikes']);
@@ -322,9 +324,33 @@ for k=1:length(files)
     if length(class3) > handles.par.min_clus; subplot(3,5,9); ylim([ymin ymax]); end
     if length(class0) > handles.par.min_clus; subplot(3,5,10); ylim([ymin ymax]); end
         
-    subplot(3,1,1)
+    %SAVE FILES
+        par = handles.par;
+        cluster_class = cluster;
+        outfile=['times_' char(file_to_cluster)];
+
+        if handles.par.permut == 'n'
+            save(outfile, 'cluster_class', 'par', 'spikes', 'inspk')
+        else
+            save(outfile, 'cluster_class', 'par', 'spikes', 'inspk', 'ipermut')
+        end
+        features_name = handles.par.features;
+
+        numclus=length(clus_pop)-1;
+        outfileclus='cluster_results.txt';
+        fout=fopen(outfileclus,'at+');
+        fprintf(fout,'%s\t %s\t %g\t %d\t %g\t', char(file_to_cluster), features_name, temperature, numclus, handles.par.stdmin);
+        for ii=1:numclus
+            fprintf(fout,'%d\t',clus_pop(ii));
+        end
+        fprintf(fout,'%d\n',clus_pop(end));
+        fclose(fout);
+        clear inspk; clear cluster_class
+        
+        subplot(3,1,1)      
+    end
     box off; hold on
-    % these lines are for plotting continuous data 
+    %% these lines are for plotting continuous data 
     if continuous_data_av == 1
         plot((1:length(xf))/handles.par.sr,xf(1:length(xf)))
         if strcmp(handles.par.detection,'pos')
@@ -339,39 +365,70 @@ for k=1:length(files)
             ylim([-thrmax thrmax])
         end
     end;
-    % end of continuous data plotting
     title([pwd '/' char(file_to_cluster)],'Interpreter','none','Fontsize',14)
-    features_name = handles.par.features;
-    toc
+%     title([pwd '   Channel  ' num2str(channel)],'Interpreter','none','Fontsize',14)
     if print2file==0;
         print
-    else       
+    else
         set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
         set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print -djpeg fig2print_' char(file_to_cluster)]);
-    end
-        
-    %SAVE FILES
-    par = handles.par;
-    cluster_class = cluster;
-    outfile=['times_' char(file_to_cluster)];
-    
-    if handles.par.permut == 'n'
-        save(outfile, 'cluster_class', 'par', 'spikes', 'inspk')
-    else
-        save(outfile, 'cluster_class', 'par', 'spikes', 'inspk', 'ipermut')
-    end
-    
-    numclus=length(clus_pop)-1;
-    outfileclus='cluster_results.txt';
-    fout=fopen(outfileclus,'at+');
-    fprintf(fout,'%s\t %s\t %g\t %d %g\t', char(file_to_cluster), features_name, temperature, numclus, handles.par.stdmin);
-    for ii=1:numclus
-        fprintf(fout,'%d\t',clus_pop(ii));
-    end
-    fprintf(fout,'%d\n',clus_pop(end));
-    fclose(fout);
-clear spikes; clear inspk; clear cluster_class
+%         eval(['print -djpeg fig2printNSX_ch' num2str(channel)]);
+        eval(['print -dpng fig2print_' char(file_to_cluster)]);
+    end 
+    toc
+    clear spikes; 
+%     
+%     subplot(3,1,1)
+% 
+%     box off; hold on
+%     %% these lines are for plotting continuous data 
+%     if continuous_data_av == 1
+%         plot((1:length(xf))/handles.par.sr,xf(1:length(xf)))
+%         if strcmp(handles.par.detection,'pos')
+%             line([0 length(xf)/handles.par.sr],[thr thr],'color','r')
+%             ylim([-thrmax/2 thrmax])
+%         elseif strcmp(handles.par.detection,'neg')
+%             line([0 length(xf)/handles.par.sr],[-thr -thr],'color','r')
+%             ylim([-thrmax thrmax/2])
+%         else
+%             line([0 length(xf)/handles.par.sr],[thr thr],'color','r')
+%             line([0 length(xf)/handles.par.sr],[-thr -thr],'color','r')
+%             ylim([-thrmax thrmax])
+%         end
+%     end;
+%     % end of continuous data plotting
+%     title([pwd '/' char(file_to_cluster)],'Interpreter','none','Fontsize',14)
+%     features_name = handles.par.features;
+%     toc
+%     if print2file==0;
+%         print
+%     else       
+%         set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
+%         set(gcf,'paperposition',[.25 .25 10.5 7.8])
+%         eval(['print -djpeg fig2print_' char(file_to_cluster)]);
+%     end
+%         
+%     %SAVE FILES
+%     par = handles.par;
+%     cluster_class = cluster;
+%     outfile=['times_' char(file_to_cluster)];
+%     
+%     if handles.par.permut == 'n'
+%         save(outfile, 'cluster_class', 'par', 'spikes', 'inspk')
+%     else
+%         save(outfile, 'cluster_class', 'par', 'spikes', 'inspk', 'ipermut')
+%     end
+%     
+%     numclus=length(clus_pop)-1;
+%     outfileclus='cluster_results.txt';
+%     fout=fopen(outfileclus,'at+');
+%     fprintf(fout,'%s\t %s\t %g\t %d %g\t', char(file_to_cluster), features_name, temperature, numclus, handles.par.stdmin);
+%     for ii=1:numclus
+%         fprintf(fout,'%d\t',clus_pop(ii));
+%     end
+%     fprintf(fout,'%d\n',clus_pop(end));
+%     fclose(fout);
+% clear spikes; 
 end
 
 
