@@ -61,7 +61,7 @@ for k= 1:length(channels)
     fseek(f,16384+8+4+4+4,'bof'); % put pointer to the beginning of data
     
     %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.
-    eval(['scale_factor=textread(''CSC' num2str(channel) '.Ncs'',''%s'',41);']);
+    scale_factor = textread(['CSC' num2str(channel) '.Ncs'],'%s',41);
     
     for j=1:length(tsmin)
         % LOAD CSC DATA

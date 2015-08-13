@@ -24,7 +24,7 @@ handles.par.stdmax = 50;                    %maximum threshold (default 50)
 handles.par.interpolation = 'y';            %interpolation for alignment (default 'y')
 handles.par.int_factor = 2;                 %interpolation factor (default 2)
 handles.par.detect_fmin = 300;              %high pass filter for detection (default 300)
-handles.par.detect_fmax = 3000;             %low pass filter for detection (default 1000)
+handles.par.detect_fmax = 1000;             %low pass filter for detection (default 1000)
 handles.par.sort_fmin = 300;                %high pass filter for sorting (default 300)
 handles.par.sort_fmax = 3000;               %low pass filter for sorting (default 3000)
 
@@ -93,20 +93,29 @@ for k=1:length(channels)
         clear Samples; 
         
         %Gets the gain and converts the data to micro V.
-        eval(['scale_factor=textread(''CSC' num2str(channel) '.Ncs'',''%s'',41);']);
-        x = x*str2num(scale_factor{41})*1e6;
+		scale_factor = textread(['CSC' num2str(channel) '.Ncs'],'%s',43);
+        if (str2num(scale_factor{41})*1e6 > 0.5)
+            num_scale_factor=str2num(scale_factor{43});
+        else
+            num_scale_factor=str2num(scale_factor{41});
+        end
+        x=x*num_scale_factor*1e6;
         
         %Filters and gets threshold
         [b,a]=ellip(2,0.1,40,[handles.par.sort_fmin handles.par.sort_fmax]*2/(sr));
         xf=filtfilt(b,a,x);
         thr = handles.par.stdmin * median(abs(xf))/0.6745;
         thrmax = handles.par.stdmax * median(abs(xf))/0.6745;
+        if strmatch(handles.par.detection,'neg');
+            thr = -thr;
+            thrmax = -thrmax;
+        end
                 
         % CALCULATES INPUTS TO THE CLUSTERING ALGORITHM. 
         inspk = wave_features(spikes,handles);              %takes wavelet coefficients.
         
         % SELECTION OF SPIKES FOR SPC
-        if handles.par.permut == 'n'
+        if (handles.par.permut == 'n')
             % GOES FOR TEMPLATE MATCHING IF TOO MANY SPIKES.
             if size(spikes,1)> handles.par.max_spk;
                 % take first 'handles.par.max_spk' spikes as an input for SPC
