@@ -203,11 +203,8 @@ switch char(handles.datatype)
         [filename, pathname] = uigetfile('*.Ncs','Select file');
         set(handles.file_name,'string',['Loading:    ' pathname filename]);
         cd(pathname);
-        if length(filename) == 8
-            channel = filename(4);
-        else
-            channel = filename(4:5);
-        end
+        channel = filename(4:end-4);
+
         f=fopen(filename,'r','l');
         fseek(f,16384,'bof');                                     %Skip Header, put pointer to the first record
         TimeStamps=fread(f,inf,'int64',(4+4+4+2*512));            %Read all TimeStamps
@@ -244,12 +241,15 @@ switch char(handles.datatype)
                 x=double(Samples(:))';
                 clear Samples;
                
-                %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.
-% %                 eval(['scale_factor=textread(''CSC' num2str(channel) '.Ncs'',''%s'',41);']);
-% %                 x=x*str2num(scale_factor{41})*1e6;       
-                eval(['scale_factor=textread(''CSC' num2str(channel) '.Ncs'',''%s'',43);']);
-                x=x*str2num(scale_factor{43})*1e6;
-                
+                %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.    
+                scale_factor = textread(['CSC' channel '.Ncs'],'%s',43);
+                if(str2num(scale_factor{41})*1e6 > 0.5)
+                    num_scale_factor=str2num(scale_factor{43}); %for the new CSC format
+                else
+                    num_scale_factor=str2num(scale_factor{41}); %for the old CSC format
+                end
+                x=x*num_scale_factor*1e6;
+        
                 handles.flag = j;                                   %flag for plotting only in the 1st loop
                 [spikes,thr,index]  = amp_detect_wc(x,handles);     %detection with amp. thresh.
                 index = index*1e6/sr+tsmin(j);
@@ -337,11 +337,8 @@ switch char(handles.datatype)
         [filename, pathname] = uigetfile('*.Ncs','Select file');
         set(handles.file_name,'string',['Loading:    ' pathname filename]);
         cd(pathname);
-        if length(filename) == 8
-            channel = filename(4);
-        else
-            channel = filename(4:5);
-        end
+        channel = filename(4:end-4);
+
         f=fopen(filename,'r','l');
         fseek(f,16384,'bof');                                       %Skip Header, put pointer to the first record
         TimeStamps=fread(f,inf,'int64',(4+4+4+2*512));              %Read all TimeStamps
@@ -353,11 +350,11 @@ switch char(handles.datatype)
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         
         %Load spikes and parameters
-        eval(['load times_CSC' num2str(channel) ';']);
+        eval(['load times_CSC' channel ';']);
         index=cluster_class(:,2)';
 
         %Load clustering results
-                fname = [handles.par.fname '_ch' num2str(channel)];         %filename for interaction with SPC
+        fname = [handles.par.fname '_ch' channel];         %filename for interaction with SPC
         clu=load([fname '.dg_01.lab']);
         tree=load([fname '.dg_01']);
         handles.par.fnamespc = fname;
@@ -392,9 +389,13 @@ switch char(handles.datatype)
         fclose(f);
 
         %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.
-        eval(['scale_factor=textread(''CSC' num2str(channel) '.Ncs'',''%s'',41);']);
-        x=x*str2num(scale_factor{41})*1e6;
-
+        scale_factor = textread(['CSC' channel '.Ncs'],'%s',43);
+        if(str2num(scale_factor{41})*1e6 > 0.5)
+            num_scale_factor=str2num(scale_factor{43});
+        else
+            num_scale_factor=str2num(scale_factor{41});
+        end
+        x=x*num_scale_factor*1e6;
         [spikes,thr,index] = amp_detect_wc(x,handles);              %Detection with amp. thresh.
     
    case 'nev data (pre-clustered)'                                   %nev files matlab files
@@ -582,12 +583,8 @@ switch char(handles.datatype)
         [filename, pathname] = uigetfile('*.Nse','Select file');
         set(handles.file_name,'string',['Loading:    ' pathname filename]);
         cd(pathname);
-        if length(filename) == 7
-            channel = filename(3);
-        else
-            channel = filename(3:4);
-        end
-        [index, Samples] = Nlx2MatSE(['Sc' num2str(channel) '.Nse'],1,0,0,0,1,0);
+        channel = filename(3:end-4);
+        [index, Samples] = Nlx2MatSE(['Sc' channel '.Nse'],1,0,0,0,1,0);
         
         spikes(:,:)= Samples(:,1,:); clear Samples; spikes = spikes';
         handles.par = set_parameters_Sc(filename,handles);          %Load parameters
@@ -597,7 +594,7 @@ switch char(handles.datatype)
         [spikes] = spike_alignment(spikes,handles);
         
         %Load clustering results
-        fname = [handles.par.fname '_ch' num2str(channel)];         %filename for interaction with SPC
+        fname = [handles.par.fname '_ch' channel];         %filename for interaction with SPC
         clu=load([fname '.dg_01.lab']);
         tree=load([fname '.dg_01']);
         handles.par.fnamespc = fname;
