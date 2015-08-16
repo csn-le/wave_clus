@@ -242,7 +242,8 @@ switch char(handles.datatype)
                 clear Samples;
                
                 %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.    
-                scale_factor = textread(['CSC' channel '.Ncs'],'%s',43);
+                scale_factor = textread(['CSC' channel '.ncs'],'%s',43);
+                
                 if(str2num(scale_factor{41})*1e6 > 0.5)
                     num_scale_factor=str2num(scale_factor{43}); %for the new CSC format
                 else
@@ -389,7 +390,7 @@ switch char(handles.datatype)
         fclose(f);
 
         %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.
-        scale_factor = textread(['CSC' channel '.Ncs'],'%s',43);
+        scale_factor = textread(['CSC' channel '.ncs'],'%s',43);
         if(str2num(scale_factor{41})*1e6 > 0.5)
             num_scale_factor=str2num(scale_factor{43});
         else

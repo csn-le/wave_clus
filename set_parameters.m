@@ -1,43 +1,51 @@
 function par=set_parameters(filename,handles)
 
-% SYSTEM
-par.system = 'windows';
-%par.system = 'linux';
+% BAD PLACED PARAMS
+par.fname_in = 'tmp_data';           % temporary filename used as input for SPC
+par.fname = 'data';                  % filename for interaction with SPC
+
+
+% ODD PARAMS
+par.segments_length = 5;             %length of segments in which the data is cutted (default 5min).
+par.segments = 1;                    % nr. of segments in which the data is cutted.
 
 % SPC PARAMETERS
 par.mintemp = 0.00;                  % minimum temperature for SPC
 par.maxtemp = 0.201;                 % maximum temperature for SPC
 par.tempstep = 0.01;                 % temperature steps
-par.SWCycles = 100;                  % SPC iterations for each temperature
-par.KNearNeighb=11;                  % number of nearest neighbors for SPC
+par.SWCycles = 100;                  % SPC iterations for each temperature (default 100)
+par.KNearNeighb = 11;                  % number of nearest neighbors for SPC
 par.num_temp = floor((par.maxtemp ...
     -par.mintemp)/par.tempstep);     % total number of temperatures 
-par.min_clus = 60;                   % minimun size of a cluster
-par.max_clus = 33;                   % maximum number of clusters allowed
-par.randomseed = 0;                  % if 0, random seed is taken as the clock value (default)
+par.min_clus = 60;                   % minimum size of a cluster (default 60)
+par.max_clus = 33;                   % maximum number of clusters allowed (default 13)
+par.randomseed = 0;                  % if 0, random seed is taken as the clock value (default 0)
 %par.randomseed = 147;               % If not 0, random seed 
 %par.temp_plot = 'lin';              % temperature plot in linear scale
 par.temp_plot = 'log';               % temperature plot in log scale
-par.fname = 'data';                  % filename for interaction with SPC
 
-% % DETECTION PARAMETERS
-par.tmax= 'all';                       % maximum time to load
-par.sr= 30000;                         % sampling rate
-par.w_pre = 29;                          % number of pre-event data points stored 
-par.w_post = 61;                         % number of post-event data points stored 
+% DETECTION PARAMETERS
+par.tmax = 'all';                      % maximum time to load
+%par.tmax= 180;                       % maximum time to load (in sec)
+par.tmin= 0;                          % starting time for loading (in sec)
+par.w_pre = 20;                        % number of pre-event data points stored (default 20)
+par.w_post = 44;                       % number of post-event data points stored (default 44))
 par.alignment_window = 10;             % number of points around the sample expected to be the maximum 
-% ref = 1.5;                           % detector dead time (in ms)
-% par.ref = floor(ref *sr/1000);       % conversion to datapoints
-% par.stdmin = 5;                      % minimum threshold for detection
-% par.stdmax = 20;                     % maximum threshold for detection
-% par.detection = 'neg';               % type of threshold
+par.stdmin = 5;                      % minimum threshold for detection
+par.stdmax = 50;                       % maximum threshold for detection
+par.detect_fmin = 400;                 % high pass filter for detection
+par.detect_fmax = 3000;                 % low pass filter for detection (default 1000)
+par.sort_fmin = 400;                   % high pass filter for sorting 
+par.sort_fmax = 3000;                   % low pass filter for sorting (default 3000)
+par.ref_ms = 3;                         % detector dead time, minimum refractory period (in ms)
+% par.detection = 'pos';                % type of threshold
+% par.detection = 'neg';
 par.detection = 'both';
-% % par.detection = 'both';
-% 
-% % INTERPOLATION PARAMETERS
+
+% INTERPOLATION PARAMETERS
 par.int_factor = 2;                  % interpolation factor
-par.interpolation = 'y';             % interpolation with cubic splines
-% %par.interpolation = 'n';
+par.interpolation = 'y';             % interpolation with cubic splines (default)
+% par.interpolation = 'n';
 
 
 % FEATURES PARAMETERS
@@ -83,3 +91,11 @@ end
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 USER_DATA{1} = par;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
+
+
+%This will be set in the main code
+par.sr = 21000;                        % sampling rate (in Hz).
+par.ref = floor(par.ref_ms *par.sr/1000);     % conversion to datapoints
+
+
+
