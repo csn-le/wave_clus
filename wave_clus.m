@@ -135,74 +135,21 @@ set(handles.fix1_button,'value',0);
 set(handles.fix2_button,'value',0);
 set(handles.fix3_button,'value',0);
 
-switch char(handles.datatype)
-    case 'Simulator'  
-        [filename, pathname] = uigetfile('C_*.mat','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
-        %load(filename);                                 %Load data
-        load([pathname filename]);                      %Load data
-        x.data=data;
-        x.sr=1000./samplingInterval;
-        
-        handles.par = set_parameters_simulation(x.sr,filename,handles);     % Load parameters
-        set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
 
-        [spikes,thr,index] = amp_detect_wc(x.data,handles);     % Detection with amp. thresh.
-        [inspk] = wave_features_wc(spikes,handles);             % Extract spike features.
-        
-        %Interaction with SPC
-        set(handles.file_name,'string','Running SPC ...');
-        handles.par.fname_in = 'tmp_data';
-        fname_in = handles.par.fname_in;
-                         
-        if handles.par.permut == 'y'
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                ipermut = randperm(length(inspk));
-                ipermut(naux+1:end) = [];
-                inspk_aux = inspk(ipermut,:);
-            else
-                ipermut = randperm(length(inspk));
-                inspk_aux = inspk(ipermut,:);
-            end
-        else
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                inspk_aux = inspk(1:naux,:);
-            else
-                inspk_aux = inspk;
-            end
-        end
-        
-        save([fname_in],'inspk_aux','-ascii');                      %Input file for SPC
-        handles.par.fname = [handles.par.fname '_wc'];          %Output filename of SPC
-        handles.par.fnamespc = handles.par.fname;
-        handles.par.fnamesave = handles.par.fnamespc;
-        [clu,tree] = run_cluster(handles);
-        USER_DATA = get(handles.wave_clus_figure,'userdata');
-        
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index)) + 1000;
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
-        
-        USER_DATA{2}=spikes;
-        USER_DATA{3}=index;
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        USER_DATA{7} = inspk;
-        set(handles.wave_clus_figure,'userdata',USER_DATA)
-        
-    case 'CSC data'                                              %Neuralynx (CSC files)
-        [filename, pathname] = uigetfile('*.Ncs','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
+
+%I will check this for case-sensitive related problems
+[filename, pathname] = uigetfile('*.mat; *.Ncs; *.ncs; nev*.mat; NSX*.NC5; *.Nse','Select file');
+set(handles.file_name,'string',['Loading:    ' pathname filename]);
+
+%I don't like this.... It's better use: ff = [pathname,ff] in all the files
+cd(pathname);
+[~,fnam,ext] = fileparts(filename);
+
+handles.par = set_parameters(handles);
+handles.par.filename = filename;
+
+switch lower(ext)    
+    case '.ncs'                                              %Neuralynx (CSC files)
         channel = filename(4:end-4);
 
         f=fopen(filename,'r','l');
@@ -213,7 +160,11 @@ switch char(handles.datatype)
         timeend = TimeStamps(end);
         delta_time=(TimeStamps(2)-TimeStamps(1));
         sr = 512*1e6/delta_time;
-        handles.par = set_parameters_CSC(sr,filename,handles);     % Load parameters
+              % Load parameters
+        handles.par.sr = sr;                                     % sampling rate (in Hz).
+        handles.par.ref = floor(handles.par.ref_ms *sr/1000);    % conversion to datapoints
+
+        
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         
         %Load continuous data 
@@ -335,9 +286,6 @@ switch char(handles.datatype)
         
         
     case 'CSC data (pre-clustered)'                                 %Neuralynx (CSC files)
-        [filename, pathname] = uigetfile('*.Ncs','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
         channel = filename(4:end-4);
 
         f=fopen(filename,'r','l');
@@ -347,7 +295,12 @@ switch char(handles.datatype)
         timeend = TimeStamps(end);
         sr = 512*1e6/(TimeStamps(2)-TimeStamps(1));
         clear TimeStamps;
-        handles.par = set_parameters_CSC(sr,filename,handles);      %Load parameters
+
+        handles.par.sr = sr;                                        % sampling rate (in Hz).
+        handles.par.ref = floor(handles.par.ref_ms *sr/1000);       % conversion to datapoints
+
+        
+        
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         
         %Load spikes and parameters
@@ -400,17 +353,17 @@ switch char(handles.datatype)
         [spikes,thr,index] = amp_detect_wc(x,handles);              %Detection with amp. thresh.
     
    case 'nev data (pre-clustered)'                                   %nev files matlab files
-        [filename, pathname] = uigetfile('nev*.mat','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
         if length(filename) == 15
             channel = filename(4);
         else
             channel = filename(4:5);
         end
         f=fopen(filename,'r','l');
-        handles.par = set_parameters_nev(filename,handles);      %Load parameters
-                
+
+        sr = 30000
+        handles.par.sr = sr;                        % sampling rate (in Hz).
+        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
+        
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         
         %Load spikes and parameters
@@ -459,20 +412,15 @@ switch char(handles.datatype)
 %         end     
         
     case 'NSX data (pre-clustered)'                                   %nev files matlab files
-        [filename, pathname] = uigetfile('NSX*.NC5','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
         channel = filename(4:4+length(filename)-8);
         f=fopen(filename,'r','l');
         
-%         handles.par = set_parameters_NSX(filename,handles);      %Load parameters                
 %         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         
         %Load spikes and parameters
         eval(['load times_NSX' num2str(channel) ';']);
         index=cluster_class(:,2)';
         
-%         handles.par = set_parameters_NSX(filename,handles);      %Load parameters
         handles.par = par;      %Load parameters
         USER_DATA = get(handles.wave_clus_figure,'userdata');
         USER_DATA{1} = par;
@@ -513,10 +461,7 @@ switch char(handles.datatype)
 
 
 
-    case 'Sc data'
-        [filename, pathname] = uigetfile('*.Nse','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
+    case '.nse'
         if length(filename) == 7
             channel = filename(3);
         else
@@ -524,7 +469,9 @@ switch char(handles.datatype)
         end
         [index, Samples] = Nlx2MatSE(['Sc' num2str(channel) '.Nse'],1,0,0,0,1,0);
         spikes(:,:)= Samples(:,1,:); clear Samples; spikes = spikes';
-        handles.par = set_parameters_Sc(filename,handles);          %Load parameters
+        sr = 24000
+        handles.par.sr = sr;                        % sampling rate (in Hz).
+        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         axes(handles.cont_data); cla
         
@@ -581,14 +528,14 @@ switch char(handles.datatype)
         set(handles.wave_clus_figure,'userdata',USER_DATA)
         
     case 'Sc data (pre-clustered)'
-        [filename, pathname] = uigetfile('*.Nse','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
         channel = filename(3:end-4);
         [index, Samples] = Nlx2MatSE(['Sc' channel '.Nse'],1,0,0,0,1,0);
         
         spikes(:,:)= Samples(:,1,:); clear Samples; spikes = spikes';
-        handles.par = set_parameters_Sc(filename,handles);          %Load parameters
+        sr = 24000
+        handles.par.sr = sr;                        % sampling rate (in Hz).
+        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
+        
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         axes(handles.cont_data); cla
 
@@ -621,13 +568,11 @@ switch char(handles.datatype)
         set(handles.wave_clus_figure,'userdata',USER_DATA)
            
     
-    case 'ASCII'            % ASCII matlab files
-        [filename, pathname] = uigetfile('*.mat','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
-        handles.par = set_parameters_ascii(filename,handles);       %Load parameters
+    case '.mat'            % ASCII matlab files
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
-        
+        sr = 20000
+        handles.par.sr = sr;                        % sampling rate (in Hz).
+        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
         index_all=[];
         spikes_all=[];
         for j=1:handles.par.segments                                %that's for cutting the data into pieces
@@ -707,17 +652,13 @@ switch char(handles.datatype)
         
         
     case 'ASCII (pre-clustered)'                                   %ASCII matlab files
-        [filename, pathname] = uigetfile('*.mat','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
-        
         %In case of polytrode data 
         if strcmp(filename(1:5),'times')
             filename = filename(7:end);
-            handles.par = set_parameters_pol(filename,handles);      %Load parameters
-        else
-            handles.par = set_parameters_ascii(filename,handles);      %Load parameters
         end
+        sr = 24000
+        handles.par.sr = sr;                                       % sampling rate (in Hz).
+        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
         
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         
@@ -765,10 +706,9 @@ switch char(handles.datatype)
         end
         
     case 'ASCII spikes'
-        [filename, pathname] = uigetfile('*.mat','Select file');
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
-        handles.par = set_parameters_ascii_spikes(filename,handles);     %Load parameters
+        sr = 30000
+        handles.par.sr = sr;                        % sampling rate (in Hz).
+        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         axes(handles.cont_data); cla
         
@@ -842,7 +782,10 @@ switch char(handles.datatype)
         cd(pathname);
         if with_ascci_wc_old
             % BEGIN OLD %
-            handles.par = set_parameters_ascii_spikes(filename,handles);     %Load parameters
+
+            sr = 24000
+            handles.par.sr = sr;                        % sampling rate (in Hz).
+            handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
             set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
             axes(handles.cont_data); cla
             % END OLD %
@@ -1251,8 +1194,8 @@ guidata(hObject, handles);
 
 % --- Executes on button press in set_parameters_button.
 function set_parameters_button_Callback(hObject, eventdata, handles)
-helpdlg('Check the set_parameters files in the subdirectory Wave_clus\Parameters_files');
-
+    %helpdlg('Check the set_parameters files in the subdirectory Wave_clus\Parameters_files');
+    edit([fileparts(mfilename('fullpath')) filesep 'set_parameters.m']) 
 
 %SETTING OF FORCE MEMBERSHIP
 % --------------------------------------------------------------------

@@ -1,4 +1,4 @@
-function par=set_parameters(filename,handles)
+function par=set_parameters(handles)
 
 % BAD PLACED PARAMS
 par.fname_in = 'tmp_data';           % temporary filename used as input for SPC
@@ -81,8 +81,6 @@ end
 
 par.max_spikes = 5000;               % max. # of spikes to be plotted
 
-par.filename = filename;
-
 % Sets to zero fix buttons from aux figures
 for i=4:par.max_clus
     eval(['par.fix' num2str(i) '=0;'])
@@ -91,11 +89,3 @@ end
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 USER_DATA{1} = par;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-
-
-%This will be set in the main code
-par.sr = 21000;                        % sampling rate (in Hz).
-par.ref = floor(par.ref_ms *par.sr/1000);     % conversion to datapoints
-
-
-
