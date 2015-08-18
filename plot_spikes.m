@@ -353,12 +353,10 @@ for i = 1:nclusters+1
 end
 
 %Resize axis  
-if ~strcmp(char(handles.datatype),'Sc data') & ~strcmp(char(handles.datatype),'Sc data (pre-clustered)')
-    ymin = min(ylimit(:,1));
-    ymax = max(ylimit(:,2));
-    for i=1:3
-        eval(['axes(handles.spikes' num2str(i) '); ylim([ymin ymax])'])
-    end
+ymin = min(ylimit(:,1));
+ymax = max(ylimit(:,2));
+for i=1:3
+	eval(['axes(handles.spikes' num2str(i) '); ylim([ymin ymax])'])
 end
 
 

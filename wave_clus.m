@@ -79,7 +79,6 @@ function wave_clus_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for wave_clus
 handles.output = hObject;
-handles.datatype ='CSC data (pre-clustered)';
 set(handles.isi1_accept_button,'value',1);
 set(handles.isi2_accept_button,'value',1);
 set(handles.isi3_accept_button,'value',1);
@@ -148,6 +147,15 @@ cd(pathname);
 handles.par = set_parameters(handles);
 handles.par.filename = filename;
 
+% Sets to zero fix buttons from aux figures
+for i=4:handles.par.max_clus
+    eval(['handles.par.fix' num2str(i) '=0;'])
+end
+
+USER_DATA = get(handles.wave_clus_figure,'userdata');
+USER_DATA{1} = handles.par;
+set(handles.wave_clus_figure,'userdata',USER_DATA);
+
 switch lower(ext)    
     case '.ncs'                                              %Neuralynx (CSC files)
         channel = filename(4:end-4);
@@ -163,7 +171,7 @@ switch lower(ext)
               % Load parameters
         handles.par.sr = sr;                                     % sampling rate (in Hz).
         handles.par.ref = floor(handles.par.ref_ms *sr/1000);    % conversion to datapoints
-
+        handles.nsegment = 1;
         
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         
@@ -202,18 +210,15 @@ switch lower(ext)
                 end
                 x=x*num_scale_factor*1e6;
         
-                handles.flag = j;                                   %flag for plotting only in the 1st loop
-                [spikes,thr,index]  = amp_detect_wc(x,handles);     %detection with amp. thresh.
+                handles.nsegment = j;                                   %flag for plotting only in the 1st loop
+                [spikes,thr,index]  = amp_detect_wc(x, handles, true);  %detection with amp. thresh.
                 index = index*1e6/sr+tsmin(j);
                 index_all = [index_all index];
                 spikes_all = [spikes_all; spikes];
             end
             index = (index_all-time0)/1000;
             spikes = spikes_all;
-            USER_DATA = get(handles.wave_clus_figure,'userdata');
-            USER_DATA{2}=spikes;
-            USER_DATA{3}=index;
-            set(handles.wave_clus_figure,'userdata',USER_DATA);
+
         else                                                        %Loads a data segment
             tsmin = time0 + handles.par.tmin*1e6;                   %min time to read (in micro-sec)
             tsmax = time0 + handles.par.tmax*1e6;                   %max time to read (in micro-sec)
@@ -233,8 +238,20 @@ switch lower(ext)
             Samples=fread(f,512*(index_tfinal-index_tinitial+1),'512*int16=>int16',8+4+4+4);
             x=double(Samples(:))';
             clear Samples;
-            [spikes,thr,index] = amp_detect_wc(x,handles);          %Detection with amp. thresh.
+            scale_factor = textread(['CSC' channel '.ncs'],'%s',43);
+            if(str2num(scale_factor{41})*1e6 > 0.5)
+                num_scale_factor=str2num(scale_factor{43}); %for the new CSC format
+            else
+                num_scale_factor=str2num(scale_factor{41}); %for the old CSC format
+            end
+                x=x*num_scale_factor*1e6;       
+            [spikes,thr,index] = amp_detect_wc(x,handles,true);          %Detection with amp. thresh.
         end
+        
+        USER_DATA = get(handles.wave_clus_figure,'userdata');
+        USER_DATA{2} = spikes;
+        USER_DATA{3} = index;
+        set(handles.wave_clus_figure,'userdata',USER_DATA);
         fclose(f);
         
         [inspk] = wave_features_wc(spikes,handles);                 %Extract spike features.
@@ -300,7 +317,6 @@ switch lower(ext)
         handles.par.ref = floor(handles.par.ref_ms *sr/1000);       % conversion to datapoints
 
         
-        
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         
         %Load spikes and parameters
@@ -350,7 +366,7 @@ switch lower(ext)
             num_scale_factor=str2num(scale_factor{41});
         end
         x=x*num_scale_factor*1e6;
-        [spikes,thr,index] = amp_detect_wc(x,handles);              %Detection with amp. thresh.
+        [spikes,thr,index] = amp_detect_wc(x,handles,false);              %Detection with amp. thresh.
     
    case 'nev data (pre-clustered)'                                   %nev files matlab files
         if length(filename) == 15
@@ -472,6 +488,7 @@ switch lower(ext)
         sr = 24000
         handles.par.sr = sr;                        % sampling rate (in Hz).
         handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
+        handles.nsegment = 1;
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         axes(handles.cont_data); cla
         
@@ -572,6 +589,7 @@ switch lower(ext)
         set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
         sr = 20000
         handles.par.sr = sr;                        % sampling rate (in Hz).
+        handles.nsegment = 1;
         handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
         index_all=[];
         spikes_all=[];
@@ -582,10 +600,10 @@ switch lower(ext)
             tsmin = (j-1)*floor(length(data)/handles.par.segments)+1;
             tsmax = j*floor(length(data)/handles.par.segments);
             x=data(tsmin:tsmax); clear data; 
-            handles.flag = 1;                                      %flag for ploting only in the 1st loop
+            handles.nsegment = j;                                      %flag for ploting only in the 1st loop
             
             % SPIKE DETECTION WITH AMPLITUDE THRESHOLDING
-            [spikes,thr,index]  = amp_detect_wc(x,handles);        %detection with amp. thresh.
+            [spikes,thr,index]  = amp_detect_wc(x,handles,true);        %detection with amp. thresh.
             index=index+tsmin-1;
             
             index_all = [index_all index];
@@ -697,12 +715,8 @@ switch lower(ext)
         %Load continuous data (for ploting)
         if ~strcmp(filename(1:4),'poly')
             load(filename);
-            if length(data)> 60*handles.par.sr
-                x=data(1:60*handles.par.sr)'; 
-            else
-                x=data(1:length(data))'; 
-            end
-            [spikes,thr,index] = amp_detect_wc(x,handles);                   %Detection with amp. thresh.
+            lplot = min(length(data),floor(60*handles.par.sr));
+            [spikes,thr,index] = amp_detect_wc(data(1:lplot), handles,false);                   %Detection with amp. thresh.
         end
         
     case 'ASCII spikes'
@@ -1183,14 +1197,6 @@ else
         eval(['print(h_fig6,''-djpeg'',''fig2print_' outfile(7:end) 'f' ''')' ]);
     end
 end
-
-% --- Executes on selection change in data_type_popupmenu.
-function data_type_popupmenu_Callback(hObject, eventdata, handles)
-aux = get(hObject, 'String');
-aux1 = get(hObject, 'Value');
-handles.datatype = aux(aux1);
-guidata(hObject, handles);
-
 
 % --- Executes on button press in set_parameters_button.
 function set_parameters_button_Callback(hObject, eventdata, handles)

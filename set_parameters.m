@@ -8,6 +8,7 @@ par.fname = 'data';                  % filename for interaction with SPC
 % ODD PARAMS
 par.segments_length = 5;             %length of segments in which the data is cutted (default 5min).
 par.segments = 1;                    % nr. of segments in which the data is cutted.
+par.show_signal = true;
 
 % SPC PARAMETERS
 par.mintemp = 0.00;                  % minimum temperature for SPC
@@ -81,11 +82,3 @@ end
 
 par.max_spikes = 5000;               % max. # of spikes to be plotted
 
-% Sets to zero fix buttons from aux figures
-for i=4:par.max_clus
-    eval(['par.fix' num2str(i) '=0;'])
-end
-
-USER_DATA = get(handles.wave_clus_figure,'userdata');
-USER_DATA{1} = par;
-set(handles.wave_clus_figure,'userdata',USER_DATA);

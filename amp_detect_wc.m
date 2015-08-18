@@ -1,43 +1,46 @@
-function [spikes,thr,index] = amp_detect(x,handles);
+function [spikes,thr,index] = amp_detect(x, handles, find_spikes);
 % Detect spikes with amplitude thresholding. Uses median estimation.
 % Detection is done with filters set by fmin_detect and fmax_detect. Spikes
 % are stored for sorting using fmin_sort and fmax_sort. This trick can
 % eliminate noise in the detection but keeps the spikes shapes for sorting.
-
-sr=handles.par.sr;
-w_pre=handles.par.w_pre;
-w_post=handles.par.w_post;
-ref=handles.par.ref;
-detect = handles.par.detection;
-stdmin = handles.par.stdmin;
-stdmax = handles.par.stdmax;
-fmin_detect = handles.par.detect_fmin;
-fmax_detect = handles.par.detect_fmax;
-fmin_sort = handles.par.sort_fmin;
-fmax_sort = handles.par.sort_fmax;
-x=double(x);
-% HIGH-PASS FILTER OF THE DATA
-xf=zeros(length(x),1);
-if exist('ellip')                         %Checks for the signal processing toolbox
-    [b,a]=ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
-    xf_detect=filtfilt(b,a,x);
-    [b,a]=ellip(2,0.1,40,[fmin_sort fmax_sort]*2/sr);
-    xf=filtfilt(b,a,x);
-else
-    xf=fix_filter(x);                   %Does a bandpass filtering between [300 3000] without the toolbox.
-    xf_detect = xf;
-end
-lx=length(xf);
-
-noise_std_detect = median(abs(xf_detect))/0.6745;
-noise_std_sorted = median(abs(xf))/0.6745;
-thr = stdmin * noise_std_detect;        %thr for detection is based on detect settings.
-thrmax = stdmax * noise_std_sorted;     %thrmax for artifact removal is based on sorted settings.
-
 set(handles.file_name,'string','Detecting spikes ...');
 
-if ~(strcmp(handles.datatype,'CSC data (pre-clustered)') |...
-        strcmp(handles.datatype,'ASCII (pre-clustered)'))
+if  find_spikes || handles.par.show.signal
+    sr = handles.par.sr;
+    w_pre = handles.par.w_pre;
+    w_post = handles.par.w_post;
+    ref = handles.par.ref;
+    detect = handles.par.detection;
+    stdmin = handles.par.stdmin;
+    stdmax = handles.par.stdmax;
+    fmin_detect = handles.par.detect_fmin;
+    fmax_detect = handles.par.detect_fmax;
+    fmin_sort = handles.par.sort_fmin;
+    fmax_sort = handles.par.sort_fmax;
+    x = double(x);
+    % HIGH-PASS FILTER OF THE DATA
+    xf = zeros(length(x), 1);
+    if exist('ellip')                         %Checks for the signal processing toolbox
+        if find_spikes
+            [b,a] = ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
+            xf_detect = filtfilt(b, a, x);
+        end
+        [b,a] = ellip(2,0.1,40,[fmin_sort fmax_sort]*2/sr);
+        xf = filtfilt(b, a, x);
+    else
+        xf = fix_filter(x);                   %Does a bandpass filtering between [300 3000] without the toolbox.
+        xf_detect = xf;
+    end
+    lx = length(xf);
+
+    noise_std_detect = median(abs(xf_detect))/0.6745;
+    noise_std_sorted = median(abs(xf))/0.6745;
+    thr = stdmin * noise_std_detect;        %thr for detection is based on detect settings.
+    thrmax = stdmax * noise_std_sorted;     %thrmax for artifact removal is based on sorted settings.
+end
+
+
+if find_spikes
         
     % LOCATE SPIKE TIMES
     switch detect
@@ -103,24 +106,14 @@ if ~(strcmp(handles.datatype,'CSC data (pre-clustered)') |...
             spikes = int_spikes(spikes,handles);
     end
 
-    if ~(strcmp(handles.datatype,'CSC data') & strcmp(handles.par.tmax,'all'))
-        USER_DATA = get(handles.wave_clus_figure,'userdata');
-        USER_DATA{2}=spikes;   
-        USER_DATA{3}=index*1000/sr; 
-        set(handles.wave_clus_figure,'userdata',USER_DATA);
-        Plot_continuous_data(xf,handles,thr,thrmax)
-    elseif handles.flag == 1
-        Plot_continuous_data(xf(1:floor(60*sr)),handles,thr,thrmax)
-    end
-
-elseif strcmp(handles.datatype,'ASCII (pre-clustered)')
-    USER_DATA = get(handles.wave_clus_figure,'userdata');
-    spikes = USER_DATA{2};
-    index = USER_DATA{3};
-    Plot_continuous_data(xf,handles,thr,thrmax)
 else
     USER_DATA = get(handles.wave_clus_figure,'userdata');
     spikes = USER_DATA{2};
     index = USER_DATA{3};
-    Plot_continuous_data(xf(1:floor(60*sr)),handles,thr,thrmax)
 end
+
+if handles.nsegment == 1 && handles.par.show_signal
+    lplot = min(floor(60*sr),length(xf));
+    Plot_continuous_data(xf(1:lplot), handles, thr, thrmax)
+end
+
