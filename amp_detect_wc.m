@@ -3,7 +3,6 @@ function [spikes,thr,index] = amp_detect(x, handles, find_spikes);
 % Detection is done with filters set by fmin_detect and fmax_detect. Spikes
 % are stored for sorting using fmin_sort and fmax_sort. This trick can
 % eliminate noise in the detection but keeps the spikes shapes for sorting.
-set(handles.file_name,'string','Detecting spikes ...');
 
 if  find_spikes || handles.par.show.signal
     sr = handles.par.sr;

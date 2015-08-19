@@ -33,7 +33,10 @@ eval(['close(10)'],[''])
 % Extract spike features if needed
 if get(handles.spike_shapes_button,'value') ==0
     if isempty(inspk) | (length(inspk)~=size(spikes,1))
-        [inspk] = wave_features_wc(spikes,handles);        
+        [inspk] = wave_features_wc(spikes,handles);
+        %axes(handles.projections)
+        %hold off
+        %plot(inspk(:,1),inspk(:,2),'.k','markersize',.5)
         USER_DATA{7} = inspk;
     end
 end

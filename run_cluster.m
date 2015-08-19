@@ -32,9 +32,8 @@ if handles.par.randomseed ~= 0
 end    
 fclose(fid);
 
-[str,maxsize,endian]=computer;
-handles.par.system=str;
-switch handles.par.system
+[str,~,~]=computer;
+switch str
     case {'PCWIN'}    
         if exist([pwd '\cluster.exe'])==0
             directory = which('cluster.exe');

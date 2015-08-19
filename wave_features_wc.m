@@ -58,12 +58,3 @@ end
 %     inspk(:,j)=inspk(:,j)/std(inspk(:,j));
 % end
 
-%PLOTS SPIKES OR PROJECTIONS
-axes(handles.projections)
-hold off
-if get(handles.spike_shapes_button,'value') ==1
-    plot(spikes','b')
-    xlim([1 ls]);
-else
-    plot(inspk(:,1),inspk(:,2),'.k','markersize',.5)
-end
