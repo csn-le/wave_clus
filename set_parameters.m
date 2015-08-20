@@ -52,7 +52,7 @@ par.interpolation = 'y';             % interpolation with cubic splines (default
 % FEATURES PARAMETERS
 par.inputs=10;                       % number of inputs to the clustering
 par.scales=4;                        % number of scales for the wavelet decomposition
-par.features = 'wav'                 % type of feature
+par.features = 'wav';                % type of feature
 %par.features = 'pca'                
 if strcmp(par.features,'pca'); par.inputs=3; end
 
@@ -75,10 +75,9 @@ par.permut = 'y';                   % for selection of random 'par.max_spk' spik
 % par.permut = 'n';                 % for selection of the first 'par.max_spk' spikes before starting templ. match. 
 
 % HISTOGRAM PARAMETERS
-for i=1:par.max_clus+1
-    eval(['par.nbins' num2str(i-1) ' = 100;']);  % # of bins for the ISI histograms
-    eval(['par.bin_step' num2str(i-1) ' = 1;']);  % percentage number of bins to plot
-end
+par.nbins = 100;                    % # of bins for the ISI histograms
+par.bin_step = 1;                   % percentage number of bins to plot
 
-par.max_spikes = 5000;               % max. # of spikes to be plotted
+
+par.max_spikes = 5000;              % max. # of spikes to be plotted
 

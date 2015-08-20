@@ -141,11 +141,18 @@ set(handles.fix3_button,'value',0);
 set(handles.file_name,'string',['Loading:    ' pathname filename]);
 
 %I don't like this.... It's better use: ff = [pathname,ff] in all the files
+%(FC)
 cd(pathname);
 [~,fnam,ext] = fileparts(filename);
 
 handles.par = set_parameters(handles);
 handles.par.filename = filename;
+
+for i=1:handles.par.max_clus+1
+    eval(['handles.par.nbins' num2str(i-1) ' = handles.par.nbins;']);  % # of bins for the ISI histograms
+    eval(['handles.par.bin_step' num2str(i-1) ' = handles.par.bin_step;']);  % percentage number of bins to plot
+end
+
 
 % Sets to zero fix buttons from aux figures
 for i=4:handles.par.max_clus
@@ -153,7 +160,6 @@ for i=4:handles.par.max_clus
 end
 
 USER_DATA = get(handles.wave_clus_figure,'userdata');
-USER_DATA{1} = handles.par;
 
 switch lower(ext)    
     case '.ncs'                                              %Neuralynx (CSC files)
@@ -249,7 +255,6 @@ switch lower(ext)
             
         end
         
-        USER_DATA{2} = spikes;
         USER_DATA{3} = index;
         fclose(f);
         
@@ -294,10 +299,6 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
         
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        USER_DATA{7} = inspk;
-        
         
     case 'CSC data (pre-clustered)'                                 %Neuralynx (CSC files)
         channel = filename(4:end-4);
@@ -335,13 +336,7 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
         
-        USER_DATA{2} = spikes;
         USER_DATA{3} = index;
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        if exist('inspk');
-            USER_DATA{7} = inspk;
-        end
  
         % LOAD CSC DATA (for plotting)
         fseek(f,16384+8+4+4+4,'bof');                               %put pointer to the beginning of data
@@ -395,13 +390,7 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
         
-        USER_DATA{2} = spikes;
         USER_DATA{3} = index;
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        if exist('inspk');
-            USER_DATA{7} = inspk;
-        end
 
         %Load continuous data (for ploting)
 %         if ~strcmp(filename(1:4),'poly')
@@ -424,7 +413,6 @@ switch lower(ext)
         index=cluster_class(:,2)';
         
         handles.par = par;      %Load parameters
-        USER_DATA{1} = par;
 
         %Load clustering results
         %fname = [handles.par.fname '_' filename(1:end-4)];         %filename for interaction with SPC
@@ -447,15 +435,7 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
         
-        USER_DATA{2} = spikes;
         USER_DATA{3} = index;
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        if exist('inspk');
-            USER_DATA{7} = inspk;
-        end
-
-
 
     case '.nse'
         if length(filename) == 7
@@ -515,11 +495,7 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
         
-        USER_DATA{2} = spikes;
         USER_DATA{3} = index/1000;
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        USER_DATA{7} = inspk;
         
     case 'Sc data (pre-clustered)'
         channel = filename(3:end-4);
@@ -551,10 +527,7 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
         
-        USER_DATA{2} = spikes;
         USER_DATA{3} = index/1000;
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
         
            
     
@@ -632,10 +605,6 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
         
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        USER_DATA{7} = inspk;
-        
         
     case 'ASCII (pre-clustered)'                                   %ASCII matlab files
         %In case of polytrode data 
@@ -667,13 +636,7 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
         
-        USER_DATA{2} = spikes;
         USER_DATA{3} = index;
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        if exist('inspk');
-            USER_DATA{7} = inspk;
-        end
 
         %Load continuous data (for ploting)
         if ~strcmp(filename(1:4),'poly')
@@ -735,12 +698,7 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
          
-        USER_DATA{2} = spikes;
-        USER_DATA{3} = index(:)';
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        USER_DATA{7} = inspk;
-        
+        USER_DATA{3} = index(:)';        
         
     case 'ASCII spikes (pre-clustered)' 
         %         with_ascci_wc_old = 1;
@@ -771,7 +729,6 @@ switch lower(ext)
             % BEGIN NEW %
             par.filename = [filename '.BLA'];   
             handles.par = par;      %Load parameters
-            USER_DATA{1} = par;
             % END NEW %
         end 
         
@@ -782,8 +739,8 @@ switch lower(ext)
         else
             fname = handles.par.fname;         %filename for interaction with SPC
         end
-        clu=load([fname '.dg_01.lab']);
-        tree=load([fname '.dg_01']);
+        clu = load([fname '.dg_01.lab']);
+        tree = load([fname '.dg_01']);
         handles.par.fnamespc = fname;
         handles.par.fnamesave = fname;
         
@@ -797,12 +754,16 @@ switch lower(ext)
             USER_DATA{12} = ipermut;
         end
         
-        USER_DATA{2} = spikes;
         USER_DATA{3} = index(:)';
-        USER_DATA{4} = clu;
-        USER_DATA{5} = tree;
-        USER_DATA{7} = inspk;
               
+end
+
+USER_DATA{1} = handles.par;
+USER_DATA{2} = spikes;
+USER_DATA{4} = clu;
+USER_DATA{5} = tree;
+if exist('inspk');
+    USER_DATA{7} = inspk;
 end
 
 set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
@@ -838,8 +799,8 @@ handles.merge = 0;
 handles.reject = 0;
 handles.undo = 0;
 handles.minclus = handles.par.min_clus;
-set(handles.wave_clus_figure,'userdata',USER_DATA);
 handles.setclus = 0;
+set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 
 % mark clusters when new data is loaded
@@ -1769,5 +1730,3 @@ function pushbutton13_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton13 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
