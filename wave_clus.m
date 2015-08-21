@@ -287,18 +287,7 @@ switch lower(ext)
                 num2str(channel)];                                  %filename if "save clusters" button is pressed
         handles.par.fnamespc = handles.par.fname;
         handles.par.fname = [handles.par.fname '_wc'];              %Output filename of SPC 
-        [clu,tree] = run_cluster(handles);
-        
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index)) + 1000;
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
-        
+    
         
     case 'CSC data (pre-clustered)'                                 %Neuralynx (CSC files)
         channel = filename(4:end-4);
@@ -325,17 +314,7 @@ switch lower(ext)
         tree=load([fname '.dg_01']);
         handles.par.fnamespc = fname;
         handles.par.fnamesave = handles.par.fnamespc;
-                
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index)) + 1000;
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
-        
+                        
         USER_DATA{3} = index;
  
         % LOAD CSC DATA (for plotting)
@@ -353,7 +332,6 @@ switch lower(ext)
             num_scale_factor=str2num(scale_factor{41});
         end
         x=x*num_scale_factor*1e6;
-        [spikes,thr,index] = amp_detect_wc(x,handles,false);              %Detection with amp. thresh.
     
    case 'nev data (pre-clustered)'                                   %nev files matlab files
         if length(filename) == 15
@@ -375,20 +353,10 @@ switch lower(ext)
         %Load clustering results
         %fname = [handles.par.fname '_' filename(1:end-4)];         %filename for interaction with SPC
         fname = [handles.par.fname '_ch' channel];         %filename for interaction with SPC
-        clu=load([fname '.dg_01.lab']);
-        tree=load([fname '.dg_01']);
+        clu = load([fname '.dg_01.lab']);
+        tree = load([fname '.dg_01']);
         handles.par.fnamespc = fname;
         handles.par.fnamesave = fname;
-        
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index));
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
         
         USER_DATA{3} = index;
 
@@ -407,7 +375,6 @@ switch lower(ext)
         channel = filename(4:4+length(filename)-8);
         f=fopen(filename,'r','l');
         
-        
         %Load spikes and parameters
         eval(['load times_NSX' num2str(channel) ';']);
         index=cluster_class(:,2)';
@@ -420,21 +387,10 @@ switch lower(ext)
 %         fname = [handles.par.fname channel];         %filename for interaction with SPC
         fname = handles.par.fname;         %filename for interaction with SPC
         
-        clu=load([fname '.dg_01.lab']);
-        tree=load([fname '.dg_01']);
+        clu = load([fname '.dg_01.lab']);
+        tree = load([fname '.dg_01']);
         handles.par.fnamespc = fname;
         handles.par.fnamesave = fname;
-        
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index));
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
-        
         USER_DATA{3} = index;
 
     case '.nse'
@@ -483,24 +439,12 @@ switch lower(ext)
         handles.par.fnamesave = [handles.par.fname '_ch' ...
                 num2str(channel)];                                 %filename if "save clusters" button is pressed
         handles.par.fnamespc = handles.par.fname;
-        [clu,tree] = run_cluster(handles);
-        
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index)) + 1000;
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
-        
         USER_DATA{3} = index/1000;
         
     case 'Sc data (pre-clustered)'
         channel = filename(3:end-4);
         [index, Samples] = Nlx2MatSE(['Sc' channel '.Nse'],1,0,0,0,1,0);
-        
+        index = index/1000;
         spikes(:,:)= Samples(:,1,:); clear Samples; spikes = spikes';
         sr = 24000
         handles.par.sr = sr;                        % sampling rate (in Hz).
@@ -512,24 +456,12 @@ switch lower(ext)
         
         %Load clustering results
         fname = [handles.par.fname '_ch' channel];         %filename for interaction with SPC
-        clu=load([fname '.dg_01.lab']);
-        tree=load([fname '.dg_01']);
+        clu = load([fname '.dg_01.lab']);
+        tree = load([fname '.dg_01']);
         handles.par.fnamespc = fname;
         handles.par.fnamesave = handles.par.fnamespc; 
-                
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index)) + 1000;
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
-        
-        USER_DATA{3} = index/1000;
-        
-           
+
+        USER_DATA{3} = index;  
     
     case '.mat'            % ASCII matlab files
         sr = 20000
@@ -594,16 +526,6 @@ switch lower(ext)
         handles.par.fnamespc = handles.par.fname;
         handles.par.fname = [handles.par.fname '_wc'];             %Output filename of SPC
         
-        [clu,tree] = run_cluster(handles);        
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index)) + 1000;
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
         
         
     case 'ASCII (pre-clustered)'                                   %ASCII matlab files
@@ -621,20 +543,10 @@ switch lower(ext)
 
         %Load clustering results
         fname = [handles.par.fname '_' filename(1:end-4)];         %filename for interaction with SPC
-        clu=load([fname '.dg_01.lab']);
-        tree=load([fname '.dg_01']);
+        clu = load([fname '.dg_01.lab']);
+        tree = load([fname '.dg_01']);
         handles.par.fnamespc = fname;
         handles.par.fnamesave = fname;
-        
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index)) + 1000;
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
         
         USER_DATA{3} = index;
 
@@ -686,18 +598,7 @@ switch lower(ext)
                 filename(1:end-4)];                             %filename if "save clusters" button is pressed
         handles.par.fname = [handles.par.fname '_wc'];          %Output filename of SPC
         handles.par.fnamespc = handles.par.fname;
-        [clu,tree] = run_cluster(handles);
-        
-        if exist('ipermut')
-            clu_aux = zeros(size(clu,1),length(index)) + 1000;
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
-         
+
         USER_DATA{3} = index(:)';        
         
     case 'ASCII spikes (pre-clustered)' 
@@ -743,42 +644,40 @@ switch lower(ext)
         tree = load([fname '.dg_01']);
         handles.par.fnamespc = fname;
         handles.par.fnamesave = fname;
-        
-        if exist('ipermut','var')
-            clu_aux = zeros(size(clu,1),length(index)) + 1000;
-            for i=1:length(ipermut)
-                clu_aux(:,ipermut(i)+2) = clu(:,i+2);
-            end
-            clu_aux(:,1:2) = clu(:,1:2);
-            clu = clu_aux; clear clu_aux
-            USER_DATA{12} = ipermut;
-        end
-        
+
         USER_DATA{3} = index(:)';
               
 end
 
+
 USER_DATA{1} = handles.par;
 USER_DATA{2} = spikes;
+
+if exist('clu') && exist('tree')
+	[clu,tree] = run_cluster(handles);
+end
+
 USER_DATA{4} = clu;
 USER_DATA{5} = tree;
 if exist('inspk');
     USER_DATA{7} = inspk;
 end
 
+
 set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
 temp = find_temp(tree,handles);                                   %Selects temperature.
 set(handles.file_name,'string',[pathname filename]);
 
 if size(clu,2)-2 < size(spikes,1);
-    classes = clu(temp(end),3:end)+1;
     if ~exist('ipermut')
+        classes = clu(temp(end),3:end)+1;
         classes = [classes(:)' zeros(1,size(spikes,1)-handles.par.max_spk)];
+    else
+        classes = zeros(1,size(clu,2)-2);
+        classes(ipermut) = clu(temp(end),3:length(ipermut)+2)+1;
+        USER_DATA{12} = ipermut;
     end
-else
-    classes = clu(temp(end),3:end)+1;
 end
-
 
 USER_DATA{6} = classes(:)';
 USER_DATA{8} = temp(end);

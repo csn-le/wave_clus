@@ -3,7 +3,7 @@ USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 spikes = USER_DATA{2};
 spk_times = USER_DATA{3};
-clu = USER_DATA{4};
+%clu = USER_DATA{4};
 classes = USER_DATA{6};
 classes = classes(:)';
 class_bkup = USER_DATA{9};
@@ -46,8 +46,8 @@ cluster_sizes=[];
 cluster_sizes_bkup=[];
 ifixflag=zeros(1,par.max_clus);
 for i=1:par.max_clus                                    
-    eval(['cluster_sizes = [cluster_sizes length(find(classes==' num2str(i) '))];'])
-    eval(['cluster_sizes_bkup = [cluster_sizes_bkup length(find(class_bkup==' num2str(i) '))];'])
+    cluster_sizes = [cluster_sizes length(find(classes==i))];
+    cluster_sizes_bkup = [cluster_sizes_bkup length(find(class_bkup==i))];   
 end
 
 % Classes should be consecutive numbers
