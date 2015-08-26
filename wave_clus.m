@@ -257,7 +257,7 @@ switch lower(ext)
         
         USER_DATA{3} = index;
         fclose(f);
-        
+        set(handles.file_name,'string','Calculating spike features ...');
         [inspk] = wave_features_wc(spikes,handles);                 %Extract spike features.
         
         if handles.par.permut == 'y'
@@ -408,7 +408,7 @@ switch lower(ext)
         axes(handles.cont_data); cla
         
         [spikes] = spike_alignment(spikes,handles);
-        
+        set(handles.file_name,'string','Calculating spike features ...');
         [inspk] = wave_features_wc(spikes,handles);                 %Extract spike features.
 
         if handles.par.permut == 'y'
@@ -492,7 +492,7 @@ switch lower(ext)
         
         USER_DATA{2}=spikes;
         USER_DATA{3}=index;
-
+        set(handles.file_name,'string','Calculating spike features ...');
         [inspk] = wave_features_wc(spikes,handles);                %Extract spike features.
 
         if handles.par.permut == 'y'
@@ -567,7 +567,7 @@ switch lower(ext)
         load(filename);
                 
         [spikes] = spike_alignment(spikes,handles);
-        
+        set(handles.file_name,'string','Calculating spike features ...');
         [inspk] = wave_features_wc(spikes,handles);                      %Extract spike features.
         
         if handles.par.permut == 'y'
@@ -653,7 +653,7 @@ end
 USER_DATA{1} = handles.par;
 USER_DATA{2} = spikes;
 
-if exist('clu') && exist('tree')
+if ~exist('clu')|| ~exist('tree')
 	[clu,tree] = run_cluster(handles);
 end
 
@@ -981,7 +981,7 @@ end
 function set_parameters_button_Callback(hObject, eventdata, handles)
     %helpdlg('Check the set_parameters files in the subdirectory Wave_clus\Parameters_files');
     edit([fileparts(mfilename('fullpath')) filesep 'set_parameters.m'])
-
+    
 %SETTING OF FORCE MEMBERSHIP
 % --------------------------------------------------------------------
 function force_button_Callback(hObject, eventdata, handles)
@@ -1020,6 +1020,7 @@ switch par.force_feature
         f_out = spikes(find(classes==0),:);
     case 'wav'
         if isempty(inspk)
+            set(handles.file_name,'string','Calculating spike features ...');
             [inspk] = wave_features_wc(spikes,handles);        % Extract spike features.
             USER_DATA{7} = inspk;
         end
@@ -1502,8 +1503,6 @@ elseif strcmp(par.filename(1:13),'C_sim_script_')
     handles.simname = par.filename;
     Plot_simulations(handles)
 end
-
-
 
 
 

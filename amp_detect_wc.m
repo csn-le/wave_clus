@@ -16,10 +16,12 @@ if  find_spikes || handles.par.show.signal
     fmax_detect = handles.par.detect_fmax;
     fmin_sort = handles.par.sort_fmin;
     fmax_sort = handles.par.sort_fmax;
-    x = double(x);
+    if ~ isa(x,'double')
+		x=double(x);
+	end
     % HIGH-PASS FILTER OF THE DATA
     xf = zeros(length(x), 1);
-    if exist('ellip')                         %Checks for the signal processing toolbox
+    if exist('ellip','file')                         %Checks for the signal processing toolbox
         if find_spikes
             [b,a] = ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
             xf_detect = filtfilt(b, a, x);
@@ -49,7 +51,7 @@ if find_spikes
             xaux0 = 0;
             for i=1:length(xaux)
                 if xaux(i) >= xaux0 + ref
-                    [maxi iaux]=max((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                    [~, iaux]=max((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
                     nspk = nspk + 1;
                     index(nspk) = iaux + xaux(i) -1;
                     xaux0 = index(nspk);
@@ -61,7 +63,7 @@ if find_spikes
             xaux0 = 0;
             for i=1:length(xaux)
                 if xaux(i) >= xaux0 + ref
-                    [maxi iaux]=min((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                    [~, iaux]=min((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
                     nspk = nspk + 1;
                     index(nspk) = iaux + xaux(i) -1;
                     xaux0 = index(nspk);
@@ -73,7 +75,7 @@ if find_spikes
             xaux0 = 0;
             for i=1:length(xaux)
                 if xaux(i) >= xaux0 + ref
-                    [maxi iaux]=max(abs(xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                    [~, iaux]=max(abs(xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
                     nspk = nspk + 1;
                     index(nspk) = iaux + xaux(i) -1;
                     xaux0 = index(nspk);

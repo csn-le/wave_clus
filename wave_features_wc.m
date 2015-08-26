@@ -6,9 +6,6 @@ feature = handles.par.features;
 inputs = handles.par.inputs;
 nspk=size(spikes,1);
 ls = size(spikes,2);
-if get(handles.spike_shapes_button,'value') ==1
-    set(handles.file_name,'string','Calculating spike features ...');
-end
 
 % CALCULATES FEATURES
 switch feature
