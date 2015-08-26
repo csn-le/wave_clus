@@ -71,6 +71,7 @@ clear TimeStamps;
 
 figure
 set(gcf,'PaperOrientation','Landscape','PaperUnits','inches','PaperPosition',[0.25 0.25 10.5 7.8]) 
+colors = ['b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
 
 for k=1:length(channels)
     channel=channels(k)
@@ -125,9 +126,12 @@ for k=1:length(channels)
             end
 
             %INTERACTION WITH SPC
-            save(handles.par.fname_in,'inspk_aux','-ascii');
-            [clu, tree] = run_cluster(handles);
-            [temp] = find_temp(tree,handles);
+			temp_fname_in=handles.par.fname_in;
+			handles.par.fname_in=[handles.par.fname_in '_ch' num2str(channel)];
+			save(handles.par.fname_in,'inspk_aux','-ascii');
+			[clu, tree] = run_cluster(handles);
+			[temp] = find_temp(tree,handles);
+			handles.par.fname_in=temp_fname_in;
 
             %DEFINE CLUSTERS
             class1=find(clu(temp,3:end)==0);
@@ -151,9 +155,12 @@ for k=1:length(channels)
             end
 
             %INTERACTION WITH SPC
-            save(handles.par.fname_in,'inspk_aux','-ascii');
-            [clu, tree] = run_cluster(handles);
-            [temp] = find_temp(tree,handles);
+            temp_fname_in=handles.par.fname_in;
+			handles.par.fname_in=[handles.par.fname_in '_ch' num2str(channel)];
+			save(handles.par.fname_in,'inspk_aux','-ascii');
+			[clu, tree] = run_cluster(handles);
+			[temp] = find_temp(tree,handles);
+			handles.par.fname_in=temp_fname_in;
 
             %DEFINE CLUSTERS
             class1=ipermut(find(clu(temp,3:end)==0));
@@ -193,25 +200,43 @@ for k=1:length(channels)
         clus_pop = [];
         subplot(3,5,11)
         temperature=handles.par.mintemp+temp*handles.par.tempstep;
-        switch handles.par.temp_plot
-            case 'lin'
-                 plot([handles.par.mintemp handles.par.maxtemp-handles.par.tempstep], ...
-            [handles.par.min_clus handles.par.min_clus],'k:',...
-            handles.par.mintemp+(1:handles.par.num_temp)*handles.par.tempstep, ...
-            tree(1:handles.par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')           
-            case 'log'
-                semilogy([handles.par.mintemp handles.par.maxtemp-handles.par.tempstep], ...
-                [handles.par.min_clus handles.par.min_clus],'k:',...
-                handles.par.mintemp+(1:handles.par.num_temp)*handles.par.tempstep, ...
-                tree(1:handles.par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
-        end
-        subplot(3,5,6)
-        hold on
+       
+        
         cluster=zeros(nspk,2);
         cluster(:,2)= index';
         num_clusters = length(find([length(class1) length(class2) length(class3)...
                 length(class4) length(class5) length(class0)] >= handles.par.min_clus));
         
+            hold on
+        switch handles.par.temp_plot
+            case 'lin'
+                 plot([handles.par.mintemp handles.par.maxtemp-handles.par.tempstep], ...
+                    [handles.par.min_clus handles.par.min_clus],'k:',...
+                    handles.par.mintemp+(1:handles.par.num_temp)*handles.par.tempstep, ...
+                    tree(1:handles.par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
+                 for i=1:length(num_clusters)
+                    tree_clus = tree(temp(i),4+i);
+                    tree_temp = tree(temp(i)+1,2);
+                    plot(tree_temp,tree_clus,'.','color',colors(i),'MarkerSize',20);
+                
+            case 'log'
+                semilogy([handles.par.mintemp handles.par.maxtemp-handles.par.tempstep], ...
+                    [handles.par.min_clus handles.par.min_clus],'k:',...
+                    handles.par.mintemp+(1:handles.par.num_temp)*handles.par.tempstep, ...
+                    tree(1:handles.par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
+                for i=1:length(num_clusters)
+                    tree_clus = tree(temp(i),4+i);
+                    tree_temp = tree(temp(i)+1,2);
+                    semilogy(tree_temp,tree_clus,'.','color',colors(i),'MarkerSize',20);
+
+        end
+            
+            
+            
+            
+            
+        subplot(3,5,6)
+        hold on    
         clus_pop = [clus_pop length(class0)];
         if length(class0) > handles.par.min_clus;
             subplot(3,5,6); 
