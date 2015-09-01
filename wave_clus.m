@@ -143,10 +143,9 @@ set(handles.file_name,'string',['Loading:    ' pathname filename]);
 %I don't like this.... It's better use: ff = [pathname,ff] in all the files
 %(FC)
 cd(pathname);
-[~,fnam,ext] = fileparts(filename);
 
-handles.par = set_parameters(handles);
-handles.par.filename = filename;
+handles.par = set_parameters();
+handles.par.filename = filename; % maybe this should be data_handler.nickname (FC)
 
 for i=1:handles.par.max_clus+1
     eval(['handles.par.nbins' num2str(i-1) ' = handles.par.nbins;']);  % # of bins for the ISI histograms
@@ -161,524 +160,108 @@ end
 
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 
-switch lower(ext)    
-    case '.ncs'                                              %Neuralynx (CSC files)
-        channel = filename(4:end-4);
 
-        f = fopen(filename,'r','l');
-        fseek(f,16384,'bof');                                     %Skip Header, put pointer to the first record
-        TimeStamps = fread(f,inf,'int64',(4+4+4+2*512));            %Read all TimeStamps
-        fseek(f,16384+8+4+4+4,'bof');                             %put pointer to the beginning of data
-        time0 = TimeStamps(1); 
-        timeend = TimeStamps(end);
-        delta_time = (TimeStamps(2) - TimeStamps(1));
-        sr = 512*1e6/delta_time;
-              % Load parameters
-        handles.par.sr = sr;                                     % sampling rate (in Hz).
-        handles.par.ref = floor(handles.par.ref_ms *sr/1000);    % conversion to datapoints
-        handles.nsegment = 1;
-        
-        %Load continuous data 
-        if strcmp(handles.par.tmax,'all')                          %Loads all data
-            index_all=[];
-            spikes_all=[];
-            lts = length(TimeStamps);
-            %Segments the data in par.segments pieces
-            handles.par.segments = ceil((timeend - time0) / ...
-                (handles.par.segments_length * 1e6 * 60));         %number of segments in which data is cutted
-            segmentLength = floor (lts/handles.par.segments);
-            tsmin = 1 : segmentLength :lts;
-            tsmin = tsmin(1:handles.par.segments);
-            tsmax = tsmin - 1;
-            tsmax = tsmax (2:end);
-            tsmax = [tsmax, lts];
-            recmax=tsmax;
-	        recmin=tsmin;
-            tsmin = TimeStamps(int64(tsmin));
-            tsmax = TimeStamps(int64(tsmax));
 
-            for j=1:length(tsmin)
-                
-                Samples=fread(f,512*(recmax(j)-recmin(j)+1),'512*int16=>int16',8+4+4+4);
-                x=double(Samples(:))';
-                clear Samples;
-               
-                %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.    
-                scale_factor = textread(['CSC' channel '.ncs'],'%s',43);
-                
-                if(str2num(scale_factor{41})*1e6 > 0.5)
-                    num_scale_factor=str2num(scale_factor{43}); %for the new CSC format
-                else
-                    num_scale_factor=str2num(scale_factor{41}); %for the old CSC format
-                end
-                x=x*num_scale_factor*1e6;
-        
-                handles.nsegment = j;                                   %flag for plotting only in the 1st loop
-                set(handles.file_name,'string','Detecting spikes ...');
 
-                [spikes,thr,index]  = amp_detect_wc(x, handles, true);  %detection with amp. thresh.
-                index = index*1e6/sr+tsmin(j);
-                index_all = [index_all index];
-                spikes_all = [spikes_all; spikes];
-            end
-            index = (index_all-time0)/1000;
-            spikes = spikes_all;
+data_handler = readInData(handles.par);
+handles.par = data_handler.par;
 
-        else                                                        %Loads a data segment
-            tsmin = time0 + handles.par.tmin*1e6;                   %min time to read (in micro-sec)
-            tsmax = time0 + handles.par.tmax*1e6;                   %max time to read (in micro-sec)
-            index_tinitial = find(tsmin > TimeStamps);
-            if isempty(index_tinitial) ==1;
-                index_tinitial = 0;
-            else
-                index_tinitial = index_tinitial(end);
-            end    
-            index_tfinal = find(tsmax < TimeStamps);
-            if isempty(index_tfinal) ==1;
-                index_tfinal = timeend;
-            else
-                index_tfinal = index_tfinal(1);
-            end    
-            fseek(f,16384+8+4+4+4+index_tinitial,'bof');            %put pointer to the correct time
-            Samples=fread(f,512*(index_tfinal-index_tinitial+1),'512*int16=>int16',8+4+4+4);
-            x=double(Samples(:))';
-            clear Samples;
-            scale_factor = textread(['CSC' channel '.ncs'],'%s',43);
-            if(str2num(scale_factor{41})*1e6 > 0.5)
-                num_scale_factor=str2num(scale_factor{43}); %for the new CSC format
-            else
-                num_scale_factor=str2num(scale_factor{41}); %for the old CSC format
-            end
-            x=x*num_scale_factor*1e6;       
-            set(handles.file_name,'string','Detecting spikes ...');
-            [spikes,thr,index] = amp_detect_wc(x,handles,true);          %Detection with amp. thresh.
-            
+
+
+if true %times doesn't exist
+    if true  %spikes doesn't exist
+        set(handles.file_name,'string','Detecting spikes ...');
+        drawnow
+        index=[];
+        spikes=[];
+        for n = 1:data_handler.max_segments
+            [x t0ms] = data_handler.get_segment();
+            [new_spikes,temp_aux_th,new_index]  = amp_detect_wc(x, handles);
+            index = [index new_index*1e3/handles.par.sr + t0ms]; %new_index to ms
+            spikes = [spikes; new_spikes];
         end
-        
-        USER_DATA{3} = index;
-        fclose(f);
-        set(handles.file_name,'string','Calculating spike features ...');
-        [inspk] = wave_features_wc(spikes,handles);                 %Extract spike features.
-        
-        if handles.par.permut == 'y'
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                ipermut = randperm(length(inspk));
-                ipermut(naux+1:end) = [];
-                inspk_aux = inspk(ipermut,:);
-            else
-                ipermut = randperm(length(inspk));
-                inspk_aux = inspk(ipermut,:);
-            end
-        else
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                inspk_aux = inspk(1:naux,:);
-            else
-                inspk_aux = inspk;
-            end
-        end
-        
-        %Interaction with SPC
-        set(handles.file_name,'string','Running SPC ...');
-        fname_in = handles.par.fname_in;
-        save([fname_in],'inspk_aux','-ascii');                      %Input file for SPC
-        handles.par.fnamesave = [handles.par.fname '_ch' ...
-                num2str(channel)];                                  %filename if "save clusters" button is pressed
-        handles.par.fnamespc = handles.par.fname;
-        handles.par.fname = [handles.par.fname '_wc'];              %Output filename of SPC 
+    else
+        index = data_handler.index
+        spikes = data_handler.spikes
+    end
+
     
-        
-    case 'CSC data (pre-clustered)'                                 %Neuralynx (CSC files)
-        channel = filename(4:end-4);
-
-        f=fopen(filename,'r','l');
-        fseek(f,16384,'bof');                                       %Skip Header, put pointer to the first record
-        TimeStamps=fread(f,inf,'int64',(4+4+4+2*512));              %Read all TimeStamps
-        time0 = TimeStamps(1); 
-        timeend = TimeStamps(end);
-        sr = 512*1e6/(TimeStamps(2)-TimeStamps(1));
-        clear TimeStamps;
-
-        handles.par.sr = sr;                                        % sampling rate (in Hz).
-        handles.par.ref = floor(handles.par.ref_ms *sr/1000);       % conversion to datapoints
-
-               
-        %Load spikes and parameters
-        eval(['load times_CSC' channel ';']);
-        index=cluster_class(:,2)';
-
-        %Load clustering results
-        fname = [handles.par.fname '_ch' channel];         %filename for interaction with SPC
-        clu=load([fname '.dg_01.lab']);
-        tree=load([fname '.dg_01']);
-        handles.par.fnamespc = fname;
-        handles.par.fnamesave = handles.par.fnamespc;
-                        
-        USER_DATA{3} = index;
- 
-        % LOAD CSC DATA (for plotting)
-        fseek(f,16384+8+4+4+4,'bof');                               %put pointer to the beginning of data
-        Samples=fread(f,ceil(sr*60),'512*int16=>int16',8+4+4+4);  
-        x=double(Samples(:))';
-        clear Samples; 
-        fclose(f);
-
-        %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.
-        scale_factor = textread(['CSC' channel '.ncs'],'%s',43);
-        if(str2num(scale_factor{41})*1e6 > 0.5)
-            num_scale_factor=str2num(scale_factor{43});
-        else
-            num_scale_factor=str2num(scale_factor{41});
-        end
-        x=x*num_scale_factor*1e6;
     
-   case 'nev data (pre-clustered)'                                   %nev files matlab files
-        if length(filename) == 15
-            channel = filename(4);
+    set(handles.file_name,'string','Calculating spike features ...');
+    drawnow
+    [inspk] = wave_features_wc(spikes,handles);                 %Extract spike features.
+
+
+    if handles.par.permut == 'y'
+        if handles.par.match == 'y';
+            naux = min(handles.par.max_spk,size(inspk,1));
+            ipermut = randperm(length(inspk));
+            ipermut(naux+1:end) = [];
+            inspk_aux = inspk(ipermut,:);
         else
-            channel = filename(4:5);
+            ipermut = randperm(length(inspk));
+            inspk_aux = inspk(ipermut,:);
         end
-        f=fopen(filename,'r','l');
-
-        sr = 30000
-        handles.par.sr = sr;                        % sampling rate (in Hz).
-        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
-
-        %Load spikes and parameters
-        %Load spikes and parameters
-        eval(['load times_' num2str(channel) ';']);
-        index=cluster_class(:,2)';
-
-        %Load clustering results
-        %fname = [handles.par.fname '_' filename(1:end-4)];         %filename for interaction with SPC
-        fname = [handles.par.fname '_ch' channel];         %filename for interaction with SPC
-        clu = load([fname '.dg_01.lab']);
-        tree = load([fname '.dg_01']);
-        handles.par.fnamespc = fname;
-        handles.par.fnamesave = fname;
-        
-        USER_DATA{3} = index;
-
-        %Load continuous data (for ploting)
-%         if ~strcmp(filename(1:4),'poly')
-%             load(filename);
-%             if length(data)> 60*handles.par.sr
-%                 x=data(1:60*handles.par.sr)'; 
-%             else
-%                 x=data(1:length(data))'; 
-%             end
-%             [spikes,thr,index] = amp_detect_wc(x,handles);                   %Detection with amp. thresh.
-%         end     
-        
-    case 'NSX data (pre-clustered)'                                   %nev files matlab files
-        channel = filename(4:4+length(filename)-8);
-        f=fopen(filename,'r','l');
-        
-        %Load spikes and parameters
-        eval(['load times_NSX' num2str(channel) ';']);
-        index=cluster_class(:,2)';
-        
-        handles.par = par;      %Load parameters
-
-        %Load clustering results
-        %fname = [handles.par.fname '_' filename(1:end-4)];         %filename for interaction with SPC
-%         fname = [handles.par.fname '_ch' channel];         %filename for interaction with SPC                                                                
-%         fname = [handles.par.fname channel];         %filename for interaction with SPC
-        fname = handles.par.fname;         %filename for interaction with SPC
-        
-        clu = load([fname '.dg_01.lab']);
-        tree = load([fname '.dg_01']);
-        handles.par.fnamespc = fname;
-        handles.par.fnamesave = fname;
-        USER_DATA{3} = index;
-
-    case '.nse'
-        if length(filename) == 7
-            channel = filename(3);
+    else
+        if handles.par.match == 'y';
+            naux = min(handles.par.max_spk,size(inspk,1));
+            inspk_aux = inspk(1:naux,:);
         else
-            channel = filename(3:4);
+            inspk_aux = inspk;
         end
-        [index, Samples] = Nlx2MatSE(['Sc' num2str(channel) '.Nse'],1,0,0,0,1,0);
-        spikes(:,:)= Samples(:,1,:); clear Samples; spikes = spikes';
-        sr = 24000
-        handles.par.sr = sr;                        % sampling rate (in Hz).
-        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
-        handles.nsegment = 1;
-        axes(handles.cont_data); cla
-        
-        [spikes] = spike_alignment(spikes,handles);
-        set(handles.file_name,'string','Calculating spike features ...');
-        [inspk] = wave_features_wc(spikes,handles);                 %Extract spike features.
+    end
 
-        if handles.par.permut == 'y'
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                ipermut = randperm(length(inspk));
-                ipermut(naux+1:end) = [];
-                inspk_aux = inspk(ipermut,:);
-            else
-                ipermut = randperm(length(inspk));
-                inspk_aux = inspk(ipermut,:);
-            end
-        else
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                inspk_aux = inspk(1:naux,:);
-            else
-                inspk_aux = inspk;
-            end
-        end
-            
-        %Interaction with SPC
-        set(handles.file_name,'string','Running SPC ...');
-        handles.par.fname_in = 'tmp_data';
-        fname_in = handles.par.fname_in;
-        save([fname_in],'inspk_aux','-ascii');                         %Input file for SPC
-        handles.par.fname = [handles.par.fname '_wc'];             %Output filename of SPC
-        handles.par.fnamesave = [handles.par.fname '_ch' ...
-                num2str(channel)];                                 %filename if "save clusters" button is pressed
-        handles.par.fnamespc = handles.par.fname;
-        USER_DATA{3} = index/1000;
-        
-    case 'Sc data (pre-clustered)'
-        channel = filename(3:end-4);
-        [index, Samples] = Nlx2MatSE(['Sc' channel '.Nse'],1,0,0,0,1,0);
-        index = index/1000;
-        spikes(:,:)= Samples(:,1,:); clear Samples; spikes = spikes';
-        sr = 24000
-        handles.par.sr = sr;                        % sampling rate (in Hz).
-        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
-        
-        axes(handles.cont_data); cla
 
-        [spikes] = spike_alignment(spikes,handles);
-        
-        %Load clustering results
-        fname = [handles.par.fname '_ch' channel];         %filename for interaction with SPC
-        clu = load([fname '.dg_01.lab']);
-        tree = load([fname '.dg_01']);
-        handles.par.fnamespc = fname;
-        handles.par.fnamesave = handles.par.fnamespc; 
-
-        USER_DATA{3} = index;  
-    
-    case '.mat'            % ASCII matlab files
-        sr = 20000
-        handles.par.sr = sr;                        % sampling rate (in Hz).
-        handles.nsegment = 1;
-        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
-        index_all=[];
-        spikes_all=[];
-        for j=1:handles.par.segments                                %that's for cutting the data into pieces
-            % LOAD CONTINUOUS DATA
-            load(filename);
-            x=data(:)';
-            tsmin = (j-1)*floor(length(data)/handles.par.segments)+1;
-            tsmax = j*floor(length(data)/handles.par.segments);
-            x=data(tsmin:tsmax); clear data; 
-            handles.nsegment = j;                                      %flag for ploting only in the 1st loop
-            
-            % SPIKE DETECTION WITH AMPLITUDE THRESHOLDING
-            set(handles.file_name,'string','Detecting spikes ...');
-            [spikes,thr,index]  = amp_detect_wc(x,handles,true);        %detection with amp. thresh.
-            index=index+tsmin-1;
-            
-            index_all = [index_all index];
-            spikes_all = [spikes_all; spikes];
-        end
-        index = index_all *1e3/handles.par.sr;                     %spike times in ms.
-        spikes = spikes_all;
-        
-        USER_DATA{2}=spikes;
-        USER_DATA{3}=index;
-        set(handles.file_name,'string','Calculating spike features ...');
-        [inspk] = wave_features_wc(spikes,handles);                %Extract spike features.
-
-        if handles.par.permut == 'y'
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                ipermut = randperm(length(inspk));
-                ipermut(naux+1:end) = [];
-                inspk_aux = inspk(ipermut,:);
-            else
-                ipermut = randperm(length(inspk));
-                inspk_aux = inspk(ipermut,:);
-            end
-        else
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                inspk_aux = inspk(1:naux,:);
-            else
-                inspk_aux = inspk;
-            end
-        end
-            
-        %Interaction with SPC
-        set(handles.file_name,'string','Running SPC ...');
-        handles.par.fname_in = 'tmp_data';
-        fname_in = handles.par.fname_in;
-        save([fname_in],'inspk_aux','-ascii');                         %Input file for SPC
-        handles.par.fnamesave = [handles.par.fname '_' ...
-                filename(1:end-4)];                                %filename if "save clusters" button is pressed
-%         handles.par.fname = [handles.par.fname '_wc'];             %Output filename of SPC
-%         handles.par.fnamespc = handles.par.fname;
-        handles.par.fnamespc = handles.par.fname;
-        handles.par.fname = [handles.par.fname '_wc'];             %Output filename of SPC
-        
-        
-        
-    case 'ASCII (pre-clustered)'                                   %ASCII matlab files
-        %In case of polytrode data 
-        if strcmp(filename(1:5),'times')
-            filename = filename(7:end);
-        end
-        sr = 24000
-        handles.par.sr = sr;                                       % sampling rate (in Hz).
-        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
-                
-        %Load spikes and parameters
-        eval(['load times_' filename ';']);
-        index=cluster_class(:,2)';
-
-        %Load clustering results
-        fname = [handles.par.fname '_' filename(1:end-4)];         %filename for interaction with SPC
-        clu = load([fname '.dg_01.lab']);
-        tree = load([fname '.dg_01']);
-        handles.par.fnamespc = fname;
-        handles.par.fnamesave = fname;
-        
-        USER_DATA{3} = index;
-
-        %Load continuous data (for ploting)
-        if ~strcmp(filename(1:4),'poly')
-            load(filename);
-            lplot = min(length(data),floor(60*handles.par.sr));
-            [spikes,thr,index] = amp_detect_wc(data(1:lplot), handles,false);                   %Detection with amp. thresh.
-        end
-        
-    case 'ASCII spikes'
-        sr = 30000
-        handles.par.sr = sr;                        % sampling rate (in Hz).
-        handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
-        axes(handles.cont_data); cla
-        
-        %Load spikes
-        load(filename);
-                
-        [spikes] = spike_alignment(spikes,handles);
-        set(handles.file_name,'string','Calculating spike features ...');
-        [inspk] = wave_features_wc(spikes,handles);                      %Extract spike features.
-        
-        if handles.par.permut == 'y'
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                ipermut = randperm(length(inspk));
-                ipermut(naux+1:end) = [];
-                inspk_aux = inspk(ipermut,:);
-            else
-                ipermut = randperm(length(inspk));
-                inspk_aux = inspk(ipermut,:);
-            end
-        else
-            if handles.par.match == 'y';
-                naux = min(handles.par.max_spk,size(inspk,1));
-                inspk_aux = inspk(1:naux,:);
-            else
-                inspk_aux = inspk;
-            end
-        end
-            
-        %Interaction with SPC
-        set(handles.file_name,'string','Running SPC ...');
-        handles.par.fname_in = 'tmp_data';
-        fname_in = handles.par.fname_in;
-        save([fname_in],'inspk_aux','-ascii');                      %Input file for SPC
-        handles.par.fnamesave = [handles.par.fname '_' ...
-                filename(1:end-4)];                             %filename if "save clusters" button is pressed
-        handles.par.fname = [handles.par.fname '_wc'];          %Output filename of SPC
-        handles.par.fnamespc = handles.par.fname;
-
-        USER_DATA{3} = index(:)';        
-        
-    case 'ASCII spikes (pre-clustered)' 
-        %         with_ascci_wc_old = 1;
-        with_ascci_wc_old = 0;
-        
-        [filename, pathname] = uigetfile('*.mat','Select file');
-        if ~with_ascci_wc_old
-            % BEGIN NEW %
-            filename = filename(1:end-11);  % removes the "_spikes.mat" part of the filename
-            % END NEW %
-        end
-        set(handles.file_name,'string',['Loading:    ' pathname filename]);
-        cd(pathname);
-        if with_ascci_wc_old
-            % BEGIN OLD %
-
-            sr = 24000
-            handles.par.sr = sr;                        % sampling rate (in Hz).
-            handles.par.ref = floor(handles.par.ref_ms *sr/1000);     % conversion to datapoints
-            axes(handles.cont_data); cla
-            % END OLD %
-        end
-        %Load spikes and parameters
-        eval(['load times_' filename ';']);
-        index=cluster_class(:,2)';
-        
-        if ~with_ascci_wc_old
-            % BEGIN NEW %
-            par.filename = [filename '.BLA'];   
-            handles.par = par;      %Load parameters
-            % END NEW %
-        end 
-        
-        %Load clustering results
-        if with_ascci_wc_old
-            % fname REPLACED %
-            fname = [handles.par.fname '_' filename(1:end-4)];               %filename for interaction with SPC
-        else
-            fname = handles.par.fname;         %filename for interaction with SPC
-        end
-        clu = load([fname '.dg_01.lab']);
-        tree = load([fname '.dg_01']);
-        handles.par.fnamespc = fname;
-        handles.par.fnamesave = fname;
-
-        USER_DATA{3} = index(:)';
-              
+    handles.par.fname = data_handler.nick_name; % or maybe raw data name(FC)
+    %Interaction with SPC
+    set(handles.file_name,'string','Running SPC ...');
+    drawnow
+    fname_in = handles.par.fname_in;
+    save([fname_in],'inspk_aux','-ascii');                      %Input file for SPC
+    handles.par.fnamesave = handles.par.fname;                                  %filename if "save clusters" button is pressed
+    handles.par.fnamespc = handles.par.fname;
+    handles.par.fname = [handles.par.fname '_wc'];              %Output filename of SPC 
+    [clu,tree] = run_cluster(handles);
+else
+    [clu,tree] = data_handler.get_clusters();
+    index = data_handler.index
+    spikes = data_handler.spikes
 end
 
 
-USER_DATA{1} = handles.par;
-USER_DATA{2} = spikes;
-
-if ~exist('clu')|| ~exist('tree')
-	[clu,tree] = run_cluster(handles);
+if true %raw exists
+    [xd_sub, sr_sub] = data_handler.get_signal_sample();
+    Plot_continuous_data(xd_sub, sr_sub,handles)
+    clear xd_sub
 end
 
-USER_DATA{4} = clu;
-USER_DATA{5} = tree;
 if exist('inspk');
     USER_DATA{7} = inspk;
 end
 
-
 set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
-temp = find_temp(tree,handles);                                   %Selects temperature.
-set(handles.file_name,'string',[pathname filename]);
+                                
+
+%Selects temperature.
+temp = find_temp(tree,handles); 
 
 if size(clu,2)-2 < size(spikes,1);
-    if ~exist('ipermut')
+    if handles.par.permut == 'n'
         classes = clu(temp(end),3:end)+1;
         classes = [classes(:)' zeros(1,size(spikes,1)-handles.par.max_spk)];
     else
-        classes = zeros(1,size(clu,2)-2);
-        classes(ipermut) = clu(temp(end),3:length(ipermut)+2)+1;
+        classes = zeros(1,size(spikes,1));
+        classes(ipermut) = clu(temp(end),3:end)+1;
+
         USER_DATA{12} = ipermut;
     end
 end
 
+USER_DATA{1} = handles.par;
+USER_DATA{2} = spikes;
+USER_DATA{3} = index;
+USER_DATA{4} = clu;
+USER_DATA{5} = tree;
 USER_DATA{6} = classes(:)';
 USER_DATA{8} = temp(end);
 USER_DATA{9} = classes(:)';                                     %backup for non-forced classes.
@@ -709,7 +292,7 @@ plot_spikes(handles); %This function edit the user data!!
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 clustering_results = USER_DATA{10};
 mark_clusters_temperature_diagram(handles,tree,clustering_results);
-
+set(handles.file_name,'string',[pathname filename]);
 
 % --- Executes on button press in change_temperature_button.
 function change_temperature_button_Callback(hObject, eventdata, handles)
@@ -901,80 +484,41 @@ h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
 h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
 h_fig5 = findobj(h_figs,'tag','wave_clus_aux4');
 h_fig6 = findobj(h_figs,'tag','wave_clus_aux5');
-if strcmp(outfile(7:9),'CSC')
-    if ~isempty(h_fig)
-        figure(h_fig); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig,''-djpeg'',''fig2print_' outfile(10:end) ''')' ]);
-    end
-    if ~isempty(h_fig1)
-        figure(h_fig1); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig1,''-djpeg'',''fig2print_' outfile(10:end) 'a' ''')' ]);
-    end
-    if ~isempty(h_fig2)
-        figure(h_fig2); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig2,''-djpeg'',''fig2print_' outfile(10:end) 'b' ''')' ]);
-    end
-    if ~isempty(h_fig3)
-        figure(h_fig3); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig3,''-djpeg'',''fig2print_' outfile(10:end) 'c' ''')' ]);
-    end
-    if ~isempty(h_fig4)
-        figure(h_fig4); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig4,''-djpeg'',''fig2print_' outfile(10:end) 'd' ''')' ]);
-    end
-    if ~isempty(h_fig5)
-        figure(h_fig5); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig5,''-djpeg'',''fig2print_' outfile(10:end) 'e' ''')' ]);
-    end
-    if ~isempty(h_fig6)
-        figure(h_fig6); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig6,''-djpeg'',''fig2print_' outfile(10:end) 'f' ''')' ]);
-    end
-       
-else
-    if ~isempty(h_fig)
-        figure(h_fig); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig,''-djpeg'',''fig2print_' outfile(7:end)  ''')' ]);
-    end
-    if ~isempty(h_fig1)
-        figure(h_fig1); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig1,''-djpeg'',''fig2print_' outfile(7:end) 'a' ''')' ]);
-    end
-    if ~isempty(h_fig2)
-        figure(h_fig2); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig2,''-djpeg'',''fig2print_' outfile(7:end) 'b' ''')' ]);
-    end
-    if ~isempty(h_fig3)
-        figure(h_fig3); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig3,''-djpeg'',''fig2print_' outfile(7:end) 'c' ''')' ]);
-    end
-    if ~isempty(h_fig4)
-        figure(h_fig4); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig4,''-djpeg'',''fig2print_' outfile(7:end) 'd' ''')' ]);
-    end
-    if ~isempty(h_fig5)
-        figure(h_fig5); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig5,''-djpeg'',''fig2print_' outfile(7:end) 'e' ''')' ]);
-    end
-    if ~isempty(h_fig6)
-        figure(h_fig6); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-        eval(['print(h_fig6,''-djpeg'',''fig2print_' outfile(7:end) 'f' ''')' ]);
-    end
-    
+
+if ~isempty(h_fig)
+    figure(h_fig); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
+    set(gcf,'paperposition',[.25 .25 10.5 7.8])
+    eval(['print(h_fig,''-djpeg'',''fig2print_' outfile(7:end)  ''',''-r800'')' ]);
+end
+if ~isempty(h_fig1)
+    figure(h_fig1); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
+    set(gcf,'paperposition',[.25 .25 10.5 7.8])
+    eval(['print(h_fig1,''-djpeg'',''fig2print_' outfile(7:end) 'a' ''',''-r800'')' ]);
+end
+if ~isempty(h_fig2)
+    figure(h_fig2); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
+    set(gcf,'paperposition',[.25 .25 10.5 7.8])
+    eval(['print(h_fig2,''-djpeg'',''fig2print_' outfile(7:end) 'b' ''',''-r800'')' ]);
+end
+if ~isempty(h_fig3)
+    figure(h_fig3); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
+    set(gcf,'paperposition',[.25 .25 10.5 7.8])
+    eval(['print(h_fig3,''-djpeg'',''fig2print_' outfile(7:end) 'c' ''',''-r800'')' ]);
+end
+if ~isempty(h_fig4)
+    figure(h_fig4); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
+    set(gcf,'paperposition',[.25 .25 10.5 7.8])
+    eval(['print(h_fig4,''-djpeg'',''fig2print_' outfile(7:end) 'd' ''',''-r800'')' ]);
+end
+if ~isempty(h_fig5)
+    figure(h_fig5); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
+    set(gcf,'paperposition',[.25 .25 10.5 7.8])
+    eval(['print(h_fig5,''-djpeg'',''fig2print_' outfile(7:end) 'e' ''',''-r800'')' ]);
+end
+if ~isempty(h_fig6)
+    figure(h_fig6); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
+    set(gcf,'paperposition',[.25 .25 10.5 7.8])
+    eval(['print(h_fig6,''-djpeg'',''fig2print_' outfile(7:end) 'f' ''')' ]);
 end
 
 % --- Executes on button press in set_parameters_button.

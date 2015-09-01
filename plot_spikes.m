@@ -238,6 +238,7 @@ axes(handles.projections); cla; reset(gca)
 % Plot clusters
 ylimit = [];
 colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
+
 for i = 1:nclusters+1
     if ~ (isempty(class0) & i==1)
         %PLOTS SPIKES OR PROJECTIONS
@@ -245,17 +246,15 @@ for i = 1:nclusters+1
         hold on
         eval(['max_spikes=min(length(class' num2str(i-1) '),par.max_spikes);']);
         eval(['sup_spikes=length(class' num2str(i-1) ');']);
+        permut = randperm(sup_spikes);
         if get(handles.spike_shapes_button,'value') ==1 & get(handles.plot_all_button,'value') ==1
-            permut = randperm(sup_spikes);
             eval(['plot(spikes(class' num2str(i-1) '(permut(1:max_spikes)),:)'',''' colors(i) ''');'])
             xlim([1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
-            permut = randperm(sup_spikes); % JMG 7/4/09
             eval(['av   = mean(spikes(class' num2str(i-1) ',:));']);
             eval(['plot(1:ls,av,''color'',''' colors(i) ''',''linewidth'',2);']);
             xlim([1 ls])
         else
-            permut = randperm(sup_spikes); % JMG 7/4/09
             eval(['plot(inspk(class' num2str(i-1) ',1),inspk(class' num2str(i-1) ',2),''.' colors(i) ''',''markersize'',.5);']);
         end        
         if i < 5

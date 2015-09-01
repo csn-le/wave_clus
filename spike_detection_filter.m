@@ -1,0 +1,17 @@
+function xf_detect = spike_detection_filter(x, par)
+
+sr = par.sr;
+fmin_detect = par.detect_fmin;
+fmax_detect = par.detect_fmax;
+
+
+
+
+% HIGH-PASS FILTER OF THE DATA
+if exist('ellip','file')                         %Checks for the signal processing toolbox
+    [b,a] = ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
+    xf_detect = filtfilt(b, a, x);
+else
+    xf_detect = fix_filter(x);                   %Does a bandpass filtering between [300 3000] without the toolbox.
+end
+
