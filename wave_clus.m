@@ -140,8 +140,6 @@ set(handles.fix3_button,'value',0);
 [filename, pathname] = uigetfile('*.mat; *.Ncs; *.ncs; nev*.mat; NSX*.NC5; *.Nse','Select file');
 set(handles.file_name,'string',['Loading:    ' pathname filename]);
 
-%I don't like this.... It's better use: ff = [pathname,ff] in all the files
-%(FC)
 cd(pathname);
 
 handles.par = set_parameters();
@@ -151,7 +149,6 @@ for i=1:handles.par.max_clus+1
     eval(['handles.par.nbins' num2str(i-1) ' = handles.par.nbins;']);  % # of bins for the ISI histograms
     eval(['handles.par.bin_step' num2str(i-1) ' = handles.par.bin_step;']);  % percentage number of bins to plot
 end
-
 
 % Sets to zero fix buttons from aux figures
 for i=4:handles.par.max_clus
@@ -165,32 +162,35 @@ USER_DATA = get(handles.wave_clus_figure,'userdata');
 
 data_handler = readInData(handles.par);
 handles.par = data_handler.par;
+handles.par.fname_in = 'tmp_data_wc';           % temporary filename used as input for SPC
+handles.par.fname = ['data_' data_handler.nick_name];
+
+handles.par.fnamesave = handles.par.fname;                  %filename if "save clusters" button is pressed
+handles.par.fnamespc = handles.par.fname;
+%handles.par.fname = [handles.par.fname '_wc'];              %Output filename of SPC 
+
+%handles.par.fname = data_handler.nick_name;
 
 
 
-if true %times doesn't exist
-    if true  %spikes doesn't exist
-        set(handles.file_name,'string','Detecting spikes ...');
-        drawnow
-        index=[];
-        spikes=[];
+if data_handler.with_results %data have _times files
+    [clu, tree, spikes, index, inspk, ipermut] = data_handler.load_results();
+else    
+    if data_handler.with_spikes  %data have some time of _spikes files
+        [spikes, index] = data_handler.load_spikes(); 
+    else    
+        set(handles.file_name,'string','Detecting spikes ...'); drawnow
+        index = [];
+        spikes = [];
         for n = 1:data_handler.max_segments
-            [x t0ms] = data_handler.get_segment();
-            [new_spikes,temp_aux_th,new_index]  = amp_detect_wc(x, handles);
-            index = [index new_index*1e3/handles.par.sr + t0ms]; %new_index to ms
+            x = data_handler.get_segment();
+            [new_spikes, temp_aux_th, new_index]  = amp_detect(x, handles);
+            index = [index data_handler.index2ts(new_index)]; %new_index to ms
             spikes = [spikes; new_spikes];
         end
-    else
-        index = data_handler.index
-        spikes = data_handler.spikes
     end
-
-    
-    
-    set(handles.file_name,'string','Calculating spike features ...');
-    drawnow
-    [inspk] = wave_features_wc(spikes,handles);                 %Extract spike features.
-
+    set(handles.file_name,'string','Calculating spike features ...'); drawnow
+    [inspk] = wave_features(spikes,handles);                 %Extract spike features.
 
     if handles.par.permut == 'y'
         if handles.par.match == 'y';
@@ -211,40 +211,29 @@ if true %times doesn't exist
         end
     end
 
-
-    handles.par.fname = data_handler.nick_name; % or maybe raw data name(FC)
     %Interaction with SPC
-    set(handles.file_name,'string','Running SPC ...');
-    drawnow
+    set(handles.file_name,'string','Running SPC ...'); drawnow
     fname_in = handles.par.fname_in;
     save([fname_in],'inspk_aux','-ascii');                      %Input file for SPC
-    handles.par.fnamesave = handles.par.fname;                                  %filename if "save clusters" button is pressed
-    handles.par.fnamespc = handles.par.fname;
-    handles.par.fname = [handles.par.fname '_wc'];              %Output filename of SPC 
+
     [clu,tree] = run_cluster(handles);
-else
-    [clu,tree] = data_handler.get_clusters();
-    index = data_handler.index
-    spikes = data_handler.spikes
+
 end
 
-
-if true %raw exists
+if data_handler.with_raw %raw exists
     [xd_sub, sr_sub] = data_handler.get_signal_sample();
     Plot_continuous_data(xd_sub, sr_sub,handles)
     clear xd_sub
+    drawnow
 end
 
-if exist('inspk');
-    USER_DATA{7} = inspk;
-end
+
 
 set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
                                 
 
 %Selects temperature.
 temp = find_temp(tree,handles); 
-
 if size(clu,2)-2 < size(spikes,1);
     if handles.par.permut == 'n'
         classes = clu(temp(end),3:end)+1;
@@ -252,7 +241,18 @@ if size(clu,2)-2 < size(spikes,1);
     else
         classes = zeros(1,size(spikes,1));
         classes(ipermut) = clu(temp(end),3:end)+1;
+        clu_aux = zeros(size(clu,1),size(spikes,1)) + 1000; %when update classes from clu, not selected go to cluster 1001
+        clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
+        clu_aux(:,1:2) = clu(:,1:2);
+        clu = clu_aux; 
+        clear clu_aux 
+    end
+else
+    classes = clu(temp,3:end)+1;
+end
 
+if exist('ipermut','var')
+    if ~isempty(ipermut)
         USER_DATA{12} = ipermut;
     end
 end
@@ -263,6 +263,7 @@ USER_DATA{3} = index;
 USER_DATA{4} = clu;
 USER_DATA{5} = tree;
 USER_DATA{6} = classes(:)';
+USER_DATA{7} = inspk;
 USER_DATA{8} = temp(end);
 USER_DATA{9} = classes(:)';                                     %backup for non-forced classes.
 
@@ -466,7 +467,7 @@ end
 
 eval(exec_line);
 
-if(~strcmp(handles.par.fnamespc,handles.par.fnamesave))
+if(~strcmp(handles.par.fnamespc, handles.par.fnamesave))
 %     handles.par.fnamespc
 %     handles.par.fnamesave
 %     copyfile([handles.par.fnamespc '.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab']);
@@ -565,7 +566,7 @@ switch par.force_feature
     case 'wav'
         if isempty(inspk)
             set(handles.file_name,'string','Calculating spike features ...');
-            [inspk] = wave_features_wc(spikes,handles);        % Extract spike features.
+            [inspk] = wave_features(spikes,handles);        % Extract spike features.
             USER_DATA{7} = inspk;
         end
         f_in  = inspk(find(classes~=0 & classes~=-1),:);

@@ -5,10 +5,11 @@ classdef ncs_reader < handle
         raw_filename
         %channel
         opened_file
-        tsmin
         recmin
         recmax
         num_scale_factor
+        TimeStamps
+        dt
     end 
 	methods 
         function obj = ncs_reader(par, raw_filename)
@@ -59,8 +60,8 @@ classdef ncs_reader < handle
             tsmax = [tsmax, lts];
             obj.recmax = tsmax;
             obj.recmin = tsmin;
-            obj.tsmin = TimeStamps(int64(tsmin))/1000; %in ms begin time of segments                   
-
+            obj.dt = min(diff(TimeStamps));
+            obj.TimeStamps = TimeStamps;
             scale_factor = textread(obj.raw_filename,'%s',43);
 
             if(str2num(scale_factor{41})*1e6 > 0.5)
@@ -68,31 +69,30 @@ classdef ncs_reader < handle
             else
                 obj.num_scale_factor = 1e6 * str2num(scale_factor{41}); %for the old CSC format
             end
-                    
             
         end
         
-        function [sr,max_segments] = get_info(obj)
+        function [sr,max_segments,with_raw,with_spikes] = get_info(obj)
         	sr = obj.sr;
             max_segments = obj.max_segments;
-          
+            with_raw = true;
+            with_spikes = false;
         end
         
+        function index_ts = index2ts(obj,index,i)
+            index_ts = (obj.TimeStamps(obj.recmin(i)+floor(index/512))'+mod(index,512)/512*obj.dt)/1000;
+        end
       
-        function [x,t0] = get_segment(obj,i)
+        function x = get_segment(obj,i)
             
             Samples = fread(obj.opened_file,512*(obj.recmax(i)- ...
                 obj.recmin(i)+1),'512*int16=>int16',8+4+4+4); %the recmax are in timestamps indexs
             
             x = double(Samples(:))' *  obj.num_scale_factor;
-            t0 = obj.tsmin(i);
-            
+           
             if i == obj.max_segments
                 fclose(obj.opened_file);
             end
         end
-        
-  
-	end
-
+    end
 end

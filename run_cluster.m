@@ -1,11 +1,10 @@
 function [clu, tree] = run_cluster(handles)
-dim=handles.par.inputs;
-fname=handles.par.fname;
-fname_in=handles.par.fname_in;
+dim = handles.par.inputs;
+fname = handles.par.fname;
+fname_in = handles.par.fname_in;
 
 % DELETE PREVIOUS FILES
-fileexist = exist([fname '.dg_01.lab'],'file');
-if(fileexist~=0)
+if exist([fname '.dg_01.lab'],'file')
     delete([fname '.dg_01.lab']);
     delete([fname '.dg_01']);
 end
@@ -69,10 +68,11 @@ switch system_type
 	    unix(run_linux);
 end
         
-clu=load([fname '.dg_01.lab']);
-tree=load([fname '.dg_01']); 
+clu = load([fname '.dg_01.lab']);
+tree = load([fname '.dg_01']); 
 delete(sprintf('%s.run',fname));
 delete *.mag
 delete *.edges
 delete *.param
+
 delete(fname_in); 

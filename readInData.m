@@ -1,16 +1,16 @@
 classdef readInData < handle
 	properties
         par
-        file_type
         nick_name
         with_raw
         with_spikes
-        with_clust
+        with_results
         n_to_read
         sample_signal
         max_segments
-        %channel
-        raw_reader
+        file_reader
+        with_wc_spikes
+        
     end 
 	methods 
         function obj = readInData(par)
@@ -18,39 +18,74 @@ classdef readInData < handle
             obj.par = par;
             obj.nick_name = fnam;
             obj.n_to_read = 1;
-            obj.par.sr =[];
+            obj.with_results = false;
+            obj.with_spikes = false;
+            obj.with_wc_spikes = false;
             
-            if strcmpi(ext,'.mat')
-                %intento encontrar el raw
-                %o si es el raw lo cargo como esta
-                disp('searching raw data')
-                obj.with_raw = true;            %maybe
-                raw_filename = par.filename;    %perphaps
-            else
-               raw_filename = par.filename;
-               obj.with_raw = true;
-            end
-
-            if obj.with_raw
-                if exist([ext(2:end) '_reader'],'file')
-                    obj.raw_reader = eval([ext(2:end) '_reader(par,raw_filename)']);
-                    [sr, obj.max_segments] = obj.raw_reader.get_info();
-                    if isempty(obj.par.sr)
-                        obj.par.sr = sr;
-                    end
+            if exist([ext(2:end) '_reader'],'file')
+                obj.file_reader = eval([ext(2:end) '_reader(par,par.filename)']);
+                [sr, obj.max_segments, obj.with_raw, obj.with_spikes] = obj.file_reader.get_info();
+                if isempty(sr)
+                    disp('Wave_clus din''t find a sampling rate in file. It will use the set in set_parameters.m')
                 else
-                    ME = MException('MyComponent:noSuchExt', 'File type ''%s'' is not supported',ext);
-                    throw(ME)
+                    obj.par.sr = sr;
                 end
-                
+            else
+                ME = MException('MyComponent:noSuchExt', 'File type ''%s'' is not supported',ext);
+                throw(ME)
             end
             
+            %Search for previously detected spikes
+            if exist([obj.nick_name '_spikes.mat'],'file')
+%                 spf_names = whos('-file','[obj.nick_name '_times.mat'].mat')
+%                 ismember('index_ts', {spf_names.name})
+                obj.with_wc_spikes = true;
+            end
+            
+
+            %Search for previous results
+            if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
+                obj.with_results = true;
+            end
             
             obj.par.ref = floor(obj.par.ref_ms *obj.par.sr/1000);
+        end
+        
+        
+        function [spikes, index_ts] = load_spikes(obj)
+            if ~ (obj.with_spikes || obj.with_wc_spikes)
+                ME = MException('MyComponent:noSpikesFound', 'Wave_Clus couldn''t find a file with spikes');
+                throw(ME)
+            end
+            
+            if obj.with_wc_spikes  %wc data have priority
+                load([obj.nick_name '_times.mat']);
+                if ~ exist('index_ts','var')  %for retrocompatibility
+                    index_ts = index;
+                end
+            else
+                [spikes, index_ts] = obj.file_reader.load_spikes();
+            end
             
         end
         
-        function [x t0]= get_segment(obj)
+        
+        function [clu, tree, spikes, index, inspk, ipermut] = load_results(obj)
+        	
+            if ~ obj.with_results
+            	ME = MException('MyComponent:noClusFound', 'This file don''t have a associated ''times_%s.mat'' file',obj.nick_name);
+            	throw(ME)
+            end
+            load(['times_' obj.nick_name '.mat']);
+            
+            % cluster_class(:,1);
+            index = cluster_class(:,2);
+         	clu = load(['data_' obj.nick_name '.dg_01.lab']);
+         	tree = load(['data_' obj.nick_name '.dg_01']);
+        end
+
+        
+        function x = get_segment(obj)
             
             if ~ obj.with_raw
                 ME = MException('MyComponent:noRawFound', 'Wave_Clus couldn''t find the raw data',ext);
@@ -61,7 +96,7 @@ classdef readInData < handle
                 throw(ME)
             end
             
-            [x t0] = obj.raw_reader.get_segment(obj.n_to_read);
+            x = obj.file_reader.get_segment(obj.n_to_read);
             
             if ~ isa(x,'double')
                 x = double(x);
@@ -71,15 +106,20 @@ classdef readInData < handle
                 lplot = min(floor(60*obj.par.sr), length(x));
                 xf_detect = spike_detection_filter(x(1:lplot), obj.par);
                 
-                max_samples = 20000;
+                max_samples = 100000;
                 sub = floor(lplot/max_samples);
                 obj.sample_signal.xd_sub = xf_detect(1:sub:end) ;
                 obj.sample_signal.sr_sub = obj.par.sr/sub ;
             end
             
             obj.n_to_read = obj.n_to_read + 1;
-            
         end
+        
+        
+        function index_ts = index2ts(obj,index)
+            index_ts = obj.file_reader.index2ts(index,obj.n_to_read-1);
+        end
+        
         
         function [xd_sub, sr_sub] = get_signal_sample(obj)
             if obj.n_to_read == 1
@@ -100,52 +140,6 @@ end
 
 
 
-% 
-% switch lower(ext)        
-%     case 'CSC data (pre-clustered)'                                 %Neuralynx (CSC files)
-%         channel = filename(4:end-4);
-% 
-%         f=fopen(filename,'r','l');
-%         fseek(f,16384,'bof');                                       %Skip Header, put pointer to the first record
-%         TimeStamps=fread(f,inf,'int64',(4+4+4+2*512));              %Read all TimeStamps
-%         time0 = TimeStamps(1); 
-%         timeend = TimeStamps(end);
-%         sr = 512*1e6/(TimeStamps(2)-TimeStamps(1));
-%         clear TimeStamps;
-% 
-%         handles.par.sr = sr;                                        % sampling rate (in Hz).
-%         handles.par.ref = floor(handles.par.ref_ms *sr/1000);       % conversion to datapoints
-% 
-%                
-%         %Load spikes and parameters
-%         eval(['load times_CSC' channel ';']);
-%         index=cluster_class(:,2)';
-% 
-%         %Load clustering results
-%         fname = [handles.par.fname '_ch' channel];         %filename for interaction with SPC
-%         clu=load([fname '.dg_01.lab']);
-%         tree=load([fname '.dg_01']);
-%         handles.par.fnamespc = fname;
-%         handles.par.fnamesave = handles.par.fnamespc;
-%                         
-%         USER_DATA{3} = index;
-%  
-%         % LOAD CSC DATA (for plotting)
-%         fseek(f,16384+8+4+4+4,'bof');                               %put pointer to the beginning of data
-%         Samples=fread(f,ceil(sr*60),'512*int16=>int16',8+4+4+4);  
-%         x=double(Samples(:))';
-%         clear Samples; 
-%         fclose(f);
-% 
-%         %GETS THE GAIN AND CONVERTS THE DATA TO MICRO V.
-%         scale_factor = textread(['CSC' channel '.ncs'],'%s',43);
-%         if(str2num(scale_factor{41})*1e6 > 0.5)
-%             num_scale_factor=str2num(scale_factor{43});
-%         else
-%             num_scale_factor=str2num(scale_factor{41});
-%         end
-%         x=x*num_scale_factor*1e6;
-%     
 %    case 'nev data (pre-clustered)'                                   %nev files matlab files
 %         if length(filename) == 15
 %             channel = filename(4);

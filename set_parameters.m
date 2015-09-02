@@ -1,15 +1,11 @@
 function par = set_parameters()
 
-% BAD PLACED PARAMS
-par.fname_in = 'tmp_data';           % temporary filename used as input for SPC
-par.fname = 'data';                  % filename for interaction with SPC
+% LOAD PARAMS
+par.segments_length = 5;             %length (in minutes) of segments in which the data is cutted (default 5min).
+par.sr = 30000;                      %sampling rate (in Hz). This parameter will be only used if the data don't have a sr.
 
 
-% ODD PARAMS
-par.segments_length = 5;             %length of segments in which the data is cutted (default 5min).
-par.segments = 1;                    % nr. of segments in which the data is cutted.
-
-% SPC PARAMETERS
+% PLOTTING PARAMETERS
 par.show_signal = true;
 par.max_spikes = 5000;              % max. # of spikes to be plotted
 

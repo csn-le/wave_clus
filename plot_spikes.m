@@ -7,7 +7,6 @@ spk_times = USER_DATA{3};
 classes = USER_DATA{6};
 classes = classes(:)';
 class_bkup = USER_DATA{9};
-class_bkup = class_bkup;
 inspk = USER_DATA{7};
 temp = USER_DATA{8};
 ls = size(spikes,2);
@@ -33,7 +32,7 @@ eval(['close(10)'],[''])
 % Extract spike features if needed
 if get(handles.spike_shapes_button,'value') ==0
     if isempty(inspk) | (length(inspk)~=size(spikes,1))
-        [inspk] = wave_features_wc(spikes,handles);
+        [inspk] = wave_features(spikes,handles);
         %axes(handles.projections)
         %hold off
         %plot(inspk(:,1),inspk(:,2),'.k','markersize',.5)
