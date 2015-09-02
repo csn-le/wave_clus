@@ -2,7 +2,7 @@ function par = set_parameters()
 
 % LOAD PARAMS
 par.segments_length = 5;             %length (in minutes) of segments in which the data is cutted (default 5min).
-par.sr = 30000;                      %sampling rate (in Hz). This parameter will be only used if the data don't have a sr.
+par.sr = 30000;                      %sampling rate (in Hz). This parameter will be only used if the data file don't have a sr.
 
 
 % PLOTTING PARAMETERS
@@ -53,7 +53,6 @@ par.inputs=10;                       % number of inputs to the clustering
 par.scales=4;                        % number of scales for the wavelet decomposition
 par.features = 'wav';                % type of feature
 %par.features = 'pca'                
-if strcmp(par.features,'pca'); par.inputs=3; end
 
 
 % FORCE MEMBERSHIP PARAMETERS

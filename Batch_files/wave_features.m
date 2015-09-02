@@ -40,7 +40,6 @@ switch feature
     case 'pca'
         [C,S,L] = princomp(spikes);
         cc = S;
-        inputs = 3; 
         coeff(1:3)=[1 2 3];
 end
 
