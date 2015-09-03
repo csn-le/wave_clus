@@ -450,7 +450,7 @@ if get(handles.fix4_button,'value') ==1
     par.fix4 = 1;
 else
     USER_DATA{23} = [];
-    par.fix4 = 0
+    par.fix4 = 0;
 end
 USER_DATA{1} = par;
 h_figs=get(0,'children');

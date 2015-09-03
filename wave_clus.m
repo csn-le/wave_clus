@@ -136,10 +136,11 @@ set(handles.fix3_button,'value',0);
 
 
 
-%I will check this for case-sensitive related problems
-[filename, pathname] = uigetfile('*.mat; *.Ncs; *.ncs; nev*.mat; NSX*.NC5; *.Nse','Select file');
+%I will check this for case-sensitive related problems (FC)
+%[filename, pathname] = uigetfile('*.mat; *.Ncs; *.ncs; nev*.mat; NSX*.NC5; *.Nse','Select file');
+[filename, pathname] = uigetfile('*.*','Select file');
 set(handles.file_name,'string',['Loading:    ' pathname filename]);
-
+axes(handles.cont_data); cla
 cd(pathname);
 
 handles.par = set_parameters();
@@ -155,18 +156,18 @@ for i=4:handles.par.max_clus
     eval(['handles.par.fix' num2str(i) '=0;'])
 end
 
-USER_DATA = get(handles.wave_clus_figure,'userdata');
 
 
 
 
 data_handler = readInData(handles.par);
 handles.par = data_handler.par;
+
 handles.par.fname_in = 'tmp_data_wc';           % temporary filename used as input for SPC
 handles.par.fname = ['data_' data_handler.nick_name];
 
 handles.par.fnamesave = handles.par.fname;                  %filename if "save clusters" button is pressed
-handles.par.fnamespc = handles.par.fname;
+handles.par.fnamespc = 'data_wc';
 %handles.par.fname = [handles.par.fname '_wc'];              %Output filename of SPC 
 
 %handles.par.fname = data_handler.nick_name;
@@ -178,6 +179,9 @@ if data_handler.with_results %data have _times files
 else    
     if data_handler.with_spikes  %data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
+        if ~data_handler.with_wc_spikes
+            [spikes] = spike_alignment(spikes,handles);
+        end
     else    
         set(handles.file_name,'string','Detecting spikes ...'); drawnow
         index = [];
@@ -197,11 +201,10 @@ else
             naux = min(handles.par.max_spk,size(inspk,1));
             ipermut = randperm(length(inspk));
             ipermut(naux+1:end) = [];
-            inspk_aux = inspk(ipermut,:);
         else
             ipermut = randperm(length(inspk));
-            inspk_aux = inspk(ipermut,:);
         end
+        inspk_aux = inspk(ipermut,:);
     else
         if handles.par.match == 'y';
             naux = min(handles.par.max_spk,size(inspk,1));
@@ -220,7 +223,7 @@ else
 
 end
 
-if data_handler.with_raw %raw exists
+if data_handler.with_raw && handles.par.show_signal             %raw exists
     [xd_sub, sr_sub] = data_handler.get_signal_sample();
     Plot_continuous_data(xd_sub, sr_sub,handles)
     clear xd_sub
@@ -251,11 +254,8 @@ else
     classes = clu(temp,3:end)+1;
 end
 
-if exist('ipermut','var')
-    if ~isempty(ipermut)
-        USER_DATA{12} = ipermut;
-    end
-end
+
+USER_DATA = get(handles.wave_clus_figure,'userdata');
 
 USER_DATA{1} = handles.par;
 USER_DATA{2} = spikes;
@@ -266,6 +266,11 @@ USER_DATA{6} = classes(:)';
 USER_DATA{7} = inspk;
 USER_DATA{8} = temp(end);
 USER_DATA{9} = classes(:)';                                     %backup for non-forced classes.
+if exist('ipermut','var')
+    if ~isempty(ipermut)
+        USER_DATA{12} = ipermut;
+    end
+end
 
 % definition of clustering_results
 clustering_results = [];
@@ -337,7 +342,7 @@ switch par.temp_plot
 end
 xlim([0 handles.par.maxtemp])
 xlabel('Temperature'); 
-if par.temp_plot == 'log' 
+if strcmp( par.temp_plot,'log')
     set(get(gca,'ylabel'),'vertical','Cap');
 else
     set(get(gca,'ylabel'),'vertical','Baseline');
@@ -352,7 +357,7 @@ handles.undo = 0;
 plot_spikes(handles);
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 clustering_results = USER_DATA{10};
-clustering_results_bk = USER_DATA{11};
+%clustering_results_bk = USER_DATA{11};
 mark_clusters_temperature_diagram(handles,tree,clustering_results)
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 
@@ -415,9 +420,9 @@ classes = USER_DATA{6};
 % Classes should be consecutive numbers
 i=1;
 while i<=max(classes)
-    if isempty(classes(find(classes==i)))
+    if isempty(classes(classes==i))
         for k=i+1:max(classes)
-            classes(find(classes==k))=k-1;
+            classes(classes==k)=k-1;
         end
     else
         i=i+1;
@@ -467,14 +472,9 @@ end
 
 eval(exec_line);
 
-if(~strcmp(handles.par.fnamespc, handles.par.fnamesave))
-%     handles.par.fnamespc
-%     handles.par.fnamesave
-%     copyfile([handles.par.fnamespc '.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab']);
-%     copyfile([handles.par.fnamespc '.dg_01'], [handles.par.fnamesave '.dg_01']);
-    copyfile([handles.par.fnamespc '_wc.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab']);
-    copyfile([handles.par.fnamespc '_wc.dg_01'], [handles.par.fnamesave '.dg_01']);
-end
+copyfile([handles.par.fnamespc '.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab']);
+copyfile([handles.par.fnamespc '.dg_01'], [handles.par.fnamesave '.dg_01']);
+
 
 %Save figures
 h_figs = get(0,'children');

@@ -1,6 +1,6 @@
 function [clu, tree] = run_cluster(handles)
 dim = handles.par.inputs;
-fname = handles.par.fname;
+fname = handles.par.fnamespc;
 fname_in = handles.par.fname_in;
 
 % DELETE PREVIOUS FILES
