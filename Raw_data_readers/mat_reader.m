@@ -3,13 +3,11 @@ classdef mat_reader < handle
         sr
         data
         max_segments
-        %channel
         opened_file
         sr_infile
         t0_segments
         segmentLength
-        spikes
-        sp_index
+        spikes_file
     end 
 	methods 
         function obj = mat_reader(par, raw_filename)
@@ -21,19 +19,14 @@ classdef mat_reader < handle
             if ismember('sr',{finfo.name})  %if is possible, load sr from file; else from set_parameters
                 load(raw_filename,'sr'); 
                 obj.sr_infile = true;
-                obj.sr = sr;  
+                obj.sr = sr;
             else
                 obj.sr_infile = false;
                 obj.sr = par.sr; 
             end
             
             if ismember('spikes',{finfo.name}) && ismember('index',{finfo.name})
-                load(raw_filename, spikes); 
-                obj.spikes = spikes;
-                clear spikes
-                load(raw_filename,index); 
-                obj.sp_index = index;
-                clear index
+               obj.spikes_file = true;
             end
             if ismember('data',{finfo.name})
                 load(raw_filename,'data');
@@ -67,8 +60,8 @@ classdef mat_reader < handle
         end
 
         function [spikes, index] = load_spikes(obj)
-            spikes = obj.spikes;
-            index = obj.sp_index;
+             load(raw_filename, spikes); 
+             load(raw_filename,index); 
         end
         
         function [sr,max_segments,with_raw,with_spikes] = get_info(obj)
@@ -80,12 +73,8 @@ classdef mat_reader < handle
                 max_segments = obj.max_segments;
             end
             
-            if isempty(obj.spikes)
-                with_spikes = false;
-            else
-                with_spikes = true;
-            end
-            
+            with_spikes = obj.spikes_file;
+
             if obj.sr_infile
                 sr = obj.sr;
             else
