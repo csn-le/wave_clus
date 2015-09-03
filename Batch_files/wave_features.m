@@ -38,9 +38,9 @@ switch feature
         [max_sd ind]=sort(sd);
         coeff(1:inputs)=ind(ls:-1:ls-inputs+1);
     case 'pca'
-        [C,S,L] = princomp(spikes);
+        [C,S] = princomp(spikes);
         cc = S;
-        coeff(1:3)=[1 2 3];
+        coeff = 1:size(S,2);
 end
 
 %CREATES INPUT MATRIX FOR SPC

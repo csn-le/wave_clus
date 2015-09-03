@@ -3,7 +3,6 @@ USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 spikes = USER_DATA{2};
 spk_times = USER_DATA{3};
-%clu = USER_DATA{4};
 classes = USER_DATA{6};
 classes = classes(:)';
 class_bkup = USER_DATA{9};
@@ -31,7 +30,7 @@ eval(['close(10)'],[''])
 
 % Extract spike features if needed
 if get(handles.spike_shapes_button,'value') ==0
-    if isempty(inspk) | (length(inspk)~=size(spikes,1))
+    if isempty(inspk) || (length(inspk)~=size(spikes,1))
         [inspk] = wave_features(spikes,handles);
         %axes(handles.projections)
         %hold off
@@ -52,9 +51,9 @@ end
 % Classes should be consecutive numbers
 i=1;
 while i<=min(max(classes),par.max_clus);
-    if isempty(classes(find(classes==i)))
+    if isempty(classes(classes==i))
         for k=i+1:par.max_clus
-            classes(find(classes==k))=k-1;
+            classes(classes==k)=k-1;
         end
     else
         i=i+1;
@@ -62,9 +61,9 @@ while i<=min(max(classes),par.max_clus);
 end
 i=1;
 while i<=min(max(class_bkup),par.max_clus);
-    if isempty(class_bkup(find(class_bkup==i)))
+    if isempty(class_bkup(class_bkup==i))
         for k=i+1:par.max_clus
-            class_bkup(find(class_bkup==k))=k-1;
+            class_bkup(class_bkup==k)=k-1;
         end
     else
         i=i+1;
@@ -72,9 +71,9 @@ while i<=min(max(class_bkup),par.max_clus);
 end
 
 nclusters_bkup = length(find(cluster_sizes(:) >= par.min_clus));
-class_bkup(find(class_bkup > nclusters_bkup))=0;
+class_bkup(class_bkup > nclusters_bkup)=0;
 
-if handles.setclus == 0 & handles.undo==0 & handles.merge==0 & handles.force==0  
+if handles.setclus == 0 && handles.undo==0 && handles.merge==0 && handles.force==0  
     sizemin_clus = par.min_clus;
 else
     sizemin_clus = 1; 
@@ -88,7 +87,7 @@ nfix_class = [];
 if get(handles.fix1_button,'value') ==1     
     nclusters = nclusters +1;
     fix_class = USER_DATA{20}';
-    classes(find(classes==nclusters))=0;
+    classes(classes==nclusters)=0;
     classes(fix_class)=nclusters;
     ifixflag(nclusters)=1;
     
@@ -98,7 +97,7 @@ end
 if get(handles.fix2_button,'value') ==1     
     nclusters = nclusters +1;
     fix_class = USER_DATA{21}';
-    classes(find(classes==nclusters))=0;
+    classes(classes==nclusters)=0;
     classes(fix_class)=nclusters;
     ifixflag(nclusters)=1;
     
@@ -108,7 +107,7 @@ end
 if get(handles.fix3_button,'value') ==1     
     nclusters = nclusters +1;
     fix_class = USER_DATA{22}';
-    classes(find(classes==nclusters))=0;
+    classes(classes==nclusters)=0;
     classes(fix_class)=nclusters;
     ifixflag(nclusters)=1;
     
@@ -121,18 +120,18 @@ for i=4:par.max_clus
     if fixx == 1
         nclusters = nclusters +1;
         fix_class = USER_DATA{22+i-3}';
-        classes(find(classes==nclusters))=0;
+        classes(classes==nclusters)=0;
         classes(fix_class)=nclusters;
         ifixflag(nclusters)=1;
         
-        fix_class2 = [fix_class2 fix_class]; 
+        fix_class2 = [fix_class2 fix_class];
         nfix_class = [nfix_class i];
     end
 end
 
 % Merge operations
 mtemp = 0;
-if handles.merge == 1 & ~isempty(nfix_class)
+if handles.merge == 1 && ~isempty(nfix_class)
     imerge = find(clustering_results(:,2)==nfix_class(1)); % index for the original temperature that will represent all the fixed classes
     mtemp = clustering_results(imerge(1),3); % temperature that represents all the fixed classes
     classes(fix_class2) = nfix_class(1); % labels all the fixed classes with the new number
@@ -141,18 +140,18 @@ end
 % Defines classes
 clustered = [];
 cont=0;  
-for i=1:nclusters       
-    eval(['class_temp = find(classes==' num2str(i) ');'])
-    if ((ifixflag(i)==1) & (~isempty(class_temp)))
+for i = 1:nclusters
+    class_temp = find(classes == i);
+    if ((ifixflag(i)==1) && (~isempty(class_temp)))
         ifixflagc = 1;
     else
         ifixflagc = 0;
-    end    
+    end
     if ((length(class_temp) >= sizemin_clus) || (ifixflagc == 1))
         cont=cont+1;        
         eval(['class' num2str(cont) '= class_temp;'])
         eval(['clustered = [clustered class' num2str(cont) '];'])
-    end        
+    end
 end
 nclusters = cont;
 class0 = setdiff( 1:size(spikes,1), sort(clustered) );
@@ -160,7 +159,7 @@ class0 = setdiff( 1:size(spikes,1), sort(clustered) );
 % Redefines classes
 classes = zeros(size(spikes,1),1);
 for i = 1:nclusters+1
-    if ~ (isempty(class0) & i==1)
+    if ~ (isempty(class0) && i==1)
         eval(['classes(class' num2str(i-1) ') = ' num2str(i-1) ';']);
     end
 end
