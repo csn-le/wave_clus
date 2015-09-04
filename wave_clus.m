@@ -165,7 +165,7 @@ handles.par = data_handler.par;
 
 handles.par.fname_in = 'tmp_data_wc';           % temporary filename used as input for SPC
 handles.par.fname = ['data_' data_handler.nick_name];
-
+handles.par.nick_name = data_handler.nick_name;
 handles.par.fnamesave = handles.par.fname;                  %filename if "save clusters" button is pressed
 handles.par.fnamespc = 'data_wc';
 %handles.par.fname = [handles.par.fname '_wc'];              %Output filename of SPC 
@@ -434,43 +434,31 @@ cluster_class = zeros(size(spikes,1),2);
 cluster_class(:,1) = classes(:);
 cluster_class(:,2) = USER_DATA{3}';
 
-outfile=['times_' par.filename(1:end-4)];
+outfile=['times_' par.nick_name];
 
-currentver = version;
-currentver = currentver(1);
-switch currentver
-    case {'7'}
-        if isempty(USER_DATA{7}) && isempty(USER_DATA{12})
-            exec_line = strcat('save',' ''',outfile,'''',' cluster_class',' par',' spikes',' -v6;');
-        elseif isempty(USER_DATA{7}) && ~isempty(USER_DATA{12})
-            ipermut = USER_DATA{12};
-            exec_line = strcat('save',' ''',outfile,'''',' cluster_class',' par',' spikes',' ipermut',' -v6;');
-        elseif ~isempty(USER_DATA{7}) && isempty(USER_DATA{12})
-            inspk = USER_DATA{7};
-            exec_line = strcat('save',' ''',outfile,'''',' cluster_class',' par',' spikes',' inspk',' -v6;');
-        else
-            inspk = USER_DATA{7};
-            ipermut = USER_DATA{12};
-            exec_line = strcat('save',' ''',outfile,'''',' cluster_class',' par',' spikes',' inspk',' ipermut',' -v6;');
-        end
-        
-    otherwise
-        if isempty(USER_DATA{7}) && isempty(USER_DATA{12})
-            exec_line = strcat('save',' ''',outfile,'''',' cluster_class',' par',' spikes');
-        elseif isempty(USER_DATA{7}) && ~isempty(USER_DATA{12})
-            ipermut = USER_DATA{12};
-            exec_line = strcat('save',' ''',outfile,'''',' cluster_class',' par',' spikes',' ipermut');
-        elseif ~isempty(USER_DATA{7}) && isempty(USER_DATA{12})
-            inspk = USER_DATA{7};
-            exec_line = strcat('save',' ''',outfile,'''',' cluster_class',' par',' spikes',' inspk');
-        else
-            inspk = USER_DATA{7};
-            ipermut = USER_DATA{12};
-            exec_line = strcat('save',' ''',outfile,'''',' cluster_class',' par',' spikes',' inspk',' ipermut');
-        end
+used_par = struct;
+used_par = update_parameters(used_par,par,'relevant');
+var_list = ' cluster_class used_par spikes';
+
+
+if ~isempty(USER_DATA{7})
+    inspk = USER_DATA{7};
+    var_list = strcat(var_list , ' inspk');
 end
 
-eval(exec_line);
+if ~isempty(USER_DATA{12})
+    ipermut = USER_DATA{12};
+    var_list = strcat(var_list , ' ipermut');
+end
+            
+currentver = version;
+if currentver(1) >= 7
+    var_list = strcat(var_list , ' -v6;');
+else
+    var_list = strcat(var_list , ';');
+end
+
+eval(['save ' outfile var_list]);
 
 copyfile([handles.par.fnamespc '.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab']);
 copyfile([handles.par.fnamespc '.dg_01'], [handles.par.fnamesave '.dg_01']);

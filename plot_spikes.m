@@ -26,26 +26,24 @@ h_fig4= findobj(h_figs,'tag','wave_clus_aux3');
 h_fig5= findobj(h_figs,'tag','wave_clus_aux4');
 h_fig6= findobj(h_figs,'tag','wave_clus_aux5');
 close(h_fig1); close(h_fig2); close(h_fig3); close(h_fig4); close(h_fig5); close(h_fig6);
-eval(['close(10)'],[''])
-
+if ishandle(10)
+	close(10)
+end 
 % Extract spike features if needed
 if get(handles.spike_shapes_button,'value') ==0
     if isempty(inspk) || (length(inspk)~=size(spikes,1))
         [inspk] = wave_features(spikes,handles);
-        %axes(handles.projections)
-        %hold off
-        %plot(inspk(:,1),inspk(:,2),'.k','markersize',.5)
         USER_DATA{7} = inspk;
     end
 end
 
 % Defines nclusters
-cluster_sizes=[];
-cluster_sizes_bkup=[];
+cluster_sizes = zeros(1,par.max_clus);
+cluster_sizes_bkup = zeros(1,par.max_clus);
 ifixflag=zeros(1,par.max_clus);
 for i=1:par.max_clus                                    
-    cluster_sizes = [cluster_sizes length(find(classes==i))];
-    cluster_sizes_bkup = [cluster_sizes_bkup length(find(class_bkup==i))];   
+    cluster_sizes(i) = nnz(classes==i);
+    cluster_sizes_bkup(i) = nnz(class_bkup==i);   
 end
 
 % Classes should be consecutive numbers
@@ -70,7 +68,7 @@ while i<=min(max(class_bkup),par.max_clus);
     end
 end
 
-nclusters_bkup = length(find(cluster_sizes(:) >= par.min_clus));
+nclusters_bkup = nnz(cluster_sizes(:) >= par.min_clus);
 class_bkup(class_bkup > nclusters_bkup)=0;
 
 if handles.setclus == 0 && handles.undo==0 && handles.merge==0 && handles.force==0  
@@ -78,7 +76,7 @@ if handles.setclus == 0 && handles.undo==0 && handles.merge==0 && handles.force=
 else
     sizemin_clus = 1; 
 end
-nclusters = length(find(cluster_sizes(:) >= sizemin_clus));
+nclusters = nnz(cluster_sizes >= sizemin_clus);
 
 
 % Get fixed clusters
@@ -186,7 +184,7 @@ if handles.force==1
 end
 
 % new temperature when merge
-if handles.merge == 1 & ~isempty(nfix_class)
+if handles.merge == 1 && ~isempty(nfix_class)
     clustering_results(fix_class2,3) = mtemp;
     clustering_results(fix_class2,4) = clustering_results(imerge(1),4);
 end 
@@ -198,7 +196,7 @@ clustering_results(:,5) = minclus; % GUI minimum cluster
 % The temperature of the non-fixed spikes will be 
 % the GUI temperature (temp) and cluster number will be 
 % the GUI cluster number (classes)
-if length(fix_class2)~=0 & handles.merge==0 & handles.undo==0 & handles.reject==0 & handles.force==0
+if (~isempty(fix_class2)) && handles.merge==0 && handles.undo==0 && handles.reject==0 && handles.force==0
     % selects the index of the non-fixed spikes
     % since those are the ones which are going to be updated
     ind_non_fix = 1:length(classes); 
@@ -211,7 +209,7 @@ end
 clustering_results(:,2) = classes;
 % If there are no fix and rejected clusters and undo operations, 
 % original classes are the same as current classes
-if length(fix_class2)==0 & handles.reject==0 & handles.undo==0 & handles.merge==0 & handles.force==0
+if isempty(fix_class2) && handles.reject==0 && handles.undo==0 && handles.merge==0 && handles.force==0
     clustering_results(:,4) = clustering_results(:,2); % clusters
     clustering_results(:,3) = temp; % temperatures
 end
@@ -238,19 +236,19 @@ ylimit = [];
 colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
 
 for i = 1:nclusters+1
-    if ~ (isempty(class0) & i==1)
+    if ~ (isempty(class0) && i==1)
         %PLOTS SPIKES OR PROJECTIONS
         axes(handles.projections)
         hold on
         eval(['max_spikes=min(length(class' num2str(i-1) '),par.max_spikes);']);
         eval(['sup_spikes=length(class' num2str(i-1) ');']);
         permut = randperm(sup_spikes);
-        if get(handles.spike_shapes_button,'value') ==1 & get(handles.plot_all_button,'value') ==1
+        if get(handles.spike_shapes_button,'value') ==1 && get(handles.plot_all_button,'value') ==1
             eval(['plot(spikes(class' num2str(i-1) '(permut(1:max_spikes)),:)'',''' colors(i) ''');'])
             xlim([1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
             eval(['av   = mean(spikes(class' num2str(i-1) ',:));']);
-            eval(['plot(1:ls,av,''color'',''' colors(i) ''',''linewidth'',2);']);
+            plot(1:ls,av,'color',colors(i),'linewidth',2);
             xlim([1 ls])
         else
             eval(['plot(inspk(class' num2str(i-1) ',1),inspk(class' num2str(i-1) ',2),''.' colors(i) ''',''markersize'',.5);']);
@@ -258,16 +256,12 @@ for i = 1:nclusters+1
         if i < 5
             eval(['axes(handles.spikes' num2str(i-1) ');']); 
             hold on
-%             eval(['av   = mean(spikes(class' num2str(i-1) ',:));']); 
-%             eval(['avup = av + par.to_plot_std * std(spikes(class' num2str(i-1) ',:));']); 
-%             eval(['avdw = av - par.to_plot_std * std(spikes(class' num2str(i-1) ',:));']); 
-                        
+
             eval(['av   = mean(spikes(class' num2str(i-1) '(:,permut(1:max_spikes)),:));']); % JMG
             eval(['avup = av + par.to_plot_std * std(spikes(class' num2str(i-1) '(:,permut(1:max_spikes)),:));']); % JMG 
             eval(['avdw = av - par.to_plot_std * std(spikes(class' num2str(i-1) '(:,permut(1:max_spikes)),:));']); % JMG
             
             if get(handles.plot_all_button,'value') ==1
-                permut=randperm(sup_spikes);
                 eval(['plot(spikes(class' num2str(i-1) '(permut(1:max_spikes)),:)'',''color'',''' colors(i) ''')']);
                 if i==1
                     plot(1:ls,av,'c','linewidth',2)
@@ -283,71 +277,44 @@ for i = 1:nclusters+1
             end
             xlim([1 ls])
             if i>1; ylimit = [ylimit;ylim]; end;
-            eval(['aux=num2str(length(class' num2str(i-1) '));']);
-            eval(['title([''Cluster ' num2str(i-1) ':  # ' aux '''],''Fontweight'',''bold'')']);
-            eval(['axes(handles.isi' num2str(i-1) ');']); 
-            eval(['times' num2str(i-1) '=diff(spk_times(class' num2str(i-1) '));']);
-            % Calculates # ISIs < 3ms  
-            bin_step_temp = 1;
-            eval(['[N,X]=hist(times' num2str(i-1) ',0:bin_step_temp:par.nbins' num2str(i-1) ');']);
-            multi_isi= sum(N(1:3)); 
-            % Builds and plots the histogram
-            eval(['[N,X]=hist(times' num2str(i-1) ',0:par.bin_step' num2str(i-1) ':par.nbins' num2str(i-1) ');']);
-            bar(X(1:end-1),N(1:end-1))
-            eval(['xlim([0 par.nbins' num2str(i-1) ']);']);
-            %The following line generates an error in Matlab 7.3
-            %eval(['set(get(gca,''children''),''FaceColor'',''' colors(i) ''',''EdgeColor'',''' colors(i) ''',''Linewidth'',0.01);']);    
-            title([num2str(multi_isi) ' in < 3ms'])
-            xlabel('ISI (ms)');
-        elseif i < 10 
-            par.axes_nr = i;
-            par.ylimit = ylimit;
-            eval(['par.class_to_plot = class' num2str(i-1) ';']);
-            par.plot_all_button = get(handles.plot_all_button,'value');
-            USER_DATA{1} = par;
-            set(handles.wave_clus_figure,'userdata',USER_DATA)
-            wave_clus_aux
-        elseif i < 15
-            par.axes_nr = i;
-            par.ylimit = ylimit;
-            eval(['par.class_to_plot = class' num2str(i-1) ';']);
-            par.plot_all_button = get(handles.plot_all_button,'value');
-            USER_DATA{1} = par;
-            set(handles.wave_clus_figure,'userdata',USER_DATA)
-            wave_clus_aux1
-        elseif i < 20
-            par.axes_nr = i;
-            par.ylimit = ylimit;
-            eval(['par.class_to_plot = class' num2str(i-1) ';']);
-            par.plot_all_button = get(handles.plot_all_button,'value');
-            USER_DATA{1} = par;
-            set(handles.wave_clus_figure,'userdata',USER_DATA)
-            wave_clus_aux2
-        elseif i < 25
-            par.axes_nr = i;
-            par.ylimit = ylimit;
-            eval(['par.class_to_plot = class' num2str(i-1) ';']);
-            par.plot_all_button = get(handles.plot_all_button,'value');
-            USER_DATA{1} = par;
-            set(handles.wave_clus_figure,'userdata',USER_DATA)
-            wave_clus_aux3
-        elseif i < 30
-            par.axes_nr = i;
-            par.ylimit = ylimit;
-            eval(['par.class_to_plot = class' num2str(i-1) ';']);
-            par.plot_all_button = get(handles.plot_all_button,'value');
-            USER_DATA{1} = par;
-            set(handles.wave_clus_figure,'userdata',USER_DATA)
-            wave_clus_aux4
-        else
-            par.axes_nr = i;
-            par.ylimit = ylimit;
-            eval(['par.class_to_plot = class' num2str(i-1) ';']);
-            par.plot_all_button = get(handles.plot_all_button,'value');
-            USER_DATA{1} = par;
-            set(handles.wave_clus_figure,'userdata',USER_DATA)
-            wave_clus_aux5
+                eval(['aux=num2str(length(class' num2str(i-1) '));']);
+                title(['Cluster ' num2str(i-1) ':  # ' aux],'Fontweight','bold');
+                eval(['axes(handles.isi' num2str(i-1) ');']); 
+                eval(['times' num2str(i-1) '=diff(spk_times(class' num2str(i-1) '));']);
+                % Calculates # ISIs < 3ms  
+                bin_step_temp = 1;
+                eval(['[N,X]=hist(times' num2str(i-1) ',0:bin_step_temp:par.nbins' num2str(i-1) ');']);
+                multi_isi= sum(N(1:3)); 
+                % Builds and plots the histogram
+                eval(['[N,X]=hist(times' num2str(i-1) ',0:par.bin_step' num2str(i-1) ':par.nbins' num2str(i-1) ');']);
+                bar(X(1:end-1),N(1:end-1))
+                eval(['xlim([0 par.nbins' num2str(i-1) ']);']);
+                %The following line generates an error in Matlab 7.3
+                %eval(['set(get(gca,''children''),''FaceColor'',''' colors(i) ''',''EdgeColor'',''' colors(i) ''',''Linewidth'',0.01);']);    
+                title([num2str(multi_isi) ' in < 3ms'])
+                xlabel('ISI (ms)');
+            else
+                par.axes_nr = i;
+                par.ylimit = ylimit;
+                eval(['par.class_to_plot = class' num2str(i-1) ';']);
+                par.plot_all_button = get(handles.plot_all_button,'value');
+                USER_DATA{1} = par;
+                set(handles.wave_clus_figure,'userdata',USER_DATA)
+
+                if i < 10 
+                    wave_clus_aux
+                elseif i < 15
+                    wave_clus_aux1
+                elseif i < 20
+                    wave_clus_aux2
+                elseif i < 25
+                    wave_clus_aux3
+                elseif i < 30
+                    wave_clus_aux4
+                else
+                    wave_clus_aux5
             %-------------------------------------------------------------------------
+            end
         end
     end
 end
@@ -358,7 +325,3 @@ ymax = max(ylimit(:,2));
 for i=1:3
 	eval(['axes(handles.spikes' num2str(i) '); ylim([ymin ymax])'])
 end
-
-
-
-

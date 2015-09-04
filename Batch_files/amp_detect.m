@@ -98,7 +98,7 @@ switch handles.par.interpolation
         spikes(:,1:2)=[];
     case 'y'
         %Does interpolation
-        spikes = int_spikes(spikes,handles);
+        spikes = int_spikes(spikes,handles.par);
 end
 
 
