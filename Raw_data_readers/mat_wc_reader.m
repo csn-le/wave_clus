@@ -1,4 +1,4 @@
-classdef mat_reader < handle
+classdef mat_wc_reader < handle
 	properties
         sr
         data

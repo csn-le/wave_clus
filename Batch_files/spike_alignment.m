@@ -1,4 +1,4 @@
-function [spikes] = spike_alignment(spikes, handles)
+function [spikes] = spike_alignment(spikes, par)
 
 
 % spike_alignment_batch
@@ -8,21 +8,13 @@ function [spikes] = spike_alignment(spikes, handles)
 % OUTPUT: matrix of spikes alligned with the maximum in sample set by the
 % parameters. This is necessary for a correct clustering of the spikes.
 
-% handles.par.w_pre=20;                       %number of pre-event data points stored
-% handles.par.w_post=44;                      %number of post-event data points stored
-% handles.par.detection = 'pos';              %type of threshold
-% handles.par.interpolation = 'y';            %interpolation for alignment
-% handles.par.int_factor = 2;                 %interpolation factor 
-% handles.par.sr = 24000;                     %sampling frequency, in Hz.
-% handles.par.alignment_window = 10;          %number of sample points around the maximum 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-w_pre = handles.par.w_pre;                      %number of pre-event data points stored
-w_post = handles.par.w_post;                    %number of post-event data points stored
-sr = handles.par.sr;
-align_window = handles.par.alignment_window;    %number of sample points for re-alignment
-detec_threshold = handles.par.detection;        %type of threshold
+w_pre = par.w_pre;                      %number of pre-event data points stored
+w_post = par.w_post;                    %number of post-event data points stored
+sr = par.sr;
+align_window = par.alignment_window;    %number of sample points for re-alignment
+detec_threshold = par.detection;        %type of threshold
 
 ls = w_pre + w_post;
 
@@ -42,7 +34,7 @@ correct_times = zeros(size(spikes,1),1);
 spikes2 = zeros(size(spikes,1),ls+4);
 for i=1:size(spikes1,1)
 
-    if strcmp(handles.par.detection, 'pos')
+    if strcmp(par.detection, 'pos')
         [maxi iaux] = max(spikes1(i,w_pre+2:w_pre+2*align_window+1));    %introduces alignment
     else 
         [mini iaux] = min(spikes1(i,w_pre+2:w_pre+2*align_window+1));    %introduces alignment
@@ -57,12 +49,12 @@ end
 
 spikes = spikes2;
 
-switch handles.par.interpolation
+switch par.interpolation
 case 'n'
     spikes(:,end-1:end)=[];       %eliminates borders that were introduced for interpolation 
     spikes(:,1:2)=[];
 case 'y'
     %Does interpolation
-    spikes = int_spikes(spikes,handles);   
+    spikes = int_spikes(spikes,par);   
 end;
 

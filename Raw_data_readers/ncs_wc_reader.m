@@ -1,4 +1,4 @@
-classdef ncs_reader < handle
+classdef ncs_wc_reader < handle
 	properties
         sr
         max_segments

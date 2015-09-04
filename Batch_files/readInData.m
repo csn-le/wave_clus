@@ -13,7 +13,7 @@ classdef readInData < handle
     end 
 	methods 
         function obj = readInData(par_gui)
-            [~, fnam, ext] = fileparts(par_gui.filename);
+            [unused, fnam, ext] = fileparts(par_gui.filename);
             ext = lower(ext);
             obj.par = par_gui;
             obj.nick_name = fnam;
@@ -23,33 +23,35 @@ classdef readInData < handle
             obj.with_spikes = false;
             obj.with_wc_spikes = false;
             with_par = false;
-
-            %Search for previous results
-            if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
-                obj.with_results = true;
-                finfo = whos('-file',['times_' obj.nick_name '.mat']);
-                if ismember('par',{finfo.name})  
-                    load(['times_' obj.nick_name '.mat'],'par'); 
-                    obj.par = update_parameters(obj.par,par,'relevant');
-                    with_par = true;
-                end
-                
-            end
             
-            %Search for previously detected spikes
-            if exist([obj.nick_name '_spikes.mat'],'file')
-                obj.with_wc_spikes = true;
-                obj.with_spikes = true;
-                finfo = whos('-file', [obj.nick_name '_spikes.mat']);
-                if ismember('par',{finfo.name}) && ~ with_par 
-                    load([obj.nick_name '_spikes.mat'],'par'); 
-                    obj.par = update_parameters(obj.par,par,'detec');
-                    with_par = true;
+            if (~isfield('reset_results',par_gui)) || (~par_gui.reset_results)
+            
+                %Search for previous results
+                if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
+                    obj.with_results = true;
+                    finfo = whos('-file',['times_' obj.nick_name '.mat']);
+                    if ismember('par',{finfo.name})  
+                        load(['times_' obj.nick_name '.mat'],'par'); 
+                        obj.par = update_parameters(obj.par, par, 'relevant');
+                        with_par = true;
+                    end
+
+                end
+
+                %Search for previously detected spikes
+                if exist([obj.nick_name '_spikes.mat'],'file')
+                    obj.with_wc_spikes = true;
+                    obj.with_spikes = true;
+                    finfo = whos('-file', [obj.nick_name '_spikes.mat']);
+                    if ismember('par',{finfo.name}) && ~ with_par 
+                        load([obj.nick_name '_spikes.mat'],'par'); 
+                        obj.par = update_parameters(obj.par,par,'detect');
+                        with_par = true;
+                    end
                 end
             end
-
             % Search raw data
-            if exist([ext(2:end) '_reader'],'file')
+            if exist([ext(2:end) '_wc_reader'],'file')
                 obj.file_reader = eval([ext(2:end) '_reader(obj.par,obj.par.filename)']);
                 [sr, obj.max_segments, obj.with_raw, with_spikes] = obj.file_reader.get_info();
                 obj.with_spikes = obj.with_spikes || with_spikes;

@@ -1,4 +1,4 @@
-classdef nse_reader < handle
+classdef nse_wc_reader < handle
 	properties
         raw_filename
     end 

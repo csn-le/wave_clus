@@ -1,11 +1,11 @@
-function [spikes1] = int_spikes(spikes,handles); 
+function [spikes1] = int_spikes(spikes,par)
 %Interpolates with cubic splines to improve alignment.
 
-w_pre=handles.par.w_pre;
-w_post=handles.par.w_post;
+w_pre=par.w_pre;
+w_post=par.w_post;
 ls = w_pre + w_post;
-detect = handles.par.detection;
-int_factor = handles.par.int_factor;
+detect = par.detection;
+int_factor = par.int_factor;
 nspk=size(spikes,1);
 
 s=1:size(spikes,2);
