@@ -15,9 +15,9 @@ clus_params = {'inputs','scales','features','template_sdnum', 'template_k', ...
 
 new_par_names = fieldnames(new_par);
 load_par_names = fieldnames(par);
-if strcmp(type,'detec') || strcmp(type,'relevant')
+if strcmp(type,'detect') || strcmp(type,'relevant')
     for i= 1:length(detection_params)
-        if ismember(detection_params(i),new_par_names) && ismember(detection_params(i),load_par_names)
+        if ismember(detection_params(i),load_par_names)
             field = char(detection_params(i));
             new_par.(field ) = par.(field );
         end
@@ -26,7 +26,7 @@ end
 
 if strcmp(type,'clus') || strcmp(type,'relevant')
     for i= 1:length(clus_params)
-        if ismember(clus_params(i),new_par_names) && ismember(clus_params(i),load_par_names)
+        if ismember(clus_params(i),load_par_names)
             field = char(clus_params(i));
             new_par.(field ) = par.(field );       
         end
@@ -37,7 +37,7 @@ if strcmp(type,'none')
     for i= 1:length(new_par_names)
         if ~ (any((ismember(new_par_names(i),clus_params)) || any(ismember(new_par_names(i),detection_params)))) 
             field = char(new_par_names(i));
-            if ismember(clus_params(i),load_par_names)
+            if ismember(new_par_names(i),load_par_names)
                 new_par.(field) = par.(field );
             else
                 new_par.(field) = [];
