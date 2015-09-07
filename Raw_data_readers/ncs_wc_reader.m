@@ -18,12 +18,27 @@ classdef ncs_wc_reader < handle
             fseek(obj.opened_file,16384,'bof');                       %Skip Header, put pointer to the first record
             TimeStamps = fread(obj.opened_file,inf,'int64',(4+4+4+2*512));          %Read all TimeStamps, in us
             fseek(obj.opened_file, 16384+8+4+4+4, 'bof');                             %put pointer to the beginning of data
-            delta_time = (TimeStamps(2) - TimeStamps(1));
-            obj.sr = 512*1e6/delta_time;            % sampling rate (in Hz).
+            
                                  
             % conversion to datapoints
+            tsdiff = diff(TimeStamps);
+            obj.dt = median(tsdiff);
+            min_dt = min(diff(TimeStamps));
+            if min_dt<=0, %check for corrupt TimeStamps that would violate the monotonic increase
+                warning('corrupt TimeStamps - attempting correction')
+                ind = find(tsdiff <= 0); %corrupt TimeStamps are usually too low
+                TimeStamps(ind+1) = TimeStamps(ind) + obj.dt;
+                clear tsdiff;
+                min_dt = min(diff(TimeStamps));
+                if min_dt <= 0
+                    error('Automated correction of corrupt TimeStamps failed - try manually!');
+                end
+            end
+            
+            obj.sr = 512*1e6/obj.dt;            % sampling rate (in Hz).
             time0 = TimeStamps(1); 
-
+            
+            
             if strcmp(par.tmax,'all')
                 index_tinitial = 0;
                 index_tfinal = length(TimeStamps);
@@ -60,7 +75,6 @@ classdef ncs_wc_reader < handle
             tsmax = [tsmax, lts];
             obj.recmax = tsmax;
             obj.recmin = tsmin;
-            obj.dt = min(diff(TimeStamps));
             obj.TimeStamps = TimeStamps;
             scale_factor = textread(obj.raw_filename,'%s',43);
 

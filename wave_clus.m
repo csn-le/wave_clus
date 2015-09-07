@@ -157,13 +157,10 @@ for i=4:handles.par.max_clus
 end
 
 
-
-
-
 data_handler = readInData(handles.par);
 handles.par = data_handler.par;
 
-handles.par.fname_in = 'tmp_data_wc';           % temporary filename used as input for SPC
+handles.par.fname_in = 'tmp_data_wc';                       % temporary filename used as input for SPC
 handles.par.fname = ['data_' data_handler.nick_name];
 handles.par.nick_name = data_handler.nick_name;
 handles.par.fnamesave = handles.par.fname;                  %filename if "save clusters" button is pressed

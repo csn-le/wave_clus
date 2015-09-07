@@ -52,7 +52,7 @@ classdef readInData < handle
             end
             % Search raw data
             if exist([ext(2:end) '_wc_reader'],'file')
-                obj.file_reader = eval([ext(2:end) '_reader(obj.par,obj.par.filename)']);
+                obj.file_reader = eval([ext(2:end) '_wc_reader(obj.par,obj.par.filename)']);
                 [sr, obj.max_segments, obj.with_raw, with_spikes] = obj.file_reader.get_info();
                 obj.with_spikes = obj.with_spikes || with_spikes;
                 
