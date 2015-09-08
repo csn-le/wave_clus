@@ -41,32 +41,33 @@ end
 cluster_sizes = zeros(1,par.max_clus);
 cluster_sizes_bkup = zeros(1,par.max_clus);
 ifixflag=zeros(1,par.max_clus);
+
 for i=1:par.max_clus                                    
     cluster_sizes(i) = nnz(classes==i);
     cluster_sizes_bkup(i) = nnz(class_bkup==i);   
 end
 
 % Classes should be consecutive numbers
-i=1;
-while i<=min(max(classes),par.max_clus);
-    if isempty(classes(classes==i))
-        for k=i+1:par.max_clus
-            classes(classes==k)=k-1;
-        end
-    else
-        i=i+1;
-    end
+classes_names = nonzeros(sort(unique(classes)));
+for i= 1:max(classes_names)
+   c = classes_names(i);
+   if c~= i
+       classes(classes == c) = i;
+   end
 end
-i=1;
-while i<=min(max(class_bkup),par.max_clus);
-    if isempty(class_bkup(class_bkup==i))
-        for k=i+1:par.max_clus
-            class_bkup(class_bkup==k)=k-1;
-        end
-    else
-        i=i+1;
-    end
+
+classes_names = nonzeros(sort(unique(class_bkup)));
+for i= 1:max(classes_names)
+   c = classes_names(i);
+   if c~= i
+       class_bkup(class_bkup == c) = i;
+   end
 end
+
+
+
+
+
 
 nclusters_bkup = nnz(cluster_sizes(:) >= par.min_clus);
 class_bkup(class_bkup > nclusters_bkup)=0;
@@ -148,7 +149,7 @@ for i = 1:nclusters
     if ((length(class_temp) >= sizemin_clus) || (ifixflagc == 1))
         cont=cont+1;        
         eval(['class' num2str(cont) '= class_temp;'])
-        eval(['clustered = [clustered class' num2str(cont) '];'])
+        clustered = [clustered class_temp];
     end
 end
 nclusters = cont;
