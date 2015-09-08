@@ -58,7 +58,7 @@ classdef readInData < handle
                 
                 if ~with_par                                                                                            %if didn't load sr from previous results 
                     if isempty(sr)
-                        disp('Wave_clus din''t find a sampling rate in file. It will use the set in set_parameters.m')  %use default sr (from set_parameters) 
+                        disp('Wave_clus didn''t find a sampling rate in file. It will use the set in set_parameters.m')  %use default sr (from set_parameters) 
                     else
                         obj.par.sr = sr;                                                                                %load sr from raw data
                     end

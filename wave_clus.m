@@ -48,6 +48,16 @@ function varargout = wave_clus(varargin)
 % solves inconsistencies with file names
 
 
+folder = fileparts(mfilename('fullpath'));
+if isempty(strfind(path, folder))
+    addpath(folder);
+    addpath([folder filesep 'Batch_files']);
+    addpath([folder filesep 'Force_files']);
+    addpath([folder filesep 'SPC']);
+    addpath([folder filesep 'Raw_data_readers']);
+end
+
+
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -139,7 +149,8 @@ set(handles.fix3_button,'value',0);
 %I will check this for case-sensitive related problems (FC)
 %[filename, pathname] = uigetfile('*.mat; *.Ncs; *.ncs; nev*.mat; NSX*.NC5; *.Nse','Select file');
 [filename, pathname] = uigetfile('*.*','Select file');
-set(handles.file_name,'string',['Loading:    ' pathname filename]);
+set(handles.file_name,'string',['Loading:    ' pathname filename]); drawnow
+
 axes(handles.cont_data); cla
 cd(pathname);
 
@@ -177,7 +188,7 @@ else
     if data_handler.with_spikes  %data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
-            [spikes] = spike_alignment(spikes,handles);
+            [spikes] = spike_alignment(spikes,handles.par);
         end
     else    
         set(handles.file_name,'string','Detecting spikes ...'); drawnow

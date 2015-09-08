@@ -6,17 +6,14 @@ classdef nc5_wc_reader < handle
         opened_file
         segmentLength
         TimeStamps
-        dt
         open_file
+        t0_segments
     end 
 	methods 
-        function obj = ncs_wc_reader(par, raw_filename)
+        function obj = nc5_wc_reader(par, raw_filename)
             load('NSX_TimeStamps','lts', 'sr');
 
             obj.sr = sr;
-            obj.raw_filename = raw_filename;
-            
-            obj.open_file = fopen(raw_filename,'r','l');
             
             if strcmp(par.tmax,'all')
                 initial_index = 0;
@@ -34,7 +31,7 @@ classdef nc5_wc_reader < handle
             obj.segmentLength = floor (lts/obj.max_segments);
              
             obj.t0_segments = zeros(1,obj.max_segments);
-            obj.t0_segments(1) = t0;
+            obj.t0_segments(1) = initial_index*obj.sr;
             for i = 2:obj.max_segments
             	obj.t0_segments(i) = obj.t0_segments(i-1) + obj.segmentLength/obj.sr*1000;
             end
@@ -53,7 +50,7 @@ classdef nc5_wc_reader < handle
         end
       
         function x = get_segment(obj,i)
-            x=fread(f1,obj.segmentLength,'int16=>double')/4;
+            x=fread(obj.opened_file,obj.segmentLength,'int16=>double')/4;
             if i == obj.max_segments
                 fclose(obj.opened_file);
             end
