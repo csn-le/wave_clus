@@ -11,9 +11,8 @@ classdef mat_wc_reader < handle
         spikes_file
     end 
 	methods 
-        function obj = mat_reader(par, raw_filename)
+        function obj = mat_wc_reader(par, raw_filename)
             obj.sr = [];
-            obj.spikes = [];
             obj.max_segments = [];
             finfo = whos('-file', raw_filename);
             obj.raw_filename = raw_filename;

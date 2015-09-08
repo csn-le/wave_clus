@@ -3,7 +3,7 @@ classdef nse_wc_reader < handle
         raw_filename
     end 
 	methods 
-        function obj = ncs_reader(par, raw_filename)
+        function obj = ncs_wc_reader(par, raw_filename)
             obj.raw_filename = raw_filename;
         end
         

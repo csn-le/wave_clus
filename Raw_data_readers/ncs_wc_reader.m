@@ -12,7 +12,7 @@ classdef ncs_wc_reader < handle
         dt
     end 
 	methods 
-        function obj = ncs_reader(par, raw_filename)
+        function obj = ncs_wc_reader(par, raw_filename)
             obj.raw_filename = raw_filename;            
             obj.opened_file = fopen(obj.raw_filename, 'r', 'l');
             fseek(obj.opened_file,16384,'bof');                       %Skip Header, put pointer to the first record

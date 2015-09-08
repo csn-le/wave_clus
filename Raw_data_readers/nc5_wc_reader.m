@@ -10,7 +10,7 @@ classdef nc5_wc_reader < handle
         open_file
     end 
 	methods 
-        function obj = ncs_reader(par, raw_filename)
+        function obj = ncs_wc_reader(par, raw_filename)
             load('NSX_TimeStamps','lts', 'sr');
 
             obj.sr = sr;

@@ -29,5 +29,8 @@ switch detect
         line([0 lx/sr_sub], [-thr -thr],'color','r')
 end
 
-axis([0 lx/sr_sub -thrmax/2 thrmax])
+ypmax = min(thrmax, max(xf_detect));
+ypmin = max(-thrmax/2, min(xf_detect));
+
+axis([0 lx/sr_sub ypmin ypmax])
 %xlabel('Time (sec)')
