@@ -12,16 +12,16 @@ function [spikes] = spike_alignment(spikes, par)
 
 w_pre = par.w_pre;                      %number of pre-event data points stored
 w_post = par.w_post;                    %number of post-event data points stored
-sr = par.sr;
+
 align_window = par.alignment_window;    %number of sample points for re-alignment
-detec_threshold = par.detection;        %type of threshold
+detect_threshold = par.detection;        %type of threshold
 
 ls = w_pre + w_post;
 
 
 % Introduces first alignment
 spikes1 = zeros(size(spikes,1),ls+(2*align_window)+4);
-if (size(spikes,2)< (ls + align_window)+2)
+if (size(spikes,2) < (ls + align_window)+2)
     diff_size = ls+align_window+2-size(spikes,2);
     spikes1(:,1:align_window+2) = -spikes(:,align_window+2:-1:1);
     spikes1(:,1+align_window:align_window+size(spikes,2)) = spikes;
@@ -30,23 +30,43 @@ else
     spikes1(:,1:align_window+2) = -spikes(:,align_window:-1:1);
     spikes1(:,1+align_window:(2*align_window+ls)) = spikes(1:align_window+ls);
 end
-correct_times = zeros(size(spikes,1),1);
-spikes2 = zeros(size(spikes,1),ls+4);
-for i=1:size(spikes1,1)
 
-    if strcmp(par.detection, 'pos')
-        [maxi iaux] = max(spikes1(i,w_pre+2:w_pre+2*align_window+1));    %introduces alignment
-    else 
-        [mini iaux] = min(spikes1(i,w_pre+2:w_pre+2*align_window+1));    %introduces alignment
-    end;
-    if iaux > 1
-        spikes2(i,:) = spikes1(i,iaux-1:iaux+ls+2);
-    else 
-        spikes2(i,:) = spikes1(i,iaux:iaux+ls+3);
-    end
-    correct_times(i) = (iaux+w_pre-align_window+1)*1/sr;  %corrects spike-times.
+%sr = par.sr;
+%correct_times = zeros(size(spikes,1),1);
+spikes2 = zeros(size(spikes,1),ls+4);
+
+switch detect_threshold
+    case 'pos'
+        for i = 1:size(spikes1,1)
+            [maxi iaux] = max(spikes1(i,w_pre+2:w_pre+2*align_window+1));    %introduces alignment
+            if iaux > 1
+                spikes2(i,:) = spikes1(i,iaux-1:iaux+ls+2);
+            else 
+                spikes2(i,:) = spikes1(i,iaux:iaux+ls+3);
+            end
+        end
+    case 'neg'
+        for i=1:size(spikes1,1)
+            [mini iaux] = min(spikes1(i,w_pre+2:w_pre+2*align_window+1));    %introduces alignment
+            if iaux > 1
+                spikes2(i,:) = spikes1(i,iaux-1:iaux+ls+2);
+            else 
+                spikes2(i,:) = spikes1(i,iaux:iaux+ls+3);
+            end
+        end
+    case 'both'
+        for i=1:size(spikes1,1)
+            [maxi iaux] = max(abs(spikes1(i,w_pre+2:w_pre+2*align_window+1)));
+            if iaux > 1
+                spikes2(i,:) = spikes1(i,iaux-1:iaux+ls+2);
+            else 
+                spikes2(i,:) = spikes1(i,iaux:iaux+ls+3);
+            end
+        end
 end
 
+
+%correct_times(i) = (iaux+w_pre-align_window+1)*1/sr;  %corrects spike-times.
 spikes = spikes2;
 
 switch par.interpolation
@@ -55,6 +75,6 @@ case 'n'
     spikes(:,1:2)=[];
 case 'y'
     %Does interpolation
-    spikes = int_spikes(spikes,par);   
+    spikes = int_spikes(spikes,par);
 end;
 

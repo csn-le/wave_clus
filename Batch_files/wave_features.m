@@ -1,10 +1,10 @@
-function [inspk] = wave_features(spikes,handles);
+function [inspk] = wave_features(spikes,par);
 %Calculates the spike features
 
-scales = handles.par.scales;
-feature = handles.par.features;
-inputs = handles.par.inputs;
-nspk=size(spikes,1);
+scales = par.scales;
+feature = par.features;
+inputs = par.inputs;
+nspk = size(spikes,1);
 ls = size(spikes,2);
 
 % CALCULATES FEATURES

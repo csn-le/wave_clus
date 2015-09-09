@@ -49,7 +49,7 @@ end
 
 % Classes should be consecutive numbers
 classes_names = nonzeros(sort(unique(classes)));
-for i= 1:max(classes_names)
+for i= 1:length(classes_names)
    c = classes_names(i);
    if c~= i
        classes(classes == c) = i;
@@ -57,7 +57,7 @@ for i= 1:max(classes_names)
 end
 
 classes_names = nonzeros(sort(unique(class_bkup)));
-for i= 1:max(classes_names)
+for i= 1:length(classes_names)
    c = classes_names(i);
    if c~= i
        class_bkup(class_bkup == c) = i;
