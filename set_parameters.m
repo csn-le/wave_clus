@@ -6,8 +6,8 @@ par.sr = 30000;                      %sampling rate (in Hz). This parameter will
 
 
 % PLOTTING PARAMETERS
-par.show_signal = true;
-par.max_spikes = 5000;              % max. # of spikes to be plotted
+par.sample_segment = true;
+par.max_spikes_plot = 5000;              % max. # of spikes to be plotted
 
 % SPC PARAMETERS
 par.mintemp = 0.00;                  % minimum temperature for SPC
@@ -75,6 +75,3 @@ par.permut = 'y';                   % for selection of random 'par.max_spk' spik
 % HISTOGRAM PARAMETERS
 par.nbins = 100;                    % # of bins for the ISI histograms
 par.bin_step = 1;                   % percentage number of bins to plot
-
-
-

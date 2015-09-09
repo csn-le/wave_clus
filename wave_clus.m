@@ -149,6 +149,11 @@ set(handles.fix3_button,'value',0);
 %I will check this for case-sensitive related problems (FC)
 %[filename, pathname] = uigetfile('*.mat; *.Ncs; *.ncs; nev*.mat; NSX*.NC5; *.Nse','Select file');
 [filename, pathname] = uigetfile('*.*','Select file');
+
+if ~ischar(pathname)
+    return
+end
+
 set(handles.file_name,'string',['Loading:    ' pathname filename]); drawnow
 
 axes(handles.cont_data); cla
@@ -202,7 +207,7 @@ else
         end
     end
     set(handles.file_name,'string','Calculating spike features ...'); drawnow
-    [inspk] = wave_features(spikes,handles);                 %Extract spike features.
+    [inspk] = wave_features(spikes,handles.par);                 %Extract spike features.
 
     if handles.par.permut == 'y'
         if handles.par.match == 'y';
@@ -231,7 +236,7 @@ else
 
 end
 
-if data_handler.with_raw && handles.par.show_signal             %raw exists
+if data_handler.with_raw && handles.par.sample_segment          %raw exists
     [xd_sub, sr_sub] = data_handler.get_signal_sample();
     Plot_continuous_data(xd_sub, sr_sub,handles)
     clear xd_sub
@@ -1040,9 +1045,6 @@ USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 if strcmp(par.filename(1:9),'polytrode')
     Plot_polytrode(handles)
-elseif strcmp(par.filename(1:13),'C_sim_script_')
-    handles.simname = par.filename;
-    Plot_simulations(handles)
 end
 
 

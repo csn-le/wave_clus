@@ -10,7 +10,7 @@ par.to_plot_std = 1;                % # of std from mean to plot
 axes_nr = par.axes_nr;
 ylimit = par.ylimit;
 class_to_plot = par.class_to_plot;
-max_spikes = min(par.max_spikes, length(class_to_plot));
+max_spikes = min(par.max_spikes_plot, length(class_to_plot));
 sup_spikes = length(class_to_plot);
 
 % Plot clusters

@@ -16,6 +16,8 @@ classdef mat_wc_reader < handle
             obj.max_segments = [];
             finfo = whos('-file', raw_filename);
             obj.raw_filename = raw_filename;
+            obj.spikes_file = false;
+            
             if ismember('sr',{finfo.name})  %if is possible, load sr from file; else from set_parameters
                 load(raw_filename,'sr'); 
                 obj.sr_infile = true;

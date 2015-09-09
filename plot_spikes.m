@@ -241,7 +241,7 @@ for i = 1:nclusters+1
         %PLOTS SPIKES OR PROJECTIONS
         axes(handles.projections)
         hold on
-        eval(['max_spikes=min(length(class' num2str(i-1) '),par.max_spikes);']);
+        eval(['max_spikes=min(length(class' num2str(i-1) '),par.max_spikes_plot);']);
         eval(['sup_spikes=length(class' num2str(i-1) ');']);
         permut = randperm(sup_spikes);
         if get(handles.spike_shapes_button,'value') ==1 && get(handles.plot_all_button,'value') ==1

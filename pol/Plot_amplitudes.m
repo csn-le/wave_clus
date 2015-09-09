@@ -31,7 +31,7 @@ for i=1:inputs
         hold on
         for k=1:nclasses
             class_aux = find(classes==k);
-            max_spikes = min(par.max_spikes,length(class_aux));
+            max_spikes = min(max_spikes_plot,length(class_aux));
             plot(amps(class_aux(1:max_spikes),i),amps(class_aux(1:max_spikes),j),['.' colors(k)],'markersize',.5)
             axis off
         end
