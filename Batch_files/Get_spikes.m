@@ -27,7 +27,6 @@ if isnumeric(input) || strcmp(input,'all')
         end
     end
     
-    
 elseif ischar(input) && length(input) > 4
     if  strcmp (input(end-3,end),'.txt')
         filenames =  textread(input,'%s');
@@ -48,7 +47,7 @@ for i = 1: size(filenames,1)
     par.filename = filename;
     par.reset_results = true;
 
-    par.show_signal = false;  %maybe true and save the sample in spikes
+    par.sample_segment = true;  %false to don't save the sample in spikes
 
     data_handler = readInData(par);
     par = data_handler.par;
@@ -72,13 +71,21 @@ for i = 1: size(filenames,1)
         end
     end
 
-        current_par = par;
-        par = struct;
-        par = update_parameters(par, current_par, 'detect');
+    current_par = par;
+    par = struct;
+    par = update_parameters(par, current_par, 'detect');
 
-            %<----  Add here auxiliar parameters
+    %<----  Add here auxiliar parameters
 
-        save([filename], 'spikes', 'index', 'par')
+    if par.sample_segment
+        [psegment, sr_psegment] = data_handler.get_signal_sample();
+        save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par','psegment','sr_psegment')
+        clear psegment
+    else
+        save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par')
+    end
 
+    clear spikes
+    
 end
 end

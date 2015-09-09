@@ -10,6 +10,7 @@ classdef readInData < handle
         max_segments
         file_reader
         with_wc_spikes
+        with_psegment
     end 
 	methods 
         function obj = readInData(par_gui)
@@ -22,8 +23,9 @@ classdef readInData < handle
             obj.with_raw = false;
             obj.with_spikes = false;
             obj.with_wc_spikes = false;
-            with_par = false;
+            obj.with_psegment = false;
             
+            with_par = false;
             if (~isfield('reset_results',par_gui)) || (~par_gui.reset_results)
             
                 %Search for previous results
@@ -48,6 +50,10 @@ classdef readInData < handle
                         obj.par = update_parameters(obj.par,par,'detect');
                         with_par = true;
                     end
+                    if ismember('psegment',{finfo.name})
+                    	obj.with_psegment = true;
+                    end
+                    
                 end
             end
             % Search raw data
@@ -130,7 +136,7 @@ classdef readInData < handle
                 x = double(x);
             end
 
-            if obj.n_to_read == 1 && obj.par.show_signal
+            if ~obj.with_psegment && obj.n_to_read == 1 && obj.par.sample_segment
                 lplot = min(floor(60*obj.par.sr), length(x));
                 xf_detect = spike_detection_filter(x(1:lplot), obj.par);
                 
@@ -150,14 +156,19 @@ classdef readInData < handle
         
         
         function [xd_sub, sr_sub] = get_signal_sample(obj)
-            if obj.n_to_read == 1
-                disp('Segment read only for plotting');
-                obj.get_segment();
+            if obj.with_psegment
+                load([obj.nick_name '_spikes.mat'],'psegment','sr_psegment');
+                xd_sub = psegment;
+                sr_sub = sr_psegment;
+            else
+                if obj.n_to_read == 1
+                    disp('Segment read only for plotting');
+                    obj.get_segment();
+                end
+                xd_sub = obj.sample_signal.xd_sub;
+                sr_sub = obj.sample_signal.sr_sub;
+                obj.sample_signal.xd_sub = [];
             end
-            xd_sub = obj.sample_signal.xd_sub;
-            sr_sub = obj.sample_signal.sr_sub;
-            obj.sample_signal.xd_sub = [];
-            
         end
 
   
