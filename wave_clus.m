@@ -204,11 +204,18 @@ else
             [new_spikes, temp_aux_th, new_index]  = amp_detect(x, handles);
             index = [index data_handler.index2ts(new_index)]; %new_index to ms
             spikes = [spikes; new_spikes];
+            
         end
     end
+    
+    if size(spikes,1) < 15
+        	ME = MException('MyComponent:notEnoughSpikes', 'Less than 15 spikes detected');
+            throw(ME)
+    end
+    
     set(handles.file_name,'string','Calculating spike features ...'); drawnow
     [inspk] = wave_features(spikes,handles.par);                 %Extract spike features.
-
+    
     if handles.par.permut == 'y'
         if handles.par.match == 'y';
             naux = min(handles.par.max_spk,size(inspk,1));
@@ -231,7 +238,7 @@ else
     set(handles.file_name,'string','Running SPC ...'); drawnow
     fname_in = handles.par.fname_in;
     save([fname_in],'inspk_aux','-ascii');                      %Input file for SPC
-
+    
     [clu,tree] = run_cluster(handles);
 
 end
@@ -972,7 +979,7 @@ set(gcbo,'value',0);
 set(handles.isi3_accept_button,'value',1);
 
 if isempty(ilab)
-      nlab = imread('filelist.xlj','jpg'); figure('color','k'); image(nlab); axis off; set(gcf,'NumberTitle','off');
+      nlab = imread('filelist_wc.xlj','jpg'); figure('color','k'); image(nlab); axis off; set(gcf,'NumberTitle','off');
 end
 
 % --- Executes on button press in undo_button.

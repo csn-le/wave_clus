@@ -18,21 +18,21 @@ switch detect
     case 'pos'
         for i=1:nspk
             intspikes(:) = spline(s,spikes(i,:),ints);
-            [maxi iaux] = max((intspikes(w_pre*int_factor:w_pre*int_factor+8))); 
+            [maxi iaux] = max((intspikes(w_pre*int_factor:w_pre*int_factor+2*int_factor))); 
             iaux = iaux + w_pre*int_factor -1;
             spikes1(i,1:ls)= intspikes(iaux-w_pre*int_factor+int_factor:int_factor:iaux+w_post*int_factor);
         end
     case 'neg'
         for i=1:nspk
             intspikes(:) = spline(s,spikes(i,:),ints);
-            [maxi iaux] = min((intspikes(w_pre*int_factor:w_pre*int_factor+8))); 
+            [maxi iaux] = min((intspikes(w_pre*int_factor:w_pre*int_factor+2*int_factor))); 
             iaux = iaux + w_pre*int_factor -1;
             spikes1(i,1:ls)= intspikes(iaux-w_pre*int_factor+int_factor:int_factor:iaux+w_post*int_factor);
         end
     case 'both'
         for i=1:nspk
             intspikes(:) = spline(s,spikes(i,:),ints);
-            [maxi iaux] = max(abs(intspikes(w_pre*int_factor:w_pre*int_factor+8))); 
+            [maxi iaux] = max(abs(intspikes(w_pre*int_factor:w_pre*int_factor+2*int_factor))); 
             iaux = iaux + w_pre*int_factor -1;
             spikes1(i,1:ls)= intspikes(iaux-w_pre*int_factor+int_factor:int_factor:iaux+w_post*int_factor);
         end

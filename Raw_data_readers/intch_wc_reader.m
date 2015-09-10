@@ -1,18 +1,18 @@
-classdef nc5_wc_reader < handle
+classdef intch_wc_reader < handle
 	properties
         sr
         max_segments
-        %channel
         opened_file
         segmentLength
         open_file
         t0_segments
     end 
 	methods 
-        function obj = nc5_wc_reader(par, raw_filename)
-            load('NSX_TimeStamps','lts', 'sr');
-
+        function obj = intch_wc_reader(par, raw_filename)
+            
+            load('intan_meta_data.mat','sr','lts','channels');
             obj.sr = sr;
+            
             
             if strcmp(par.tmax,'all')
                 initial_index = 0;
@@ -25,7 +25,7 @@ classdef nc5_wc_reader < handle
             end
             
             obj.opened_file = fopen(raw_filename,'r','l');
-			fseek(obj.opened_file,initial_index*2,'bof');
+			fseek(obj.opened_file,initial_index*4,'bof');
             
             obj.segmentLength = floor (lts/obj.max_segments);
              
@@ -34,9 +34,7 @@ classdef nc5_wc_reader < handle
             for i = 2:obj.max_segments
             	obj.t0_segments(i) = obj.t0_segments(i-1) + obj.segmentLength/obj.sr*1000;
             end
-
-        end
-        
+        end     
         function [sr,max_segments,with_raw,with_spikes] = get_info(obj)
         	sr = obj.sr;
             max_segments = obj.max_segments;
@@ -49,10 +47,11 @@ classdef nc5_wc_reader < handle
         end
       
         function x = get_segment(obj,i)
-            x=fread(obj.opened_file,obj.segmentLength,'int16=>double')'/4;
+            x=fread(obj.opened_file,obj.segmentLength,'single=>double')';
             if i == obj.max_segments
                 fclose(obj.opened_file);
             end
-        end
+        end   
+        
     end
 end

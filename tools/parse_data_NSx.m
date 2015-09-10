@@ -3,7 +3,6 @@ function parse_data(filename,max_memo_GB)
 % stored in RAM, so it is used to compute the number of segments in which
 % the data should be split for processing
 
-
 aux = version;
 if ~exist(max_memo_GB) && str2num(aux(1:3)) =>7.6
 	[uaux,aux] = memory;
@@ -24,8 +23,6 @@ lts = NSx.MetaTags.DataPoints;   % total data points
 samples_per_channel = ceil(max_memo/nchan/2);
 num_segments = ceil(lts/samples_per_channel);
 
-% num_segments = 20;
-% samples_per_channel = ceil(lts/num_segments);
 
 outfile_handles = cell(1,nchan);
 for i = 1:nchan
@@ -47,6 +44,7 @@ for j=1:num_segments
     end
     fprintf('Segment %d out of %d processed. Data Point Read = %d \n',j,num_segments,size(NSx.Data,2));
 end
+
 fclose('all');
 tcum = tcum + toc;
 fprintf('Total time spent in parsing the data was %s secs.\n',num2str(tcum, '%0.1f')); 
