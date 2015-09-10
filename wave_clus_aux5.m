@@ -154,7 +154,7 @@ set(h_fig3,'userdata',USER_DATA)
 set(h_fig4,'userdata',USER_DATA)
 set(h_fig5,'userdata',USER_DATA)
 
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 
 
 
@@ -171,7 +171,7 @@ par.class_to_plot = find(classes==25);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 function isi30_nbins_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_aux5,'userdata');
@@ -183,7 +183,7 @@ par.class_to_plot = find(classes==30);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 function isi31_nbins_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_aux5,'userdata');
@@ -195,7 +195,7 @@ par.class_to_plot = find(classes==31);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 function isi32_nbins_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_aux5,'userdata');
@@ -207,7 +207,7 @@ par.class_to_plot = find(classes==32);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 function isi33_nbins_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_aux5,'userdata');
@@ -219,7 +219,7 @@ par.class_to_plot = find(classes==33);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 
 
@@ -235,7 +235,7 @@ par.class_to_plot = find(classes==29);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 function isi30_bin_step_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_aux5,'userdata');
@@ -247,7 +247,7 @@ par.class_to_plot = find(classes==30);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 function isi31_bin_step_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_aux5,'userdata');
@@ -259,7 +259,7 @@ par.class_to_plot = find(classes==31);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 function isi32_bin_step_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_aux5,'userdata');
@@ -271,7 +271,7 @@ par.class_to_plot = find(classes==32);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 function isi33_bin_step_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_aux5,'userdata');
@@ -283,7 +283,7 @@ par.class_to_plot = find(classes==33);
 USER_DATA{1} = par;
 USER_DATA{6} = classes;
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
-plot_spikes_aux5(handles)
+plot_spikes_aux(handles,5)
 % --------------------------------------------------------------------
 
 

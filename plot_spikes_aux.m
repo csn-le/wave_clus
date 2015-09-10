@@ -1,5 +1,12 @@
-function Plot_Spikes_aux(handles)
-USER_DATA = get(handles.wave_clus_aux,'userdata');
+function Plot_Spikes_aux(handles, plot_number)
+
+if ~exist('plot_number') || (plot_number== 0)
+	USER_DATA = get(handles.wave_clus_aux,'userdata');
+	plot_number= 0;
+else
+	eval(['USER_DATA = get(handles.wave_clus_aux' num2str(plot_number) ',''userdata'');']);
+end
+
 par = USER_DATA{1};
 spikes = USER_DATA{2};
 spk_times = USER_DATA{3};
@@ -13,7 +20,7 @@ max_spikes = min(par.max_spikes_plot, length(class_to_plot));
 sup_spikes = length(class_to_plot);
 
 % Plot clusters
-colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
+colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
 eval(['axes(handles.spikes' num2str(axes_nr-1) ');']); 
 cla reset
 hold on
@@ -42,7 +49,7 @@ multi_isi= sum(N(1:3));
 eval(['[N,X]=hist(times,0:par.bin_step' num2str(axes_nr-1) ':par.nbins' num2str(axes_nr-1) ');']);
 bar(X(1:end-1),N(1:end-1))
 eval(['xlim([0 par.nbins' num2str(axes_nr-1) ']);']);
-%eval(['set(get(gca,''children''),''facecolor'',''' colors(axes_nr) ''',''edgecolor'',''' colors(axes_nr) ''',''linewidth'',0.01);']);    
+%eval(['set(get(gca,''children''),''facecolor'',''' colors(axes_nr) ''',''edgecolor'',''' colors(axes_nr) ''',''linewidth'',0.01);']);  %  (FC) why is this commented?
 title([num2str(multi_isi) ' in < 3ms'])
 xlabel('ISI (ms)');
 
@@ -51,8 +58,8 @@ ymin = min(ylimit(:,1));
 ymax = max(ylimit(:,2));
 eval(['axes(handles.spikes' num2str(axes_nr-1) '); ylim([ymin ymax])'])
 
-set(handles.fix4_button,'value',0);
-set(handles.fix5_button,'value',0);
-set(handles.fix6_button,'value',0);
-set(handles.fix7_button,'value',0);
-set(handles.fix8_button,'value',0);
+eval(['set(handles.fix' num2str(4+plot_number*5) '_button,''value'',0);']);
+eval(['set(handles.fix' num2str(5+plot_number*5) '_button,''value'',0);']);
+eval(['set(handles.fix' num2str(6+plot_number*5) '_button,''value'',0);']);
+eval(['set(handles.fix' num2str(7+plot_number*5) '_button,''value'',0);']);
+eval(['set(handles.fix' num2str(8+plot_number*5) '_button,''value'',0);']);
