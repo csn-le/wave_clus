@@ -5,6 +5,7 @@ classdef readInData < handle
         with_raw
         with_spikes
         with_results
+        with_gui_status
         n_to_read
         sample_signal
         max_segments
@@ -24,20 +25,23 @@ classdef readInData < handle
             obj.with_spikes = false;
             obj.with_wc_spikes = false;
             obj.with_psegment = false;
-            
+            obj.with_gui_status = false;
             with_par = false;
+            
             if (~isfield('reset_results',par_gui)) || (~par_gui.reset_results)
             
                 %Search for previous results
                 if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
                     obj.with_results = true;
                     finfo = whos('-file',['times_' obj.nick_name '.mat']);
-                    if ismember('par',{finfo.name})  
-                        load(['times_' obj.nick_name '.mat'],'par'); 
+                    if ismember('par',{finfo.name})
+                        load(['times_' obj.nick_name '.mat'],'par');
                         obj.par = update_parameters(obj.par, par, 'relevant');
                         with_par = true;
                     end
-
+                    if ismember('gui_status',{finfo.name})  
+                        obj.with_gui_status = true;
+                    end
                 end
 
                 %Search for previously detected spikes
@@ -83,7 +87,14 @@ classdef readInData < handle
             obj.par.ref = floor(obj.par.ref_ms *obj.par.sr/1000);
         end
         
-        
+        function par = update_par(obj,par)
+            load_par_names = fieldnames(obj.par);
+            for i= 1:length(load_par_names)
+                par.(load_par_names{i}) = obj.par.(load_par_names{i});
+            end
+        end
+            
+            
         function [spikes, index_ts] = load_spikes(obj)
             if ~ (obj.with_spikes || obj.with_wc_spikes)
                 ME = MException('MyComponent:noSpikesFound', 'Wave_Clus couldn''t find a file with spikes');
@@ -118,7 +129,14 @@ classdef readInData < handle
          	tree = load(['data_' obj.nick_name '.dg_01']);
         end
 
-        
+        function [saved_gui_status, temp,gui_classes] = get_gui_status(obj)
+            load(['times_' obj.nick_name '.mat'],'gui_status','cluster_class'); 
+            temp = gui_status.temp;
+            saved_gui_status = gui_status.classes;
+            gui_classes = cluster_class(:,1);
+        end
+            
+            
         function x = get_segment(obj)
             
             if ~ obj.with_raw

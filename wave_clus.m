@@ -186,14 +186,18 @@ handles.par.fnamespc = 'data_wc';
 %handles.par.fname = data_handler.nick_name;
 
 
+handles.par = update_par(data_handler,handles.par);
 
 if data_handler.with_results %data have _times files
     [clu, tree, spikes, index, inspk, ipermut] = data_handler.load_results();
+   
 else    
     if data_handler.with_spikes  %data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
             [spikes] = spike_alignment(spikes,handles.par);
+            
+            
         end
     else    
         set(handles.file_name,'string','Detecting spikes ...'); drawnow
@@ -237,7 +241,7 @@ else
     %Interaction with SPC
     set(handles.file_name,'string','Running SPC ...'); drawnow
     fname_in = handles.par.fname_in;
-    save([fname_in],'inspk_aux','-ascii');                      %Input file for SPC
+    save(fname_in,'inspk_aux','-ascii');                      %Input file for SPC
     
     [clu,tree] = run_cluster(handles.par);
 
@@ -250,21 +254,10 @@ if data_handler.with_raw && handles.par.sample_segment          %raw exists
     drawnow
 end
 
-
-
-set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
-                                
-
-%Selects temperature.
-temp = find_temp(tree, handles.par); 
-
-if handles.par.permut == 'n'
-    classes = clu(temp,3:end)+1;
-    classes = [classes(:)' zeros(1,max(size(spikes,1)-handles.par.max_spk),0)];
-else
-    classes = zeros(1,size(spikes,1));
-    classes(ipermut) = clu(temp,3:end)+1;
-    clu_aux = zeros(size(clu,1),size(spikes,1)) + 1000; %when update classes from clu, not selected go to cluster 1001
+%Fixing lost elements of clu . Skiped elements will be  class -1 because in
+%all the uses of clu are like: clu(temp,3:end)+1
+if handles.par.permut == 'y'
+    clu_aux = zeros(size(clu,1),size(spikes,1)) -1;% + 1000; %when update classes from clu, not selected go to cluster 1001
     clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
     clu_aux(:,1:2) = clu(:,1:2);
     clu = clu_aux;
@@ -272,43 +265,66 @@ else
 end
 
 
-
-
 USER_DATA = get(handles.wave_clus_figure,'userdata');
-
 USER_DATA{1} = handles.par;
 USER_DATA{2} = spikes;
 USER_DATA{3} = index;
 USER_DATA{4} = clu;
 USER_DATA{5} = tree;
-USER_DATA{6} = classes(:)';
 USER_DATA{7} = inspk;
-USER_DATA{8} = temp;
-USER_DATA{9} = classes(:)';                                     %backup for non-forced classes.
-if exist('ipermut','var')
-    if ~isempty(ipermut)
-        USER_DATA{12} = ipermut;
-    end
+if exist('ipermut','var') && ~isempty(ipermut)
+    USER_DATA{12} = ipermut;
 end
 
-% definition of clustering_results
-clustering_results = [];
-clustering_results(:,1) = repmat(temp,length(classes),1); % GUI temperatures
-clustering_results(:,2) = classes'; % GUI classes 
-clustering_results(:,3) = repmat(temp,length(classes),1); % original temperatures 
-clustering_results(:,4) = classes'; % original classes 
-clustering_results(:,5) = repmat(handles.par.min_clus,length(classes),1); % minimum number of clusters
+set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
+
+
+
+if  data_handler.with_gui_status
+    [saved_gui_status, temp, classes] = data_handler.get_gui_status();
+    clustering_results(:,1) = repmat(temp,length(classes),1);
+    clustering_results(:,2) = classes'; % GUI classes 
+    clustering_results(:,3:4) = saved_gui_status;
+    handles.undo = 1;
+else
+    %Selects temperature.
+    temp = find_temp(tree, handles.par); 
+
+    classes = clu(temp,3:end)+1;
+    if handles.par.permut == 'n'
+        classes = [classes(:)' zeros(1,max(size(spikes,1)-handles.par.max_spk),0)];
+    end
+
+    % definition of clustering_results
+    clustering_results = [];
+    clustering_results(:,1) = repmat(temp,length(classes),1); % GUI temperatures
+    clustering_results(:,2) = classes'; % GUI classes 
+    clustering_results(:,3) = repmat(temp,length(classes),1); % original temperatures 
+    clustering_results(:,4) = classes'; % original classes 
+    handles.undo = 0;
+end
+
+
+    clustering_results(:,5) = repmat(handles.par.min_clus,length(classes),1); % minimum number of clusters
+    USER_DATA{6} = classes(:)';
+    USER_DATA{9} = classes(:)';         %backup for non-forced classes.
+    USER_DATA{8} = temp;
+    
+
+
+
+
 clustering_results_bk = clustering_results; % old clusters for undo actions
 USER_DATA{10} = clustering_results;
 USER_DATA{11} = clustering_results_bk;
+
 handles.force = 0;
 handles.merge = 0;
 handles.reject = 0;
-handles.undo = 0;
+
 handles.minclus = handles.par.min_clus;
 handles.setclus = 0;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-
 
 % mark clusters when new data is loaded
 guidata(hObject, handles); %this is need for plot the isi histograms
@@ -318,6 +334,7 @@ USER_DATA = get(handles.wave_clus_figure,'userdata');
 clustering_results = USER_DATA{10};
 mark_clusters_temperature_diagram(handles,tree,clustering_results);
 set(handles.file_name,'string',[pathname filename]);
+
 
 % --- Executes on button press in change_temperature_button.
 function change_temperature_button_Callback(hObject, eventdata, handles)
@@ -430,9 +447,9 @@ end
 function save_clusters_button_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 spikes = USER_DATA{2};
-par = USER_DATA{1};
+used_par = USER_DATA{1};
 classes = USER_DATA{6};
-classes_gui_info = USER_DATA{10};
+gui_classes_data = USER_DATA{10};
 
 % Classes should be consecutive numbers
 classes_names = nonzeros(sort(unique(classes)));
@@ -448,11 +465,17 @@ cluster_class = zeros(size(spikes,1),2);
 cluster_class(:,1) = classes(:);
 cluster_class(:,2) = USER_DATA{3}';
 
-outfile=['times_' par.nick_name];
+outfile=['times_' used_par.nick_name];
 
-used_par = struct;
-used_par = update_parameters(used_par,par,'relevant');
-var_list = ' cluster_class used_par spikes classes_gui_info';
+par = struct;
+par = update_parameters(par,used_par,'relevant');
+
+gui_status = struct();
+gui_status.temp =  gui_classes_data(1,1);
+gui_status.classes = gui_classes_data(1:end,3:4);
+
+
+var_list = ' cluster_class par spikes gui_status';
 
 
 if ~isempty(USER_DATA{7})
