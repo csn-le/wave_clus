@@ -1,7 +1,7 @@
-function [clu, tree] = run_cluster(handles)
-dim = handles.par.inputs;
-fname = handles.par.fnamespc;
-fname_in = handles.par.fname_in;
+function [clu, tree] = run_cluster(par)
+dim = par.inputs;
+fname = par.fnamespc;
+fname_in = par.fname_in;
 
 % DELETE PREVIOUS FILES
 if exist([fname '.dg_01.lab'],'file')
@@ -16,18 +16,18 @@ fprintf(fid,'NumberOfPoints: %s\n',num2str(n));
 fprintf(fid,'DataFile: %s\n',fname_in);
 fprintf(fid,'OutFile: %s\n',fname);
 fprintf(fid,'Dimensions: %s\n',num2str(dim));
-fprintf(fid,'MinTemp: %s\n',num2str(handles.par.mintemp));
-fprintf(fid,'MaxTemp: %s\n',num2str(handles.par.maxtemp));
-fprintf(fid,'TempStep: %s\n',num2str(handles.par.tempstep));
-fprintf(fid,'SWCycles: %s\n',num2str(handles.par.SWCycles));
-fprintf(fid,'KNearestNeighbours: %s\n',num2str(handles.par.KNearNeighb));
+fprintf(fid,'MinTemp: %s\n',num2str(par.mintemp));
+fprintf(fid,'MaxTemp: %s\n',num2str(par.maxtemp));
+fprintf(fid,'TempStep: %s\n',num2str(par.tempstep));
+fprintf(fid,'SWCycles: %s\n',num2str(par.SWCycles));
+fprintf(fid,'KNearestNeighbours: %s\n',num2str(par.KNearNeighb));
 fprintf(fid,'MSTree|\n');
 fprintf(fid,'DirectedGrowth|\n');
 fprintf(fid,'SaveSuscept|\n');
 fprintf(fid,'WriteLables|\n');
 fprintf(fid,'WriteCorFile~\n');
-if handles.par.randomseed ~= 0
-    fprintf(fid,'ForceRandomSeed: %s\n',num2str(handles.par.randomseed));
+if par.randomseed ~= 0
+    fprintf(fid,'ForceRandomSeed: %s\n',num2str(par.randomseed));
 end    
 fclose(fid);
 
@@ -59,13 +59,17 @@ switch system_type
         end
         run_maci = sprintf('./cluster_maci.exe %s.run',fname);
 	    unix(run_maci);
-    otherwise  %(GLNX86, GLNXA64, GLNXI64 correspond to linux)
-        if exist([pwd '/cluster_linux.exe'])==0
+    case {'GLNX86', 'GLNXA64', 'GLNXI64'} %(GLNX86, GLNXA64, GLNXI64 correspond to linux)     
+        if exist([pwd '/cluster_linux.exe'],'file') == 0
             directory = which('cluster_linux.exe');
             copyfile(directory,pwd);
         end
         run_linux = sprintf('./cluster_linux.exe %s.run',fname);
 	    unix(run_linux);
+        
+    otherwise 
+    	ME = MException('MyComponent:NotSupportedArq', '%s type of computer not supported.',com_type);
+    	throw(ME)
 end
         
 clu = load([fname '.dg_01.lab']);

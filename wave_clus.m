@@ -239,13 +239,13 @@ else
     fname_in = handles.par.fname_in;
     save([fname_in],'inspk_aux','-ascii');                      %Input file for SPC
     
-    [clu,tree] = run_cluster(handles);
+    [clu,tree] = run_cluster(handles.par);
 
 end
 
 if data_handler.with_raw && handles.par.sample_segment          %raw exists
     [xd_sub, sr_sub] = data_handler.get_signal_sample();
-    Plot_continuous_data(xd_sub, sr_sub,handles)
+    Plot_continuous_data(xd_sub, sr_sub, handles)
     clear xd_sub
     drawnow
 end
@@ -256,23 +256,22 @@ set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
                                 
 
 %Selects temperature.
-temp = find_temp(tree,handles); 
-if size(clu,2)-2 < size(spikes,1);
-    if handles.par.permut == 'n'
-        classes = clu(temp(end),3:end)+1;
-        classes = [classes(:)' zeros(1,size(spikes,1)-handles.par.max_spk)];
-    else
-        classes = zeros(1,size(spikes,1));
-        classes(ipermut) = clu(temp(end),3:end)+1;
-        clu_aux = zeros(size(clu,1),size(spikes,1)) + 1000; %when update classes from clu, not selected go to cluster 1001
-        clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
-        clu_aux(:,1:2) = clu(:,1:2);
-        clu = clu_aux; 
-        clear clu_aux 
-    end
-else
+temp = find_temp(tree, handles.par); 
+
+if handles.par.permut == 'n'
     classes = clu(temp,3:end)+1;
+    classes = [classes(:)' zeros(1,max(size(spikes,1)-handles.par.max_spk),0)];
+else
+    classes = zeros(1,size(spikes,1));
+    classes(ipermut) = clu(temp,3:end)+1;
+    clu_aux = zeros(size(clu,1),size(spikes,1)) + 1000; %when update classes from clu, not selected go to cluster 1001
+    clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
+    clu_aux(:,1:2) = clu(:,1:2);
+    clu = clu_aux;
+    clear clu_aux
 end
+
+
 
 
 USER_DATA = get(handles.wave_clus_figure,'userdata');
@@ -284,7 +283,7 @@ USER_DATA{4} = clu;
 USER_DATA{5} = tree;
 USER_DATA{6} = classes(:)';
 USER_DATA{7} = inspk;
-USER_DATA{8} = temp(end);
+USER_DATA{8} = temp;
 USER_DATA{9} = classes(:)';                                     %backup for non-forced classes.
 if exist('ipermut','var')
     if ~isempty(ipermut)
@@ -324,7 +323,7 @@ set(handles.file_name,'string',[pathname filename]);
 function change_temperature_button_Callback(hObject, eventdata, handles)
 axes(handles.temperature_plot)
 hold off
-[temp aux]= ginput(1);                                          %gets the mouse input
+[temp aux] = ginput(1);                                          %gets the mouse input
 temp = round((temp-handles.par.mintemp)/handles.par.tempstep);
 if temp < 1; temp=1;end                                         %temp should be within the limits
 if temp > handles.par.num_temp; temp=handles.par.num_temp; end
@@ -344,10 +343,8 @@ USER_DATA{9} = classes(:)';                                     %backup for non-
 
 
 handles.minclus = min_clus;
-clustering_results = USER_DATA{10};
-clustering_results_bk = USER_DATA{11};
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-temperature=handles.par.mintemp+temp*handles.par.tempstep;
+temperature = handles.par.mintemp + temp * handles.par.tempstep;
 
 switch par.temp_plot
     case 'lin'
@@ -377,8 +374,7 @@ handles.undo = 0;
 plot_spikes(handles);
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 clustering_results = USER_DATA{10};
-%clustering_results_bk = USER_DATA{11};
-mark_clusters_temperature_diagram(handles,tree,clustering_results)
+mark_clusters_temperature_diagram(handles,tree,clustering_results);
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 set(handles.fix1_button,'value',0);
@@ -436,17 +432,15 @@ USER_DATA = get(handles.wave_clus_figure,'userdata');
 spikes = USER_DATA{2};
 par = USER_DATA{1};
 classes = USER_DATA{6};
+classes_gui_info = USER_DATA{10};
 
 % Classes should be consecutive numbers
-i=1;
-while i<=max(classes)
-    if isempty(classes(classes==i))
-        for k=i+1:max(classes)
-            classes(classes==k)=k-1;
-        end
-    else
-        i=i+1;
-    end
+classes_names = nonzeros(sort(unique(classes)));
+for i= 1:length(classes_names)
+   c = classes_names(i);
+   if c~= i
+       classes(classes == c) = i;
+   end
 end
 
 %Saves clusters
@@ -458,7 +452,7 @@ outfile=['times_' par.nick_name];
 
 used_par = struct;
 used_par = update_parameters(used_par,par,'relevant');
-var_list = ' cluster_class used_par spikes';
+var_list = ' cluster_class used_par spikes classes_gui_info';
 
 
 if ~isempty(USER_DATA{7})

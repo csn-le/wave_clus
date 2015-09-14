@@ -83,8 +83,8 @@ end
 
 for j=1:num_segments
     ini = (j-1)*samples_per_channel;
-    fin = min(j*samples_per_channel,lts );
-    data2 = fread(fid,fin-ini,'uint8=>uint8');
+    fin = min(j*samples_per_channel,lts);
+    data2 = fread(fid,(fin-ini)*(num_amps*4+1),'uint8=>uint8');
     data2((num_amps*4)+1:num_amps*4+1:end) = [];
     data2 = typecast(data2,'single');
     for ind = 1:num_amps

@@ -138,7 +138,7 @@ if handles.par.permut == 'n'
 
 	%INTERACTION WITH SPC
 	save(handles.par.fname_in,'inspk_aux','-ascii');
-	[clu, tree] = run_cluster(handles);
+	[clu, tree] = run_cluster(handles.par);
 	[temp] = find_temp(tree,handles);
 
 	%DEFINE CLUSTERS
@@ -164,7 +164,7 @@ else
 
 	%INTERACTION WITH SPC
 	save(handles.par.fname_in,'inspk_aux','-ascii');
-	[clu, tree] = run_cluster(handles);
+	[clu, tree] = run_cluster(handles.par);
 	[temp] = find_temp(tree,handles);
 
 	%DEFINE CLUSTERS
