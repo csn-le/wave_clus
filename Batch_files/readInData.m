@@ -113,7 +113,7 @@ classdef readInData < handle
         end
         
         
-        function [clu, tree, spikes, index, inspk, ipermut] = load_results(obj)
+        function [clu, tree, spikes, index, inspk, ipermut,classes] = load_results(obj)
         	
             if ~ obj.with_results
             	ME = MException('MyComponent:noClusFound', 'This file don''t have a associated ''times_%s.mat'' file',obj.nick_name);
@@ -125,6 +125,7 @@ classdef readInData < handle
             end
             % cluster_class(:,1);
             index = cluster_class(:,2);
+            classes = cluster_class(:,1);
          	clu = load(['data_' obj.nick_name '.dg_01.lab']);
          	tree = load(['data_' obj.nick_name '.dg_01']);
         end

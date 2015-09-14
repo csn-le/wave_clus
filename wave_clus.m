@@ -189,7 +189,7 @@ handles.par.fnamespc = 'data_wc';
 handles.par = update_par(data_handler,handles.par);
 
 if data_handler.with_results %data have _times files
-    [clu, tree, spikes, index, inspk, ipermut] = data_handler.load_results();
+    [clu, tree, spikes, index, inspk, ipermut,classes] = data_handler.load_results();
    
 else    
     if data_handler.with_spikes  %data have some time of _spikes files
@@ -281,15 +281,23 @@ set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
 
 
 if  data_handler.with_gui_status
-    [saved_gui_status, temp, classes] = data_handler.get_gui_status();
+    [saved_gui_status, temp] = data_handler.get_gui_status();
     clustering_results(:,1) = repmat(temp,length(classes),1);
     clustering_results(:,2) = classes'; % GUI classes 
     clustering_results(:,3:4) = saved_gui_status;
     handles.undo = 1;
+    
+elseif data_handler.with_results
+    temp = 2;
+    clustering_results(:,1) = repmat(temp,length(classes),1); % GUI temperatures
+    clustering_results(:,2) = classes'; % GUI classes 
+    clustering_results(:,3) = repmat(temp,length(classes),1); % original temperatures 
+    clustering_results(:,4) = classes'; % original classes 
+    handles.par.min_clus = 1;
+    handles.undo = 1;
 else
     %Selects temperature.
     temp = find_temp(tree, handles.par); 
-
     classes = clu(temp,3:end)+1;
     if handles.par.permut == 'n'
         classes = [classes(:)' zeros(1,max(size(spikes,1)-handles.par.max_spk),0)];
@@ -305,15 +313,10 @@ else
 end
 
 
-    clustering_results(:,5) = repmat(handles.par.min_clus,length(classes),1); % minimum number of clusters
-    USER_DATA{6} = classes(:)';
-    USER_DATA{9} = classes(:)';         %backup for non-forced classes.
-    USER_DATA{8} = temp;
-    
-
-
-
-
+clustering_results(:,5) = repmat(handles.par.min_clus,length(classes),1); % minimum number of clusters
+USER_DATA{6} = classes(:)';
+USER_DATA{9} = classes(:)';         %backup for non-forced classes.
+USER_DATA{8} = temp;
 clustering_results_bk = clustering_results; % old clusters for undo actions
 USER_DATA{10} = clustering_results;
 USER_DATA{11} = clustering_results_bk;
