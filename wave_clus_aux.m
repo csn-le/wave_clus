@@ -285,11 +285,8 @@ plot_spikes_aux(handles)
 % --------------------------------------------------------------------
 
 
-% Accept and Reject buttons
-% --------------------------------------------------------
-function isi4_accept_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi4_reject_button,'value',0);
+% Reject buttons
+
 % --------------------------------------------------------------------
 function isi4_reject_button_Callback(hObject, eventdata, handles)
 set(gcbo,'value',1);
@@ -316,10 +313,6 @@ cla reset
 set(gcbo,'value',0);
 set(handles.isi4_accept_button,'value',1);
 
-% --------------------------------------------------------
-function isi5_accept_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi5_reject_button,'value',0);
 % --------------------------------------------------------------------
 function isi5_reject_button_Callback(hObject, eventdata, handles)
 set(gcbo,'value',1);
@@ -346,10 +339,6 @@ cla reset
 set(gcbo,'value',0);
 set(handles.isi5_accept_button,'value',1);
 
-% --------------------------------------------------------
-function isi6_accept_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi6_reject_button,'value',0);
 % --------------------------------------------------------------------
 function isi6_reject_button_Callback(hObject, eventdata, handles)
 set(gcbo,'value',1);
@@ -376,10 +365,6 @@ cla reset
 set(gcbo,'value',0);
 set(handles.isi6_accept_button,'value',1);
 
-% --------------------------------------------------------
-function isi7_accept_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi7_reject_button,'value',0);
 % --------------------------------------------------------------------
 function isi7_reject_button_Callback(hObject, eventdata, handles)
 set(gcbo,'value',1);
@@ -406,10 +391,7 @@ cla reset
 set(gcbo,'value',0);
 set(handles.isi7_accept_button,'value',1);
 
-% --------------------------------------------------------
-function isi8_accept_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi8_reject_button,'value',0);
+
 % --------------------------------------------------------------------
 function isi8_reject_button_Callback(hObject, eventdata, handles)
 set(gcbo,'value',1);

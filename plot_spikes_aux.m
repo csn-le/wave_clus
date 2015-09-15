@@ -1,6 +1,6 @@
 function Plot_Spikes_aux(handles, plot_number)
 
-if ~exist('plot_number') || (plot_number== 0)
+if ~exist('plot_number','var') || (plot_number== 0)
 	USER_DATA = get(handles.wave_clus_aux,'userdata');
 	plot_number= 0;
 else
@@ -10,7 +10,6 @@ end
 par = USER_DATA{1};
 spikes = USER_DATA{2};
 spk_times = USER_DATA{3};
-inspk = USER_DATA{7};
 ls = size(spikes,2);
 par.to_plot_std = 1;                % # of std from mean to plot
 axes_nr = par.axes_nr;
@@ -28,7 +27,7 @@ av   = mean(spikes(class_to_plot,:));
 avup = av + par.to_plot_std * std(spikes(class_to_plot,:));
 avdw = av - par.to_plot_std * std(spikes(class_to_plot,:));
 if par.plot_all_button ==1
-    permut=randperm(sup_spikes);
+    permut = randperm(sup_spikes);
     plot(spikes(class_to_plot(permut(1:max_spikes)),:)','color',colors(axes_nr));
     plot(1:ls,av,'k','linewidth',2);
     plot(1:ls,avup,1:ls,avdw,'color',[.4 .4 .4],'linewidth',.5)

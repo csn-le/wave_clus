@@ -11,21 +11,20 @@ temp = USER_DATA{8};
 ls = size(spikes,2);
 par.to_plot_std = 1;                % # of std from mean to plot
 
-merge = handles.merge;
 minclus = handles.minclus;
 clustering_results = USER_DATA{10};
 
 
 % Closes aux figures
 h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
 h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
 h_fig2= findobj(h_figs,'tag','wave_clus_aux1');
 h_fig3= findobj(h_figs,'tag','wave_clus_aux2');
 h_fig4= findobj(h_figs,'tag','wave_clus_aux3');
 h_fig5= findobj(h_figs,'tag','wave_clus_aux4');
 h_fig6= findobj(h_figs,'tag','wave_clus_aux5');
-close(h_fig1); close(h_fig2); close(h_fig3); close(h_fig4); close(h_fig5); close(h_fig6);
+close(h_fig1);
+close(h_fig2); close(h_fig3); close(h_fig4); close(h_fig5); close(h_fig6);
 if ishandle(10)
 	close(10)
 end 
@@ -49,7 +48,7 @@ end
 
 % Classes should be consecutive numbers
 classes_names = nonzeros(sort(unique(classes)));
-for i= 1:length(classes_names)
+for i = 1:length(classes_names)
    c = classes_names(i);
    if c~= i
        classes(classes == c) = i;
@@ -57,28 +56,22 @@ for i= 1:length(classes_names)
 end
 
 classes_names = nonzeros(sort(unique(class_bkup)));
-for i= 1:length(classes_names)
+for i = 1:length(classes_names)
    c = classes_names(i);
-   if c~= i
+   if c ~= i
        class_bkup(class_bkup == c) = i;
    end
 end
 
-
-
-
-
-
-nclusters_bkup = nnz(cluster_sizes(:) >= par.min_clus);
+nclusters_bkup = nnz(cluster_sizes >= par.min_clus);
 class_bkup(class_bkup > nclusters_bkup)=0;
 
 if handles.setclus == 0 && handles.undo==0 && handles.merge==0 && handles.force==0  
     sizemin_clus = par.min_clus;
 else
-    sizemin_clus = 1; 
+    sizemin_clus = 1;
 end
 nclusters = nnz(cluster_sizes >= sizemin_clus);
-
 
 % Get fixed clusters
 fix_class2 = [];
@@ -119,9 +112,9 @@ for i=4:par.max_clus
     if fixx == 1
         nclusters = nclusters +1;
         fix_class = USER_DATA{22+i-3}';
-        classes(classes==nclusters)=0;
-        classes(fix_class)=nclusters;
-        ifixflag(nclusters)=1;
+        classes(classes==nclusters) = 0;
+        classes(fix_class) = nclusters;
+        ifixflag(nclusters) = 1;
         
         fix_class2 = [fix_class2 fix_class];
         nfix_class = [nfix_class i];
@@ -241,7 +234,7 @@ for i = 1:nclusters+1
         %PLOTS SPIKES OR PROJECTIONS
         axes(handles.projections)
         hold on
-        eval(['max_spikes=min(length(class' num2str(i-1) '),par.max_spikes_plot);']);
+        eval(['max_spikes=min(length(class' num2str(i-1) '), par.max_spikes_plot);']);
         eval(['sup_spikes=length(class' num2str(i-1) ');']);
         permut = randperm(sup_spikes);
         if get(handles.spike_shapes_button,'value') ==1 && get(handles.plot_all_button,'value') ==1
@@ -320,9 +313,11 @@ for i = 1:nclusters+1
     end
 end
 
-%Resize axis  
-ymin = min(ylimit(:,1));
-ymax = max(ylimit(:,2));
-for i=1:3
-	eval(['axes(handles.spikes' num2str(i) '); ylim([ymin ymax])'])
+%Resize axis
+if size(ylimit,2) >0
+    ymin = min(ylimit(:,1));
+    ymax = max(ylimit(:,2));
+    for i=1:3
+        eval(['axes(handles.spikes' num2str(i) '); ylim([ymin ymax])'])
+    end
 end
