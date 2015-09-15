@@ -2,7 +2,6 @@ function Plot_Spikes(handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 spikes = USER_DATA{2};
-spk_times = USER_DATA{3};
 classes = USER_DATA{6};
 classes = classes(:)';
 class_bkup = USER_DATA{9};
@@ -47,7 +46,9 @@ for i=1:par.max_clus
 end
 
 % Classes should be consecutive numbers
-classes_names = nonzeros(sort(unique(classes)));
+classes_names = sort(unique(classes));
+classes_names = classes_names(classes_names>0);
+
 for i = 1:length(classes_names)
    c = classes_names(i);
    if c~= i
@@ -55,7 +56,8 @@ for i = 1:length(classes_names)
    end
 end
 
-classes_names = nonzeros(sort(unique(class_bkup)));
+classes_names = sort(unique(class_bkup));
+classes_names = classes_names(classes_names>0);
 for i = 1:length(classes_names)
    c = classes_names(i);
    if c ~= i
@@ -271,47 +273,36 @@ for i = 1:nclusters+1
             end
             xlim([1 ls])
             if i>1; ylimit = [ylimit;ylim]; end;
-                eval(['aux=num2str(length(class' num2str(i-1) '));']);
-                title(['Cluster ' num2str(i-1) ':  # ' aux],'Fontweight','bold');
-                eval(['axes(handles.isi' num2str(i-1) ');']); 
-                eval(['times' num2str(i-1) '=diff(spk_times(class' num2str(i-1) '));']);
-                % Calculates # ISIs < 3ms  
-                bin_step_temp = 1;
-                eval(['[N,X]=hist(times' num2str(i-1) ',0:bin_step_temp:par.nbins' num2str(i-1) ');']);
-                multi_isi= sum(N(1:3)); 
-                % Builds and plots the histogram
-                eval(['[N,X]=hist(times' num2str(i-1) ',0:par.bin_step' num2str(i-1) ':par.nbins' num2str(i-1) ');']);
-                bar(X(1:end-1),N(1:end-1))
-                eval(['xlim([0 par.nbins' num2str(i-1) ']);']);
-                %The following line generates an error in Matlab 7.3
-                %eval(['set(get(gca,''children''),''FaceColor'',''' colors(i) ''',''EdgeColor'',''' colors(i) ''',''Linewidth'',0.01);']);    
-                title([num2str(multi_isi) ' in < 3ms'])
-                xlabel('ISI (ms)');
-            else
-                par.axes_nr = i;
-                par.ylimit = ylimit;
-                eval(['par.class_to_plot = class' num2str(i-1) ';']);
-                par.plot_all_button = get(handles.plot_all_button,'value');
-                USER_DATA{1} = par;
-                set(handles.wave_clus_figure,'userdata',USER_DATA)
+            eval(['aux=num2str(length(class' num2str(i-1) '));']);
+            title(['Cluster ' num2str(i-1) ':  # ' aux],'Fontweight','bold');
+        else
+            par.axes_nr = i;
+            par.ylimit = ylimit;
+            eval(['par.class_to_plot = class' num2str(i-1) ';']);
+            par.plot_all_button = get(handles.plot_all_button,'value');
+            USER_DATA{1} = par;
+            set(handles.wave_clus_figure,'userdata',USER_DATA)
 
-                if i < 10 
-                    wave_clus_aux
-                elseif i < 15
-                    wave_clus_aux1
-                elseif i < 20
-                    wave_clus_aux2
-                elseif i < 25
-                    wave_clus_aux3
-                elseif i < 30
-                    wave_clus_aux4
-                else
-                    wave_clus_aux5
+            if i < 10 
+                wave_clus_aux
+            elseif i < 15
+                wave_clus_aux1
+            elseif i < 20
+                wave_clus_aux2
+            elseif i < 25
+                wave_clus_aux3
+            elseif i < 30
+                wave_clus_aux4
+            else
+                wave_clus_aux5
             %-------------------------------------------------------------------------
             end
         end
     end
 end
+
+
+draw_histograms(handles, 0:min(nclusters,3));
 
 %Resize axis
 if size(ylimit,2) >0

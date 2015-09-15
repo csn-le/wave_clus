@@ -1,4 +1,4 @@
-function Plot_Spikes_aux(handles, plot_number)
+function plot_spikes_aux(handles, plot_number)
 
 if ~exist('plot_number','var') || (plot_number== 0)
 	USER_DATA = get(handles.wave_clus_aux,'userdata');
@@ -41,9 +41,7 @@ eval(['title([''Cluster ' num2str(axes_nr-1) ':  # ' aux '''],''Fontweight'',''b
 eval(['axes(handles.isi' num2str(axes_nr-1) ');']); 
 times = diff(spk_times(class_to_plot));
 % Calculates # ISIs < 3ms  
-bin_step_temp = 1;
-eval(['[N,X]=hist(times,0:bin_step_temp:par.nbins' num2str(axes_nr-1) ');']);
-multi_isi= sum(N(1:3)); 
+multi_isi = nnz(times<3); 
 % Builds and plots the histogram
 eval(['[N,X]=hist(times,0:par.bin_step' num2str(axes_nr-1) ':par.nbins' num2str(axes_nr-1) ');']);
 bar(X(1:end-1),N(1:end-1))

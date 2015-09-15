@@ -728,39 +728,26 @@ b_name = get(gcbo,'Tag');
 cn = regexp(b_name, '\d+', 'match');
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
-cluster_results = USER_DATA{10};
+%cluster_results = USER_DATA{10};
 eval(['par.nbins' cn{1}  '= str2num(get(hObject, ''String''));']);
 
 USER_DATA{1} = par;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-handles.setclus = 1;
-handles.force = 0;
-handles.merge = 0;
-handles.reject = 0;
-handles.undo = 0;
-handles.minclus = cluster_results(1,5);
-plot_spikes(handles)
+draw_histograms(handles,  str2double(cn{1}));
+
 % --------------------------------------------------------------------
 function isi_bin_step_Callback(hObject, eventdata, handles)
 b_name = get(gcbo,'Tag');
 cn = regexp(b_name, '\d+', 'match');
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
-cluster_results = USER_DATA{10};
+%cluster_results = USER_DATA{10};
 eval(['par.bin_step' cn{1}  '= str2num(get(hObject, ''String''));']);
 
 USER_DATA{1} = par;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-handles.setclus = 1;
-handles.force = 0;
-handles.merge = 0;
-handles.reject = 0;
-handles.undo = 0;
-handles.minclus = cluster_results(1,5);
-plot_spikes(handles)
-
-
-
+draw_histograms(handles, str2double(cn{1}));
+            
 %SETTING OF ISI BUTTONS
 
 % --------------------------------------------------------------------
