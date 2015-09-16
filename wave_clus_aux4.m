@@ -157,134 +157,29 @@ plot_spikes_aux(handles,4)
 
 
 
-
 % Change nbins
 % -------------------------------------------------------------
-function isi24_nbins_Callback(hObject, eventdata, handles)
+function isi_nbins_Callback(hObject, eventdata, handles)
+b_name = get(gcbo,'Tag');
+cn = regexp(b_name, '\d+', 'match');
 USER_DATA = get(handles.wave_clus_aux4,'userdata');
 par = USER_DATA{1};
-par.nbins24 = str2num(get(hObject, 'String'));
-par.axes_nr = 25;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==24);
+eval(['par.nbins' cn{1}  '= str2num(get(hObject, ''String''));']);
 USER_DATA{1} = par;
-USER_DATA{6} = classes;
 set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-function isi25_nbins_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-par.nbins25 = str2num(get(hObject, 'String'));
-par.axes_nr = 26;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==25);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-function isi26_nbins_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-par.nbins26 = str2num(get(hObject, 'String'));
-par.axes_nr = 27;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==26);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-function isi27_nbins_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-par.nbins27 = str2num(get(hObject, 'String'));
-par.axes_nr = 28;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==27);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-function isi28_nbins_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-par.nbins28 = str2num(get(hObject, 'String'));
-par.axes_nr = 29;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==28);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-
+draw_histograms(handles,  str2double(cn{1}),USER_DATA);
 
 % Change bin steps
-% --------------------------------------------------------
-function isi24_bin_step_Callback(hObject, eventdata, handles)
+% --------------------------------------------------------------------
+function isi_bin_step_Callback(hObject, eventdata, handles)
+b_name = get(gcbo,'Tag');
+cn = regexp(b_name, '\d+', 'match');
 USER_DATA = get(handles.wave_clus_aux4,'userdata');
 par = USER_DATA{1};
-par.bin_step24 = str2num(get(hObject, 'String'));
-par.axes_nr = 25;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==24);
+eval(['par.bin_step' cn{1}  '= str2num(get(hObject, ''String''));']);
 USER_DATA{1} = par;
-USER_DATA{6} = classes;
 set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-function isi25_bin_step_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-par.bin_step25 = str2num(get(hObject, 'String'));
-par.axes_nr = 26;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==25);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-function isi26_bin_step_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-par.bin_step26 = str2num(get(hObject, 'String'));
-par.axes_nr = 27;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==26);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-function isi27_bin_step_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-par.bin_step27 = str2num(get(hObject, 'String'));
-par.axes_nr = 28;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==27);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-function isi28_bin_step_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-par.bin_step28 = str2num(get(hObject, 'String'));
-par.axes_nr = 29;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==28);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-plot_spikes_aux(handles,4)
-% --------------------------------------------------------------------
-
+draw_histograms(handles, str2double(cn{1}),USER_DATA);
 
 % Reject buttons
 
@@ -562,87 +457,3 @@ set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
 set(h_fig4,'userdata',USER_DATA)
 
-
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% --- Executes during object creation, after setting all properties.
-function isi24_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi24_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi25_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi25_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi26_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi26_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi27_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi27_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi28_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi28_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end

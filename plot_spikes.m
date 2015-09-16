@@ -302,7 +302,7 @@ for i = 1:nclusters+1
 end
 
 
-draw_histograms(handles, 0:min(nclusters,3));
+draw_histograms(handles, 0:min(nclusters,3),USER_DATA);
 
 %Resize axis
 if size(ylimit,2) >0

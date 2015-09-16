@@ -1,13 +1,12 @@
-function draw_histograms(handles, c2plot)
+function draw_histograms(handles, c2plot,USER_DATA)
 
-USER_DATA = get(handles.wave_clus_figure,'userdata');
 spk_times = USER_DATA{3};
 classes = USER_DATA{6};
 par = USER_DATA{1};
 
 for i = c2plot 
     eval(['axes(handles.isi' num2str(i) ');']); 
-    times=diff(spk_times(classes==i));
+    times = diff(spk_times(classes==i));
     % Calculates # ISIs < 3ms  
     multi_isi = nnz(times < 3); 
     % Builds and plots the histogram

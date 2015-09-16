@@ -733,7 +733,7 @@ eval(['par.nbins' cn{1}  '= str2num(get(hObject, ''String''));']);
 
 USER_DATA{1} = par;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-draw_histograms(handles,  str2double(cn{1}));
+draw_histograms(handles,  str2double(cn{1}),USER_DATA);
 
 % --------------------------------------------------------------------
 function isi_bin_step_Callback(hObject, eventdata, handles)
@@ -746,7 +746,7 @@ eval(['par.bin_step' cn{1}  '= str2num(get(hObject, ''String''));']);
 
 USER_DATA{1} = par;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-draw_histograms(handles, str2double(cn{1}));
+draw_histograms(handles, str2double(cn{1}),USER_DATA);
             
 %SETTING OF ISI BUTTONS
 

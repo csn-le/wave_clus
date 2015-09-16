@@ -159,131 +159,27 @@ plot_spikes_aux(handles)
 
 % Change nbins
 % -------------------------------------------------------------
-function isi4_nbins_Callback(hObject, eventdata, handles)
+function isi_nbins_Callback(hObject, eventdata, handles)
+b_name = get(gcbo,'Tag');
+cn = regexp(b_name, '\d+', 'match');
 USER_DATA = get(handles.wave_clus_aux,'userdata');
 par = USER_DATA{1};
-par.nbins4 = str2num(get(hObject, 'String'));
-par.axes_nr = 5;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==4);
+eval(['par.nbins' cn{1}  '= str2num(get(hObject, ''String''));']);
 USER_DATA{1} = par;
-USER_DATA{6} = classes;
 set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-function isi5_nbins_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux,'userdata');
-par = USER_DATA{1};
-par.nbins5 = str2num(get(hObject, 'String'));
-par.axes_nr = 6;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==5);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-function isi6_nbins_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux,'userdata');
-par = USER_DATA{1};
-par.nbins6 = str2num(get(hObject, 'String'));
-par.axes_nr = 7;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==6);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-function isi7_nbins_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux,'userdata');
-par = USER_DATA{1};
-par.nbins7 = str2num(get(hObject, 'String'));
-par.axes_nr = 8;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==7);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-function isi8_nbins_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux,'userdata');
-par = USER_DATA{1};
-par.nbins8 = str2num(get(hObject, 'String'));
-par.axes_nr = 9;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==8);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-
+draw_histograms(handles,  str2double(cn{1}),USER_DATA);
 
 % Change bin steps
-% --------------------------------------------------------
-function isi4_bin_step_Callback(hObject, eventdata, handles)
+% --------------------------------------------------------------------
+function isi_bin_step_Callback(hObject, eventdata, handles)
+b_name = get(gcbo,'Tag');
+cn = regexp(b_name, '\d+', 'match');
 USER_DATA = get(handles.wave_clus_aux,'userdata');
 par = USER_DATA{1};
-par.bin_step4 = str2num(get(hObject, 'String'));
-par.axes_nr = 5;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==4);
+eval(['par.bin_step' cn{1}  '= str2num(get(hObject, ''String''));']);
 USER_DATA{1} = par;
-USER_DATA{6} = classes;
 set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-function isi5_bin_step_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux,'userdata');
-par = USER_DATA{1};
-par.bin_step5 = str2num(get(hObject, 'String'));
-par.axes_nr = 6;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==5);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-function isi6_bin_step_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux,'userdata');
-par = USER_DATA{1};
-par.bin_step6 = str2num(get(hObject, 'String'));
-par.axes_nr = 7;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==6);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-function isi7_bin_step_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux,'userdata');
-par = USER_DATA{1};
-par.bin_step7 = str2num(get(hObject, 'String'));
-par.axes_nr = 8;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==7);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-function isi8_bin_step_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux,'userdata');
-par = USER_DATA{1};
-par.bin_step8 = str2num(get(hObject, 'String'));
-par.axes_nr = 9;
-classes = USER_DATA{6};
-par.class_to_plot = find(classes==8);
-USER_DATA{1} = par;
-USER_DATA{6} = classes;
-set(handles.wave_clus_aux,'userdata',USER_DATA);
-plot_spikes_aux(handles)
-% --------------------------------------------------------------------
-
+draw_histograms(handles, str2double(cn{1}),USER_DATA);
 
 % Reject buttons
 
