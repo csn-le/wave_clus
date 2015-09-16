@@ -152,7 +152,7 @@ set(h_fig1,'userdata',USER_DATA)
 set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
 set(h_fig4,'userdata',USER_DATA)
-
+set(h_fig5,'userdata',USER_DATA)
 plot_spikes_aux(handles,4)
 
 

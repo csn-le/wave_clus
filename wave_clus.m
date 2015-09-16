@@ -440,7 +440,7 @@ set(handles.fix2_button,'value',0);
 set(handles.fix3_button,'value',0);
 for i=4:par.max_clus
     eval(['par.fix' num2str(i) '=0;']);
-end    
+end
 
 
 % --- Executes on button press in save_clusters_button.
@@ -474,9 +474,7 @@ gui_status = struct();
 gui_status.temp =  gui_classes_data(1,1);
 gui_status.classes = gui_classes_data(1:end,3:4);
 
-
 var_list = ' cluster_class par spikes gui_status';
-
 
 if ~isempty(USER_DATA{7})
     inspk = USER_DATA{7};
@@ -639,7 +637,7 @@ else
 end
 % --------------------------------------------------------------------
 
-% fix1 button --------------------------------------------------------------------
+% fix buttons --------------------------------------------------------------------
 function fix_button_Callback(hObject, eventdata, handles)
 b_name = get(gcbo,'Tag');
 cn = regexp(b_name, '\d+', 'match');
@@ -748,8 +746,8 @@ USER_DATA{1} = par;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 draw_histograms(handles, str2double(cn{1}),USER_DATA);
             
-%SETTING OF ISI BUTTONS
 
+%SETTING OF ISI BUTTONS
 % --------------------------------------------------------------------
 function isi_accept_button_Callback(hObject, eventdata, handles)
 set(gcbo,'value',1);
@@ -868,108 +866,18 @@ if strcmp(par.filename(1:9),'polytrode')
 end
 
 
-
 % --- Executes during object creation, after setting all properties.
-function isi1_nbins_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to isi1_nbins (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function isi1_bin_step_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to isi1_bin_step (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function isi2_nbins_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to isi2_nbins (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function isi2_bin_step_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to isi2_bin_step (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function isi3_nbins_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to isi3_nbins (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function isi3_bin_step_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to isi3_bin_step (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function isi0_nbins_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to isi0_nbins (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function isi0_bin_step_CreateFcn(hObject, eventdata, handles)
+function isi_line_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to isi0_bin_step (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+if ispc
     set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
 

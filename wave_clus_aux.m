@@ -149,9 +149,10 @@ USER_DATA{1} = par;
 set(handles.wave_clus_aux,'userdata',USER_DATA)
 set(h_fig,'userdata',USER_DATA)
 set(h_fig1,'userdata',USER_DATA)
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-
+set(h_fig2,'userdata',USER_DATA)
+set(h_fig3,'userdata',USER_DATA)
+set(h_fig4,'userdata',USER_DATA)
+set(h_fig5,'userdata',USER_DATA)
 plot_spikes_aux(handles)
 
 
@@ -215,7 +216,7 @@ set(gcbo,'value',1);
 set(handles.isi5_accept_button,'value',0);
 USER_DATA = get(handles.wave_clus_aux,'userdata');
 classes = USER_DATA{6};
-classes(find(classes==5))=0;
+classes(classes==5)=0;
 USER_DATA{6} = classes;
 USER_DATA{9} = classes;
 h_figs=get(0,'children');
@@ -437,88 +438,3 @@ set(h_fig,'userdata',USER_DATA)
 set(h_fig1,'userdata',USER_DATA)
 set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
-
-
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% --- Executes during object creation, after setting all properties.
-function isi4_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi4_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi5_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi5_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi6_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi6_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi7_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi7_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi8_nbins_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
-
-% --- Executes during object creation, after setting all properties.
-function isi8_bin_step_CreateFcn(hObject, eventdata, handles)
-if ispc
-    set(hObject,'BackgroundColor','white');
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
