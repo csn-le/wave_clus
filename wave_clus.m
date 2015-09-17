@@ -340,7 +340,10 @@ set(handles.file_name,'string',[pathname filename]);
 function change_temperature_button_Callback(hObject, eventdata, handles)
 axes(handles.temperature_plot)
 hold off
-[temp aux] = ginput(1);                                          %gets the mouse input
+[temp,aux,button] = ginput(1);                                          %gets the mouse input
+if button == 3
+	return
+end
 temp = round((temp-handles.par.mintemp)/handles.par.tempstep);
 if temp < 1; temp=1;end                                         %temp should be within the limits
 if temp > handles.par.num_temp; temp=handles.par.num_temp; end
@@ -494,10 +497,10 @@ else
 end
 
 eval(['save ' outfile var_list]);
-
-copyfile([handles.par.fnamespc '.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab']);
-copyfile([handles.par.fnamespc '.dg_01'], [handles.par.fnamesave '.dg_01']);
-
+if exist([handles.par.fnamespc '.dg_01.lab'],'file')
+    copyfile([handles.par.fnamespc '.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab']);
+    copyfile([handles.par.fnamespc '.dg_01'], [handles.par.fnamesave '.dg_01']);
+end
 
 %Save figures
 h_figs = get(0,'children');
@@ -761,10 +764,17 @@ set(gcbo,'value',1);
 b_name = get(gcbo,'Tag');
 cn = str2double(regexp(b_name, '\d+', 'match'));
 
-eval(['set(handles.isi' int2str(cn{1}) '_accept_button,''value'',0);'])
+eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',0);'])
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 classes = USER_DATA{6};
 tree = USER_DATA{5};
+
+if cn == 3
+    if nnz(classes==3)==0
+        nlab = imread('filelist_wc.xlj','jpg'); 
+        figure('color','k'); image(nlab); axis off; set(gcf,'NumberTitle','off');
+    end
+end
 
 classes(classes==cn)=0;
 USER_DATA{6} = classes;
@@ -788,12 +798,7 @@ set(handles.wave_clus_figure,'userdata',USER_DATA);
 set(gcbo,'value',0);
 eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',1);']);
 
-% --------------------------------------------------------------------
-% function isi3_reject_button_Callback(hObject, eventdata, handles)
-% ilab = find(classes==3);
-% if isempty(ilab)
-%       nlab = imread('filelist_wc.xlj','jpg'); figure('color','k'); image(nlab); axis off; set(gcf,'NumberTitle','off');
-% end
+
 
 % --- Executes on button press in undo_button.
 function undo_button_Callback(hObject, eventdata, handles)
@@ -818,8 +823,6 @@ clustering_results_bk = USER_DATA{11};
 mark_clusters_temperature_diagram(handles,tree,clustering_results_bk)
 min_clus = handles.minclus;
 set(handles.min_clus_edit,'string',num2str(min_clus));
-set(handles.wave_clus_figure,'userdata',USER_DATA)
-set(handles.wave_clus_figure,'userdata',USER_DATA)
 set(handles.fix1_button,'value',0);
 set(handles.fix2_button,'value',0);
 set(handles.fix3_button,'value',0);
