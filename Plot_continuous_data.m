@@ -13,24 +13,23 @@ thr = stdmin * noise_std_detect;        %thr for detection is based on detect se
 %thrmax = stdmax * noise_std_sorted;    %thr
 thrmax = stdmax * noise_std_detect;     %aprox thrmax for plotting
 
-axes(handles.cont_data)
-cla
-hold on
+cla(handles.cont_data);
+hold(handles.cont_data, 'on');
 
-plot((1:lx)/sr_sub, xf_detect)
+plot(handles.cont_data, (1:lx)/sr_sub, xf_detect)
 
 switch detect
     case 'pos'
-        line([0 lx/sr_sub], [thr thr],'color','r')
+        plot(handles.cont_data, [0 lx/sr_sub], [thr thr],'-r')
     case 'neg'
-        line([0 lx/sr_sub], [-thr -thr],'color','r')
+        plot(handles.cont_data, [0 lx/sr_sub], [-thr -thr],'-r')
     case 'both'
-        line([0 lx/sr_sub], [thr thr],'color','r')
-        line([0 lx/sr_sub], [-thr -thr],'color','r')
+        plot(handles.cont_data, [0 lx/sr_sub], [thr thr],'-r')
+        plot(handles.cont_data, [0 lx/sr_sub], [-thr -thr],'-r')
 end
 
 ypmax = min(thrmax, max(xf_detect));
 ypmin = max(-thrmax/2, min(xf_detect));
 
-axis([0 lx/sr_sub ypmin ypmax])
+axis(handles.cont_data, [0 lx/sr_sub ypmin ypmax])
 %xlabel('Time (sec)')

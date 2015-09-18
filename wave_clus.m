@@ -156,7 +156,7 @@ end
 
 set(handles.file_name,'string',['Loading:    ' pathname filename]); drawnow
 
-axes(handles.cont_data); cla
+cla(handles.cont_data);
 cd(pathname);
 
 handles.par = set_parameters();
@@ -338,8 +338,7 @@ set(handles.file_name,'string',[pathname filename]);
 
 % --- Executes on button press in change_temperature_button.
 function change_temperature_button_Callback(hObject, eventdata, handles)
-axes(handles.temperature_plot)
-hold off
+hold(handles.temperature_plot,'off')
 [temp,aux,button] = ginput(1);                                          %gets the mouse input
 if button == 3
 	return
@@ -368,23 +367,24 @@ temperature = handles.par.mintemp + temp * handles.par.tempstep;
 
 switch par.temp_plot
     case 'lin'
-        plot([handles.par.mintemp handles.par.maxtemp-handles.par.tempstep],[par.min_clus par.min_clus],'k:',...
+        plot(handles.temperature_plot, [handles.par.mintemp handles.par.maxtemp-handles.par.tempstep],[par.min_clus par.min_clus],'k:',...
             handles.par.mintemp+(1:handles.par.num_temp)*handles.par.tempstep, ...
             tree(1:handles.par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
     case 'log'
-         semilogy([handles.par.mintemp handles.par.maxtemp-handles.par.tempstep], ...
+         semilogy(handles.temperature_plot, [handles.par.mintemp handles.par.maxtemp-handles.par.tempstep], ...
             [par.min_clus par.min_clus],'k:',...
             handles.par.mintemp+(1:handles.par.num_temp)*handles.par.tempstep, ...
             tree(1:handles.par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
 end
-xlim([0 handles.par.maxtemp])
-xlabel('Temperature'); 
+xlim(handles.temperature_plot, [0 handles.par.maxtemp])
+xlabel(handles.temperature_plot, 'Temperature'); 
+
 if strcmp( par.temp_plot,'log')
-    set(get(gca,'ylabel'),'vertical','Cap');
+    set(get(handles.temperature_plot,'ylabel'),'vertical','Cap');
 else
-    set(get(gca,'ylabel'),'vertical','Baseline');
+    set(get(handles.temperature_plot,'ylabel'),'vertical','Baseline');
 end
-ylabel('Clusters size');
+ylabel(handles.temperature_plot,'Clusters size');
 
 handles.setclus = 0;
 handles.force = 0;
@@ -697,7 +697,7 @@ plot_spikes(handles);
 %SETTING OF SPIKE PLOTS
 % --------------------------------------------------------------------
 function plot_all_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
+set(hObject,'value',1);
 set(handles.plot_average_button,'value',0);
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 cluster_results = USER_DATA{10};
@@ -710,7 +710,7 @@ handles.minclus = cluster_results(1,5);
 plot_spikes(handles);
 % --------------------------------------------------------------------
 function plot_average_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
+set(hObject,'value',1);
 set(handles.plot_all_button,'value',0);
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 cluster_results = USER_DATA{10};
@@ -725,7 +725,7 @@ plot_spikes(handles);
 
 %SETTING OF ISI HISTOGRAMS
 function isi_nbins_Callback(hObject, eventdata, handles)
-b_name = get(gcbo,'Tag');
+b_name = get(hObject,'Tag');
 cn = regexp(b_name, '\d+', 'match');
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
@@ -738,7 +738,7 @@ draw_histograms(handles,  str2double(cn{1}),USER_DATA);
 
 % --------------------------------------------------------------------
 function isi_bin_step_Callback(hObject, eventdata, handles)
-b_name = get(gcbo,'Tag');
+b_name = get(hObject,'Tag');
 cn = regexp(b_name, '\d+', 'match');
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
@@ -753,14 +753,14 @@ draw_histograms(handles, str2double(cn{1}),USER_DATA);
 %SETTING OF ISI BUTTONS
 % --------------------------------------------------------------------
 function isi_accept_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
+set(hObject,'value',1);
 b_name = get(gcbo,'Tag');
 cn = regexp(b_name, '\d+', 'match');
 eval(['set(handles.isi' cn{1} '_reject_button,''value'',0);']);
 
 % --------------------------------------------------------------------
 function isi_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
+set(hObject,'value',1);
 b_name = get(gcbo,'Tag');
 cn = str2double(regexp(b_name, '\d+', 'match'));
 
@@ -795,7 +795,7 @@ clustering_results = USER_DATA{10};
 mark_clusters_temperature_diagram(handles,tree,clustering_results)
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 
-set(gcbo,'value',0);
+set(hObject,'value',0);
 eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',1);']);
 
 

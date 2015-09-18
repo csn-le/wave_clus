@@ -20,10 +20,6 @@ function varargout = wave_clus_aux(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help wave_clus_aux
-
-% Last Modified by GUIDE v2.5 16-Dec-2004 18:37:28
-
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -190,7 +186,7 @@ set(gcbo,'value',1);
 set(handles.isi4_accept_button,'value',0);
 USER_DATA = get(handles.wave_clus_aux,'userdata');
 classes = USER_DATA{6};
-classes(find(classes==4))=0;
+classes(classes==4)=0;
 USER_DATA{6} = classes;
 USER_DATA{9} = classes;
 h_figs=get(0,'children');
@@ -203,11 +199,9 @@ set(h_fig,'userdata',USER_DATA)
 set(h_fig1,'userdata',USER_DATA)
 set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes4); 
-cla reset
-axes(handles.isi4); 
-cla reset
-set(gcbo,'value',0);
+cla(handles.spikes4, 'reset');
+cla(handles.isi4, 'reset');
+set(hObject,'value',0);
 set(handles.isi4_accept_button,'value',1);
 
 % --------------------------------------------------------------------
@@ -229,11 +223,9 @@ set(h_fig,'userdata',USER_DATA)
 set(h_fig1,'userdata',USER_DATA)
 set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes5); 
-cla reset
-axes(handles.isi5); 
-cla reset
-set(gcbo,'value',0);
+cla(handles.spikes5, 'reset');
+cla(handles.isi5, 'reset');
+set(hObject,'value',0);
 set(handles.isi5_accept_button,'value',1);
 
 % --------------------------------------------------------------------
@@ -242,7 +234,7 @@ set(gcbo,'value',1);
 set(handles.isi6_accept_button,'value',0);
 USER_DATA = get(handles.wave_clus_aux,'userdata');
 classes = USER_DATA{6};
-classes(find(classes==6))=0;
+classes(classes==6)=0;
 USER_DATA{6} = classes;
 USER_DATA{9} = classes;
 h_figs=get(0,'children');
@@ -255,11 +247,9 @@ set(h_fig,'userdata',USER_DATA)
 set(h_fig1,'userdata',USER_DATA)
 set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes6); 
-cla reset
-axes(handles.isi6); 
-cla reset
-set(gcbo,'value',0);
+cla(handles.spikes6, 'reset');
+cla(handles.isi6, 'reset');
+set(hObject,'value',0);
 set(handles.isi6_accept_button,'value',1);
 
 % --------------------------------------------------------------------
@@ -268,7 +258,7 @@ set(gcbo,'value',1);
 set(handles.isi7_accept_button,'value',0);
 USER_DATA = get(handles.wave_clus_aux,'userdata');
 classes = USER_DATA{6};
-classes(find(classes==7))=0;
+classes(classes==7)=0;
 USER_DATA{6} = classes;
 USER_DATA{9} = classes;
 h_figs=get(0,'children');
@@ -281,11 +271,9 @@ set(h_fig,'userdata',USER_DATA)
 set(h_fig1,'userdata',USER_DATA)
 set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes7); 
-cla reset
-axes(handles.isi7); 
-cla reset
-set(gcbo,'value',0);
+cla(handles.spikes7, 'reset');
+cla(handles.isi7, 'reset');
+set(hObject,'value',0);
 set(handles.isi7_accept_button,'value',1);
 
 
@@ -295,7 +283,7 @@ set(gcbo,'value',1);
 set(handles.isi8_accept_button,'value',0);
 USER_DATA = get(handles.wave_clus_aux,'userdata');
 classes = USER_DATA{6};
-classes(find(classes==8))=0;
+classes(classes==8)=0;
 USER_DATA{6} = classes;
 USER_DATA{9} = classes;
 h_figs=get(0,'children');
@@ -308,11 +296,9 @@ set(h_fig,'userdata',USER_DATA)
 set(h_fig1,'userdata',USER_DATA)
 set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes8); 
-cla reset
-axes(handles.isi8); 
-cla reset
-set(gcbo,'value',0);
+cla(handles.spikes8, 'reset');
+cla(handles.isi8, 'reset');
+set(hObject,'value',0);
 set(handles.isi8_accept_button,'value',1);
 
 

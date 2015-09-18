@@ -20,40 +20,44 @@ sup_spikes = length(class_to_plot);
 
 % Plot clusters
 colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
-eval(['axes(handles.spikes' num2str(axes_nr-1) ');']); 
-cla reset
-hold on
+
+sp_axes = eval(['handles.spikes' num2str(axes_nr-1)]); 
+cla(sp_axes, 'reset');
+hold(sp_axes, 'on');
 av   = mean(spikes(class_to_plot,:));
 avup = av + par.to_plot_std * std(spikes(class_to_plot,:));
 avdw = av - par.to_plot_std * std(spikes(class_to_plot,:));
 if par.plot_all_button ==1
     permut = randperm(sup_spikes);
-    plot(spikes(class_to_plot(permut(1:max_spikes)),:)','color',colors(axes_nr));
-    plot(1:ls,av,'k','linewidth',2);
-    plot(1:ls,avup,1:ls,avdw,'color',[.4 .4 .4],'linewidth',.5)
+    plot(sp_axes, spikes(class_to_plot(permut(1:max_spikes)),:)','color',colors(axes_nr));
+    plot(sp_axes, 1:ls,av,'k','linewidth',2);
+    plot(sp_axes, 1:ls,avup,1:ls,avdw,'color',[.4 .4 .4],'linewidth',.5)
 else
-    plot(1:ls,av,'color',colors(axes_nr),'linewidth',2)
-    plot(1:ls,avup,1:ls,avdw,'color',[.65 .65 .65],'linewidth',.5)
+    plot(sp_axes, 1:ls,av,'color',colors(axes_nr),'linewidth',2)
+    plot(sp_axes, 1:ls,avup,1:ls,avdw,'color',[.65 .65 .65],'linewidth',.5)
 end
-xlim([1 ls])
+xlim(sp_axes, [1 ls]);
 aux = num2str(length(class_to_plot));
-eval(['title([''Cluster ' num2str(axes_nr-1) ':  # ' aux '''],''Fontweight'',''bold'')']);
-eval(['axes(handles.isi' num2str(axes_nr-1) ');']); 
+eval(['title(sp_axes, [''Cluster ' num2str(axes_nr-1) ':  # ' aux '''],''Fontweight'',''bold'')']);
+
+%Resize axis
+ymin = min(ylimit(:,1));
+ymax = max(ylimit(:,2));
+ylim(sp_axes, [ymin ymax]);
+
+
+isi_ax = eval(['handles.isi' num2str(axes_nr-1)]);
 times = diff(spk_times(class_to_plot));
 % Calculates # ISIs < 3ms  
 multi_isi = nnz(times<3); 
 % Builds and plots the histogram
 eval(['[N,X]=hist(times,0:par.bin_step' num2str(axes_nr-1) ':par.nbins' num2str(axes_nr-1) ');']);
-bar(X(1:end-1),N(1:end-1))
-eval(['xlim([0 par.nbins' num2str(axes_nr-1) ']);']);
+bar(isi_ax, X(1:end-1),N(1:end-1))
+eval(['xlim(isi_ax, [0 par.nbins' num2str(axes_nr-1) ']);']);
 %eval(['set(get(gca,''children''),''facecolor'',''' colors(axes_nr) ''',''edgecolor'',''' colors(axes_nr) ''',''linewidth'',0.01);']);  %  (FC) why is this commented?
-title([num2str(multi_isi) ' in < 3ms'])
-xlabel('ISI (ms)');
+title(isi_ax, [num2str(multi_isi) ' in < 3ms'])
+xlabel(isi_ax, 'ISI (ms)');
 
-%Resize axis
-ymin = min(ylimit(:,1));
-ymax = max(ylimit(:,2));
-eval(['axes(handles.spikes' num2str(axes_nr-1) '); ylim([ymin ymax])'])
 
 eval(['set(handles.fix' num2str(4+plot_number*5) '_button,''value'',0);']);
 eval(['set(handles.fix' num2str(5+plot_number*5) '_button,''value'',0);']);
