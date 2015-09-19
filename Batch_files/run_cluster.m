@@ -59,14 +59,20 @@ switch system_type
         end
         run_maci = sprintf('./cluster_maci.exe %s.run',fname);
 	    unix(run_maci);
-    case {'GLNX86', 'GLNXA64', 'GLNXI64'} %(GLNX86, GLNXA64, GLNXI64 correspond to linux)     
+    case {'GLNX86'}      
         if exist([pwd '/cluster_linux.exe'],'file') == 0
             directory = which('cluster_linux.exe');
             copyfile(directory,pwd);
         end
         run_linux = sprintf('./cluster_linux.exe %s.run',fname);
 	    unix(run_linux);
-        
+    case {'GLNXA64', 'GLNXI64'}
+        if exist([pwd '/cluster_linux64'],'file') == 0
+            directory = which('cluster_linux64');
+            copyfile(directory,pwd);
+        end
+        run_linux = sprintf('./cluster_linux64 %s.run',fname);
+	    unix(run_linux);        
     otherwise 
     	ME = MException('MyComponent:NotSupportedArq', '%s type of computer not supported.',com_type);
     	throw(ME)
