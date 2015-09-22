@@ -1,10 +1,10 @@
-function parse_data(filename,max_memo_GB)
+function parse_data_NSx(filename,max_memo_GB)
 % max_memo_GB is an idea of the number of GB allocated for the data to be
 % stored in RAM, so it is used to compute the number of segments in which
 % the data should be split for processing
 
 aux = version;
-if ~exist(max_memo_GB) && str2num(aux(1:3)) =>7.6
+if ~exist('max_memo_GB','builtin')
 	[uaux,aux] = memory;
 	max_memo = aux.PhysicalMemory.Available;
 else
