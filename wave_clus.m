@@ -41,13 +41,6 @@ function varargout = wave_clus(varargin)
 % USER_DATA{13} - USER_DATA{19}, for future changes
 % USER_DATA{20} - USER_DATA{42}, fix clusters
 
-% HGR Dec 2012
-% change for NSX only
-% get the parameters saved in times instead of what says the file
-% set_parameters ...
-% solves inconsistencies with file names
-
-
 folder = fileparts(mfilename('fullpath'));
 if isempty(strfind(path, folder))
     addpath(folder);
@@ -124,28 +117,6 @@ set(0,'DefaultAxesColorOrder',clus_colors)
 
 % --- Executes on button press in load_data_button.
 function load_data_button_Callback(hObject, eventdata, handles)
-set(handles.isi1_accept_button,'value',1);
-set(handles.isi2_accept_button,'value',1);
-set(handles.isi3_accept_button,'value',1);
-set(handles.isi1_reject_button,'value',0);
-set(handles.isi2_reject_button,'value',0);
-set(handles.isi3_reject_button,'value',0);
-set(handles.isi1_nbins,'string','Auto');
-set(handles.isi1_bin_step,'string','Auto');
-set(handles.isi2_nbins,'string','Auto');
-set(handles.isi2_bin_step,'string','Auto');
-set(handles.isi3_nbins,'string','Auto');
-set(handles.isi3_bin_step,'string','Auto');
-set(handles.isi0_nbins,'string','Auto');
-set(handles.isi0_bin_step,'string','Auto');
-set(handles.force_button,'value',0);
-set(handles.force_button,'string','Force');
-set(handles.fix1_button,'value',0);
-set(handles.fix2_button,'value',0);
-set(handles.fix3_button,'value',0);
-
-
-
 %I will check this for case-sensitive related problems (FC)
 %[filename, pathname] = uigetfile('*.mat; *.Ncs; *.ncs; nev*.mat; NSX*.NC5; *.Nse','Select file');
 [filename, pathname] = uigetfile('*.*','Select file');
@@ -162,10 +133,27 @@ cd(pathname);
 handles.par = set_parameters();
 handles.par.filename = filename; % maybe this should be data_handler.nickname (FC)
 
-for i=1:handles.par.max_clus+1
-    eval(['handles.par.nbins' num2str(i-1) ' = handles.par.nbins;']);  % # of bins for the ISI histograms
-    eval(['handles.par.bin_step' num2str(i-1) ' = handles.par.bin_step;']);  % percentage number of bins to plot
+
+
+for i = 1:3
+    si = num2str(i);
+    set(eval(['handles.isi' si '_accept_button']),'value',1);
+    set(eval(['handles.isi' si '_reject_button']),'value',0);
+    set(eval(['handles.fix' si '_button']),'value',0);
+    
+    eval(['handles.par.nbins' si ' = handles.par.nbins;']);  % # of bins for the ISI histograms
+    eval(['handles.par.bin_step' si ' = handles.par.bin_step;']);  % percentage number of bins to plot
+    eval(['set(handles.isi' si '_nbins,''string'',handles.par.nbins);']);
+    eval(['set(handles.isi' si '_bin_step,''string'',handles.par.bin_step);']);
 end
+
+
+set(handles.force_button,'value',0);
+set(handles.force_button,'string','Force');
+handles.par.nbins0 = handles.par.nbins;  % # of bins for the ISI histograms
+handles.par.bin_step0 = handles.par.bin_step;  % percentage number of bins to plot
+set(handles.isi0_nbins,'string',handles.par.nbins);
+set(handles.isi0_bin_step,'string',handles.par.bin_step);
 
 % Sets to zero fix buttons from aux figures
 for i=4:handles.par.max_clus
@@ -592,7 +580,7 @@ switch par.force_feature
     case 'wav'
         if isempty(inspk)
             set(handles.file_name,'string','Calculating spike features ...');
-            [inspk] = wave_features(spikes,handles);        % Extract spike features.
+            [inspk] = wave_features(spikes,par);        % Extract spike features.
             USER_DATA{7} = inspk;
         end
         f_in  = inspk(classes~=0 & classes~=-1,:);
@@ -600,7 +588,7 @@ switch par.force_feature
 end
 
 class_in = classes(classes~=0 & classes~=-1);
-class_out = force_membership_wc(f_in, class_in, f_out, handles);
+class_out = force_membership_wc(f_in, class_in, f_out, par);
 classes(classes==0) = class_out;
   
 USER_DATA{6} = classes(:)';
@@ -895,10 +883,3 @@ function min_clus_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes on button press in pushbutton13.
-function pushbutton13_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton13 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)

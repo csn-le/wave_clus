@@ -1,25 +1,25 @@
-function class_out = force_membership_wc(f_in, class_in, f_out, handles);
-% class = function force_membership(f_in, class_in, f_out, handles)
+function class_out = force_membership_wc(f_in, class_in, f_out, par)
+% class = function force_membership_wc(f_in, class_in, f_out, par)
 % Given classified points, try to classify new points via template matching
 %
 % f_in:          features of classified points  (# input spikes x n_features)
 % class_in:      classification of those points
 % f_out:         features of points to be classified (nspk x n_features)
-% handles        environment variables, of which the following are
+% par        environment variables, of which the following are
 %                required: 
-%                    o handles.par.template_sdnum - max radius of cluster,
+%                    o par.template_sdnum - max radius of cluster,
 %                                                   in std devs.
-%                    o handles.par.template_k     - # of nearest neighbors
-%                    o handles.par.template_k_min - min # of nn for vote
-%                    o handles.par.template_type  - nn, center, ml, mahal
+%                    o par.template_k     - # of nearest neighbors
+%                    o par.template_k_min - min # of nn for vote
+%                    o par.template_type  - nn, center, ml, mahal
 
 nspk = size(f_out,1);
 class_out = zeros(1,size(f_out,1));
-switch handles.par.template_type
+switch par.template_type
     case 'nn'
-        sdnum = handles.par.template_sdnum;
-        k     = handles.par.template_k;
-        k_min = handles.par.template_k_min;
+        sdnum = par.template_sdnum;
+        k     = par.template_k;
+        k_min = par.template_k_min;
         sd    = sqrt(sum(var(f_in,1)))*ones(1,size(f_in,1));
         for i=1:nspk,
             nn = nearest_neighbor(f_out(i,:),f_in,sdnum*sd,Inf*ones(size(f_in)),Inf,k);
@@ -33,7 +33,7 @@ switch handles.par.template_type
       
     case 'center'
         [centers, sd, pd] = build_templates(class_in,f_in); % we are going to ignore pd
-        sdnum = handles.par.template_sdnum;
+        sdnum = par.template_sdnum;
         for i=1:nspk,
             class_out(i) = nearest_neighbor(f_out(i,:),centers,sdnum*sd);        
         end
@@ -50,6 +50,6 @@ switch handles.par.template_type
         end
         
     otherwise
-        sprintf('force_membership(): <%s> is not a known template type.\n',handles.par.template_type);
+        sprintf('force_membership(): <%s> is not a known template type.\n',par.template_type);
         
 end

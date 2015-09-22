@@ -22,8 +22,6 @@ function varargout = wave_clus_aux3(varargin)
 
 % Edit the above text to modify the response to help wave_clus_aux
 
-% Last Modified by GUIDE v2.5 16-Dec-2004 18:37:28
-
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -32,7 +30,7 @@ gui_State = struct('gui_Name',       mfilename, ...
                    'gui_OutputFcn',  @wave_clus_aux3_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
-if nargin & isstr(varargin{1})
+if nargin && isstr(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
 
@@ -82,22 +80,6 @@ function varargout = wave_clus_aux3_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-set(handles.isi19_accept_button,'value',1);
-set(handles.isi20_accept_button,'value',1);
-set(handles.isi21_accept_button,'value',1);
-set(handles.isi22_accept_button,'value',1);
-set(handles.isi23_accept_button,'value',1);
-set(handles.isi19_reject_button,'value',0);
-set(handles.isi20_reject_button,'value',0);
-set(handles.isi21_reject_button,'value',0);
-set(handles.isi22_reject_button,'value',0);
-set(handles.isi23_reject_button,'value',0);
-set(handles.fix19_button,'value',0);
-set(handles.fix20_button,'value',0);
-set(handles.fix21_button,'value',0);
-set(handles.fix22_button,'value',0);
-set(handles.fix23_button,'value',0);
-
 h_figs=get(0,'children');
 h_fig = findobj(h_figs,'tag','wave_clus_figure');
 h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
@@ -108,43 +90,23 @@ h_fig5 = findobj(h_figs,'tag','wave_clus_aux5');
 USER_DATA = get(h_fig,'UserData');
 par = USER_DATA{1};
 
-set(handles.isi19_nbins,'string',par.nbins9);
-set(handles.isi20_nbins,'string',par.nbins10);
-set(handles.isi21_nbins,'string',par.nbins11);
-set(handles.isi22_nbins,'string',par.nbins12);
-set(handles.isi23_nbins,'string',par.nbins13);
-set(handles.isi19_bin_step,'string',par.bin_step9);
-set(handles.isi20_bin_step,'string',par.bin_step10);
-set(handles.isi21_bin_step,'string',par.bin_step11);
-set(handles.isi22_bin_step,'string',par.bin_step12);
-set(handles.isi23_bin_step,'string',par.bin_step13);
+for i = 19:23
+	si = num2str(i);
+	set(eval(['handles.isi' si '_accept_button']),'value',1);
+	set(eval(['handles.isi' si '_reject_button']),'value',0);
+	set(eval(['handles.fix' si '_button']),'value',0);
+	
+	eval(['set(handles.isi' si '_nbins,''string'',par.nbins' si ');']);
+	eval(['set(handles.isi' si '_bin_step,''string'',par.bin_step' si ');']);
+	
+	% That's for passing the fix button settings to plot_spikes.
+	if get(eval(['handles.fix' si '_button,''value'''])) ==1     
+		eval(['par.fix' si ' = 1;']);
+	else
+		eval(['par.fix' si ' = 0;']);
+	end
+end
 
-% That's for passing the fix button settings to plot_spikes.
-if get(handles.fix19_button,'value') ==1     
-    par.fix19 = 1;
-else
-    par.fix19 = 0;
-end
-if get(handles.fix20_button,'value') ==1     
-    par.fix20 = 1;
-else
-    par.fix20 = 0;
-end
-if get(handles.fix21_button,'value') ==1     
-    par.fix21 = 1;
-else
-    par.fix21 = 0;
-end
-if get(handles.fix22_button,'value') ==1     
-    par.fix22 = 1;
-else
-    par.fix22 = 0;
-end
-if get(handles.fix23_button,'value') ==1     
-    par.fix23 = 1;
-else
-    par.fix23 = 0;
-end
 USER_DATA{1} = par;
 set(handles.wave_clus_aux3,'userdata',USER_DATA)
 set(h_fig,'userdata',USER_DATA)
@@ -241,7 +203,6 @@ axes(handles.isi20);
 cla reset
 set(gcbo,'value',0);
 set(handles.isi20_accept_button,'value',1);
-
 
 % --------------------------------------------------------------------
 function isi21_reject_button_Callback(hObject, eventdata, handles)

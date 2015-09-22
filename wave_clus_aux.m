@@ -78,21 +78,7 @@ function varargout = wave_clus_aux_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-set(handles.isi4_accept_button,'value',1);
-set(handles.isi5_accept_button,'value',1);
-set(handles.isi6_accept_button,'value',1);
-set(handles.isi7_accept_button,'value',1);
-set(handles.isi8_accept_button,'value',1);
-set(handles.isi4_reject_button,'value',0);
-set(handles.isi5_reject_button,'value',0);
-set(handles.isi6_reject_button,'value',0);
-set(handles.isi7_reject_button,'value',0);
-set(handles.isi8_reject_button,'value',0);
-set(handles.fix4_button,'value',0);
-set(handles.fix5_button,'value',0);
-set(handles.fix6_button,'value',0);
-set(handles.fix7_button,'value',0);
-set(handles.fix8_button,'value',0);
+
 
 h_figs=get(0,'children');
 h_fig = findobj(h_figs,'tag','wave_clus_figure');
@@ -104,43 +90,24 @@ h_fig5 = findobj(h_figs,'tag','wave_clus_aux5');
 USER_DATA = get(h_fig,'UserData');
 par = USER_DATA{1};
 
-set(handles.isi4_nbins,'string',par.nbins4);
-set(handles.isi5_nbins,'string',par.nbins5);
-set(handles.isi6_nbins,'string',par.nbins6);
-set(handles.isi7_nbins,'string',par.nbins7);
-set(handles.isi8_nbins,'string',par.nbins8);
-set(handles.isi4_bin_step,'string',par.bin_step4);
-set(handles.isi5_bin_step,'string',par.bin_step5);
-set(handles.isi6_bin_step,'string',par.bin_step6);
-set(handles.isi7_bin_step,'string',par.bin_step7);
-set(handles.isi8_bin_step,'string',par.bin_step8);
 
-% That's for passing the fix button settings to plot_spikes.
-if get(handles.fix4_button,'value') ==1     
-    par.fix4 = 1;
-else
-    par.fix4 = 0;
+for i = 4:8
+	si = num2str(i);
+	set(eval(['handles.isi' si '_accept_button']),'value',1);
+	set(eval(['handles.isi' si '_reject_button']),'value',0);
+	set(eval(['handles.fix' si '_button']),'value',0);
+	
+	eval(['set(handles.isi' si '_nbins,''string'',par.nbins' si ');']);
+	eval(['set(handles.isi' si '_bin_step,''string'',par.bin_step' si ');']);
+	
+	% That's for passing the fix button settings to plot_spikes.
+	if get(eval(['handles.fix' si '_button,''value'''])) ==1     
+		eval(['par.fix' si ' = 1;']);
+	else
+		eval(['par.fix' si ' = 0;']);
+	end
 end
-if get(handles.fix5_button,'value') ==1     
-    par.fix5 = 1;
-else
-    par.fix5 = 0;
-end
-if get(handles.fix6_button,'value') ==1     
-    par.fix6 = 1;
-else
-    par.fix6 = 0;
-end
-if get(handles.fix7_button,'value') ==1     
-    par.fix7 = 1;
-else
-    par.fix7 = 0;
-end
-if get(handles.fix8_button,'value') ==1     
-    par.fix8 = 1;
-else
-    par.fix8 = 0;
-end
+
 USER_DATA{1} = par;
 set(handles.wave_clus_aux,'userdata',USER_DATA)
 set(h_fig,'userdata',USER_DATA)

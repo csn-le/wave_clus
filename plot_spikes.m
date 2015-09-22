@@ -1,4 +1,4 @@
-function Plot_Spikes(handles)
+function plot_spikes(handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 spikes = USER_DATA{2};
@@ -38,7 +38,7 @@ end
 % Defines nclusters
 cluster_sizes = zeros(1,par.max_clus);
 cluster_sizes_bkup = zeros(1,par.max_clus);
-ifixflag=zeros(1,par.max_clus);
+ifixflag = zeros(1,par.max_clus);
 
 for i=1:par.max_clus
     cluster_sizes(i) = nnz(classes==i);
@@ -132,7 +132,7 @@ if handles.merge == 1 && ~isempty(nfix_class)
 end
 
 % Defines classes
-clustered = [];
+non_clustered = ones(1,size(spikes,1));
 cont=0;
 for i = 1:nclusters
     class_temp = find(classes == i);
@@ -144,11 +144,14 @@ for i = 1:nclusters
     if ((length(class_temp) >= sizemin_clus) || (ifixflagc == 1))
         cont = cont+1;
         eval(['class' num2str(cont) '= class_temp;'])
-        clustered = [clustered class_temp];
+        non_clustered(class_temp) = 0;
     end
 end
 nclusters = cont;
-class0 = setdiff( 1:size(spikes,1), sort(clustered) );
+%class0 = setdiff( 1:size(spikes,1), sort(clustered) );
+class0 = find(non_clustered);
+clear non_clustered
+
 
 % Redefines classes
 classes = zeros(size(spikes,1),1);
@@ -231,7 +234,8 @@ hold(handles.projections,'on')
 ylimit = [];
 colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
 
-opened_gifs = cell(1,6);
+figs_num = 6;
+opened_figs = cell(1,figs_num);
 for i = 1:nclusters+1
     if ~ (isempty(class0) && i==1)
         %PLOTS SPIKES OR PROJECTIONS
@@ -270,8 +274,8 @@ for i = 1:nclusters+1
                 plot(clus_ax,1:ls,av,'color',colors(i),'linewidth',2)
                 plot(clus_ax,1:ls,avup,1:ls,avdw,'color',[.65 .65 .65],'linewidth',.5)
             end
-            xlim(clus_ax,[1 ls])
-            if i>1; ylimit = [ylimit;ylim(clus_ax)]; end;
+            xlim(clus_ax, [1 ls])
+            if i>1; ylimit = [ylimit; ylim(clus_ax)]; end;
             eval(['aux=num2str(length(class' num2str(i-1) '));']);
             title(clus_ax,['Cluster ' num2str(i-1) ':  # ' aux],'Fontweight','bold');
         else
@@ -283,17 +287,17 @@ for i = 1:nclusters+1
             set(handles.wave_clus_figure,'userdata',USER_DATA)
 
             if i < 10 
-                opened_gifs{1} = wave_clus_aux('Visible', 'off');
+                opened_figs{1} = wave_clus_aux('Visible', 'off');
             elseif i < 15
-                opened_gifs{2} = wave_clus_aux1('Visible', 'off');
+                opened_figs{2} = wave_clus_aux1('Visible', 'off');
             elseif i < 20
-                opened_gifs{3} = wave_clus_aux2('Visible', 'off');
+                opened_figs{3} = wave_clus_aux2('Visible', 'off');
             elseif i < 25
-                opened_gifs{4} = wave_clus_aux3('Visible', 'off');
+                opened_figs{4} = wave_clus_aux3('Visible', 'off');
             elseif i < 30
-                opened_gifs{5} = wave_clus_aux4('Visible', 'off');
+                opened_figs{5} = wave_clus_aux4('Visible', 'off');
             else
-                opened_gifs{6} = wave_clus_aux5('Visible', 'off');
+                opened_figs{6} = wave_clus_aux5('Visible', 'off');
             %-------------------------------------------------------------------------
             end
         end
@@ -313,8 +317,8 @@ if size(ylimit,2) >0
     end
 end
 
-for i =1:6
-    if ~isempty(opened_gifs{i})
-        set(opened_gifs{i},'Visible', 'on'); 
+for i =1:figs_num
+    if ~isempty(opened_figs{i})
+        set(opened_figs{i},'Visible', 'on'); 
     end
 end

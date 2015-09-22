@@ -6,7 +6,7 @@ templates = zeros(max_class, feature_dim);
 maxdist   = zeros(1,max_class);
 pointdist = zeros(max_class,feature_dim);
 for i=1:max_class,
-    fi = features(find(classes==i),:);
+    fi = features(classes==i,:);
     templates(i,:) = mean(fi);
     maxdist(i)     = sqrt(sum(var(fi,1)));   % the 1 means that we want sum(x-m)^2/N, not N-1
                                              % maxdist is the std dev of
