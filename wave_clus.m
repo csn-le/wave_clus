@@ -141,17 +141,13 @@ for i = 1:3
     set(eval(['handles.isi' si '_reject_button']),'value',0);
     set(eval(['handles.fix' si '_button']),'value',0);
     
-    eval(['handles.par.nbins' si ' = handles.par.nbins;']);  % # of bins for the ISI histograms
-    eval(['handles.par.bin_step' si ' = handles.par.bin_step;']);  % percentage number of bins to plot
+   
     eval(['set(handles.isi' si '_nbins,''string'',handles.par.nbins);']);
     eval(['set(handles.isi' si '_bin_step,''string'',handles.par.bin_step);']);
 end
 
-
 set(handles.force_button,'value',0);
 set(handles.force_button,'string','Force');
-handles.par.nbins0 = handles.par.nbins;  % # of bins for the ISI histograms
-handles.par.bin_step0 = handles.par.bin_step;  % percentage number of bins to plot
 set(handles.isi0_nbins,'string',handles.par.nbins);
 set(handles.isi0_bin_step,'string',handles.par.bin_step);
 
@@ -160,6 +156,11 @@ for i=4:handles.par.max_clus
     eval(['handles.par.fix' num2str(i) '=0;'])
 end
 
+for i =0:handles.par.max_clus
+    si = num2str(i);
+    eval(['handles.par.nbins' si ' = handles.par.nbins;']);  % # of bins for the ISI histograms
+    eval(['handles.par.bin_step' si ' = handles.par.bin_step;']);  % percentage number of bins to plot
+end
 
 data_handler = readInData(handles.par);
 handles.par = data_handler.par;
@@ -184,8 +185,6 @@ else
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
             [spikes] = spike_alignment(spikes,handles.par);
-            
-            
         end
     else    
         set(handles.file_name,'string','Detecting spikes ...'); drawnow
@@ -372,6 +371,7 @@ if strcmp( par.temp_plot,'log')
 else
     set(get(handles.temperature_plot,'ylabel'),'vertical','Baseline');
 end
+
 ylabel(handles.temperature_plot,'Clusters size');
 
 handles.setclus = 0;
@@ -575,7 +575,7 @@ end
 
 switch par.force_feature
     case 'spk'
-        f_in  = spikes(classes~=0 & classes~=-1,:);
+        f_in  = spikes(classes>0,:);
         f_out = spikes(classes==0,:);
     case 'wav'
         if isempty(inspk)
@@ -583,11 +583,11 @@ switch par.force_feature
             [inspk] = wave_features(spikes,par);        % Extract spike features.
             USER_DATA{7} = inspk;
         end
-        f_in  = inspk(classes~=0 & classes~=-1,:);
+        f_in  = inspk(classes>0,:);
         f_out = inspk(classes==0,:);
 end
 
-class_in = classes(classes~=0 & classes~=-1);
+class_in = classes(classes>0);
 class_out = force_membership_wc(f_in, class_in, f_out, par);
 classes(classes==0) = class_out;
   

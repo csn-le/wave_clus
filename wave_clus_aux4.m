@@ -103,7 +103,7 @@ for i = 24:28
 	eval(['set(handles.isi' si '_bin_step,''string'',par.bin_step' si ');']);
 	
 	% That's for passing the fix button settings to plot_spikes.
-	if get(eval(['handles.fix' si '_button,''value'''])) ==1     
+	if eval(['get(handles.fix' si '_button,''value'')']) ==1     
 		eval(['par.fix' si ' = 1;']);
 	else
 		eval(['par.fix' si ' = 0;']);
