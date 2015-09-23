@@ -8,6 +8,7 @@ par.sr = 30000;                      %sampling rate (in Hz). This parameter will
 % PLOTTING PARAMETERS
 par.sample_segment = true;
 par.max_spikes_plot = 5000;              % max. # of spikes to be plotted
+par.print2file = true;                   % If is not true, print the figure (only for batch scripts).
 
 % SPC PARAMETERS
 par.mintemp = 0.00;                  % minimum temperature for SPC
@@ -18,6 +19,7 @@ par.KNearNeighb = 11;                  % number of nearest neighbors for SPC
 par.num_temp = floor((par.maxtemp ...
     -par.mintemp)/par.tempstep);     % total number of temperatures 
 par.min_clus = 60;                   % minimum size of a cluster (default 60)
+par.min_clus_rel = 0.005;            % minimum cluster size, relative to the total nr. of spikes (only for batch scripts).
 par.max_clus = 33;                   % maximum number of clusters allowed (default 13)
 par.randomseed = 0;                  % if 0, random seed is taken as the clock value (default 0)
 %par.randomseed = 147;               % If not 0, random seed 
@@ -40,7 +42,7 @@ par.sort_fmax = 3000;                   % low pass filter for sorting (default 3
 par.ref_ms = 3;                         % detector dead time, minimum refractory period (in ms)
 par.detection = 'pos';                % type of threshold
 % par.detection = 'neg';
-% par.detection = 'both';
+%par.detection = 'both';
 
 % INTERPOLATION PARAMETERS
 par.int_factor = 2;                  % interpolation factor
@@ -63,12 +65,12 @@ par.template_k_min = 10;            % min # of nn for vote
 par.template_type = 'center';       % nn, center, ml, mahal
 par.force_feature = 'spk';          % feature use for forcing (whole spike shape)
 %par.force_feature = 'wav';         % feature use for forcing (wavelet coefficients).
-
+par.force_auto = true;                  %automatically force membership (only for batch scripts).
 
 % TEMPLATE MATCHING
 par.match = 'y';                    % for template matching
 %par.match = 'n';                   % for no template matching
-par.max_spk = 4000;                 % max. # of spikes before starting templ. match.
+par.max_spk = 5000;                 % max. # of spikes before starting templ. match.
 par.permut = 'y';                   % for selection of random 'par.max_spk' spikes before starting templ. match. 
 % par.permut = 'n';                 % for selection of the first 'par.max_spk' spikes before starting templ. match. 
 

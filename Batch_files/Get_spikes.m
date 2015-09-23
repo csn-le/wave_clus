@@ -28,7 +28,7 @@ if isnumeric(input) || strcmp(input,'all')
     end
     
 elseif ischar(input) && length(input) > 4
-    if  strcmp (input(end-3,end),'.txt')
+    if  strcmp (input(end-3:end),'.txt')
         filenames =  textread(input,'%s');
     else
         filenames = {input};
@@ -41,7 +41,7 @@ else
     throw(ME)
 end
 
-for i = 1: size(filenames,1)
+for filename = 1: size(filenames,1)
     
     par = set_parameters();
     par.filename = filename;
@@ -59,13 +59,12 @@ for i = 1: size(filenames,1)
             [spikes] = spike_alignment(spikes,par);
         end
     else    
-        set(handles.file_name,'string','Detecting spikes ...'); drawnow
         index = [];
         spikes = [];
         for n = 1:data_handler.max_segments
             x = data_handler.get_segment();
                 %<----  Add here extra processing of the signal (x)
-            [new_spikes, temp_aux_th, new_index]  = amp_detect(x, handles);
+            [new_spikes, temp_aux_th, new_index]  = amp_detect(x, par);
             index = [index data_handler.index2ts(new_index)]; %new_index to ms
             spikes = [spikes; new_spikes];
         end
