@@ -1,21 +1,21 @@
-function [spikes,thr,index] = amp_detect(x, handles)
+function [spikes,thr,index] = amp_detect(x, par)
 % Detect spikes with amplitude thresholding. Uses median estimation.
 % Detection is done with filters set by fmin_detect and fmax_detect. Spikes
 % are stored for sorting using fmin_sort and fmax_sort. This trick can
 % eliminate noise in the detection but keeps the spikes shapes for sorting.
 
 
-sr = handles.par.sr;
-w_pre = handles.par.w_pre;
-w_post = handles.par.w_post;
-ref = handles.par.ref;
-detect = handles.par.detection;
-stdmin = handles.par.stdmin;
-stdmax = handles.par.stdmax;
-fmin_detect = handles.par.detect_fmin;
-fmax_detect = handles.par.detect_fmax;
-fmin_sort = handles.par.sort_fmin;
-fmax_sort = handles.par.sort_fmax;
+sr = par.sr;
+w_pre = par.w_pre;
+w_post = par.w_post;
+ref = par.ref;
+detect = par.detection;
+stdmin = par.stdmin;
+stdmax = par.stdmax;
+fmin_detect = par.detect_fmin;
+fmax_detect = par.detect_fmax;
+fmin_sort = par.sort_fmin;
+fmax_sort = par.sort_fmax;
 
 
 % HIGH-PASS FILTER OF THE DATA
@@ -92,13 +92,13 @@ aux = find(spikes(:,w_pre)==0);       %erases indexes that were artifacts
 spikes(aux,:)=[];
 index(aux)=[];
 
-switch handles.par.interpolation
+switch par.interpolation
     case 'n'
         spikes(:,end-1:end)=[];       %eliminates borders that were introduced for interpolation
         spikes(:,1:2)=[];
     case 'y'
         %Does interpolation
-        spikes = int_spikes(spikes,handles.par);
+        spikes = int_spikes(spikes,par);
 end
 
 

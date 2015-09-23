@@ -193,7 +193,7 @@ else
         spikes = [];
         for n = 1:data_handler.max_segments
             x = data_handler.get_segment();
-            [new_spikes, temp_aux_th, new_index]  = amp_detect(x, handles);
+            [new_spikes, temp_aux_th, new_index]  = amp_detect(x, handles.par);
             index = [index data_handler.index2ts(new_index)]; %new_index to ms
             spikes = [spikes; new_spikes];
             
@@ -554,22 +554,22 @@ inspk = USER_DATA{7};
 % Fixed clusters are not considered for forcing
 if get(handles.fix1_button,'value') ==1     
     fix_class = USER_DATA{20}';
-    classes(fix_class)=-1;
+    classes(fix_class) = -1;
 end
 if get(handles.fix2_button,'value') ==1     
     fix_class = USER_DATA{21}';
-    classes(fix_class)=-1;
+    classes(fix_class) = -1;
 end
 if get(handles.fix3_button,'value') ==1     
     fix_class = USER_DATA{22}';
-    classes(fix_class)=-1;
+    classes(fix_class )= -1;
 end
 % Get fixed clusters from aux figures
 for i=4:par.max_clus
     eval(['fixx = par.fix' num2str(i) ';']);
     if fixx == 1
         fix_class = USER_DATA{22+i-3}';
-        classes(fix_class)=-1;
+        classes(fix_class) = -1;
     end
 end
 
@@ -601,7 +601,6 @@ handles.force = 1;
 handles.merge = 0;
 handles.reject = 0;
 handles.undo = 0;
-
 plot_spikes(handles);
 
 USER_DATA = get(handles.wave_clus_figure,'userdata');
@@ -613,6 +612,7 @@ set(handles.fix3_button,'value',0);
 for i=4:par.max_clus
     eval(['par.fix' num2str(i) '=0;']);
 end    
+mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
 
 
 

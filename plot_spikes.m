@@ -26,7 +26,7 @@ close(h_fig1);
 close(h_fig2); close(h_fig3); close(h_fig4); close(h_fig5); close(h_fig6);
 if ishandle(10)
 	close(10)
-end 
+end
 % Extract spike features if needed
 if get(handles.spike_shapes_button,'value') ==0
     if isempty(inspk) || (length(inspk)~=size(spikes,1))

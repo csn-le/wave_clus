@@ -50,11 +50,8 @@ switch handles.par.temp_plot
 end
 xlim(handles.temperature_plot, [0 handles.par.maxtemp])
 xlabel(handles.temperature_plot, 'Temperature'); 
-if handles.par.temp_plot == 'log' 
-    set(get(gca,'ylabel'),'vertical','Cap');
-else
-    set(get(gca,'ylabel'),'vertical','Baseline');
-end
+
+set(get(gca,'ylabel'),'vertical','Baseline');
 ylabel(handles.temperature_plot, 'Clusters size');
 handles.setclus = 0;
 
