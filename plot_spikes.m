@@ -13,7 +13,6 @@ par.to_plot_std = 1;                % # of std from mean to plot
 minclus = handles.minclus;
 clustering_results = USER_DATA{10};
 
-
 % Closes aux figures
 h_figs=get(0,'children');
 h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
@@ -48,7 +47,7 @@ end
 % Classes should be consecutive numbers
 classes_names = sort(unique(classes));
 classes_names = classes_names(classes_names>0);
-for i = 1:length(classes_names)
+for i = 1:min(length(classes_names),par.max_clus)
    c = classes_names(i);
    if c~= i
        classes(classes == c) = i;
@@ -57,7 +56,7 @@ end
 
 classes_names = sort(unique(class_bkup));
 classes_names = classes_names(classes_names>0);
-for i = 1:length(classes_names)
+for i = 1:min(length(classes_names),par.max_clus)
    c = classes_names(i);
    if c ~= i
        class_bkup(class_bkup == c) = i;
@@ -124,7 +123,7 @@ for i=4:par.max_clus
 end
 
 % Merge operations
-mtemp = 0;
+
 if handles.merge == 1 && ~isempty(nfix_class)
     imerge = find(clustering_results(:,2)==nfix_class(1)); % index for the original temperature that will represent all the fixed classes
     mtemp = clustering_results(imerge(1),3); % temperature that represents all the fixed classes
@@ -171,10 +170,11 @@ clustering_results_bk = clustering_results;
 
 % Forcing
 if handles.force==1
+    
     for i=1:max(classes)
-        ind = find(clustering_results(:,2)==i); % get index of GUI class
-        oclass = clustering_results(ind(1),4); % get original class
-        otemp = clustering_results(ind(1),3); % get original temperature
+        ind = find(clustering_results_bk(:,2)==i); % get index of GUI class
+        oclass = clustering_results_bk(ind(1),4); % get original class
+        otemp = clustering_results_bk(ind(1),3); % get original temperature
         ind2 = find(classes==i); % get index of forced class
         clustering_results(ind2,2) = i; % update GUI class with forced class
         clustering_results(ind2,3) = otemp; % update original temperatures with forced class
