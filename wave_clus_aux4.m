@@ -149,144 +149,36 @@ draw_histograms(handles, str2double(cn{1}),USER_DATA);
 % Reject buttons
 
 % --------------------------------------------------------------------
-function isi24_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi24_accept_button,'value',0);
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-classes = USER_DATA{6};
-classes(find(classes==24))=0;
-USER_DATA{6} = classes;
-USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-axes(handles.spikes24); 
-cla reset
-axes(handles.isi24); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi24_accept_button,'value',1);
+function isi_reject_button_Callback(hObject, eventdata, handles)
+set(hObject,'value',1);
+b_name = get(gcbo,'Tag');
+cn = str2double(regexp(b_name, '\d+', 'match'));
 
-% --------------------------------------------------------------------
-function isi25_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi25_accept_button,'value',0);
+eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',0);'])
 USER_DATA = get(handles.wave_clus_aux4,'userdata');
 classes = USER_DATA{6};
-classes(find(classes==25))=0;
+classes(classes==cn)=0;
 USER_DATA{6} = classes;
 USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-axes(handles.spikes25); 
-cla reset
-axes(handles.isi25); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi25_accept_button,'value',1);
+USER_DATA{15} = true;
+h_figs = get(0,'children');
 
-% --------------------------------------------------------------------
-function isi26_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi26_accept_button,'value',0);
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-classes = USER_DATA{6};
-classes(find(classes==26))=0;
-USER_DATA{6} = classes;
-USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
+h_fig{1} = findobj(h_figs,'tag','wave_clus_figure');
+h_fig{2} = findobj(h_figs,'tag','wave_clus_aux');
+h_fig{3} = findobj(h_figs,'tag','wave_clus_aux2');
+h_fig{4} = findobj(h_figs,'tag','wave_clus_aux1');
+h_fig{5} = findobj(h_figs,'tag','wave_clus_aux3');
+h_fig{6} = findobj(h_figs,'tag','wave_clus_aux5');
 set(handles.wave_clus_aux4,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-axes(handles.spikes26); 
-cla reset
-axes(handles.isi26); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi26_accept_button,'value',1);
 
-% --------------------------------------------------------------------
-function isi27_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi27_accept_button,'value',0);
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-classes = USER_DATA{6};
-classes(classes==27)=0;
-USER_DATA{6} = classes;
-USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-axes(handles.spikes27); 
-cla reset
-axes(handles.isi27); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi27_accept_button,'value',1);
+for h = h_fig
+    set(h{1},'userdata',USER_DATA)
+end
 
-% --------------------------------------------------------------------
-function isi28_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi28_accept_button,'value',0);
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-classes = USER_DATA{6};
-classes(classes==28)=0;
-USER_DATA{6} = classes;
-USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux4,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-axes(handles.spikes28); 
-cla reset
-axes(handles.isi28); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi28_accept_button,'value',1);
+set(hObject,'value',0);
+eval(['cla(handles.spikes' int2str(cn) ',''reset'');']);
+eval(['cla(handles.isi' int2str(cn) ',''reset'');']);
+eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',1);']);
 
 
 

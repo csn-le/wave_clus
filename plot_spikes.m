@@ -170,7 +170,6 @@ clustering_results_bk = clustering_results;
 
 % Forcing
 if handles.force==1
-    
     for i=1:max(classes)
         ind = find(clustering_results_bk(:,2)==i); % get index of GUI class
         oclass = clustering_results_bk(ind(1),4); % get original class
@@ -180,6 +179,13 @@ if handles.force==1
         clustering_results(ind2,3) = otemp; % update original temperatures with forced class
         clustering_results(ind2,4) = oclass; % update original class with forced class
     end
+elseif  handles.setclus
+    forced = USER_DATA{13};
+    USER_DATA{14} = forced;
+    new_forced = zeros(size(forced));
+    new_forced(fix_class2) = forced(fix_class2);
+    clear forced
+    USER_DATA{13} = new_forced;
 end
 
 % new temperature when merge
@@ -216,6 +222,9 @@ end
 % Updates clustering_results and clustering_results_bk in USER_DATA
 USER_DATA{10} = clustering_results; 
 USER_DATA{11} = clustering_results_bk; 
+
+
+USER_DATA{15} = false;
 set(handles.wave_clus_figure,'userdata',USER_DATA)
 
 for i=20:52
@@ -252,6 +261,7 @@ for i = 1:nclusters+1
             xlim(handles.projections,[1 ls])
         else
             eval(['plot(handles.projections,inspk(class' num2str(i-1) ',1),inspk(class' num2str(i-1) ',2),''.' colors(i) ''',''markersize'',.5);']);
+            axis(handles.projections,'auto');
         end        
         if i < 5
             clus_ax = eval(['handles.spikes' num2str(i-1)]); 
@@ -322,3 +332,5 @@ for i =1:figs_num
         set(opened_figs{i},'Visible', 'on'); 
     end
 end
+
+mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)

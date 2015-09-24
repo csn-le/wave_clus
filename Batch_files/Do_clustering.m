@@ -141,9 +141,9 @@ for fnum = 1:length(filenames)
         
     end
     
-    class0=setdiff(1:size(spikes,1), sort([class1 class2 class3 class4 class5]));
+    class0 = setdiff(1:size(spikes,1), sort([class1 class2 class3 class4 class5]));
     whos class*
-
+    
     
     % IF TEMPLATE MATCHING WAS DONE, THEN FORCE
     if (size(spikes,1)> par.max_spk || ...
@@ -158,13 +158,18 @@ for fnum = 1:length(filenames)
         f_out = spikes(classes==0,:);
         class_in = classes(classes~=0,:);
         class_out = force_membership_wc(f_in, class_in, f_out, par);
-        classes(classes==0) = class_out;
+        forced = classes==0;
+        classes = class_out;
+        forced(classes==0) =0;
         class0 = find(classes==0);
         class1 = find(classes==1);
         class2 = find(classes==2);
         class3 = find(classes==3);
         class4 = find(classes==4);
         class5 = find(classes==5);
+        
+    else
+        forced = zeros(1, size(spikes,1));
     end
     
     
@@ -365,7 +370,7 @@ for fnum = 1:length(filenames)
     cluster_class = cluster;
     %<----  Add here auxiliar parameters
     
-    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'index', 'par','inspk','ipermut')
+    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'index', 'par','inspk','ipermut','forced')
     if exist('ipermut','var')
         save(['times_' data_handler.nick_name],'ipermut','-append')
     end

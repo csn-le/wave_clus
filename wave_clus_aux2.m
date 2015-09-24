@@ -30,7 +30,7 @@ gui_State = struct('gui_Name',       mfilename, ...
                    'gui_OutputFcn',  @wave_clus_aux2_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
-if nargin & isstr(varargin{1})
+if nargin && isstr(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
 
@@ -146,138 +146,39 @@ USER_DATA{1} = par;
 set(handles.wave_clus_aux2,'userdata',USER_DATA);
 draw_histograms(handles, str2double(cn{1}),USER_DATA);
 
-%Reject buttons
+% Reject buttons
 
 % --------------------------------------------------------------------
-function isi14_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi14_accept_button,'value',0);
+function isi_reject_button_Callback(hObject, eventdata, handles)
+set(hObject,'value',1);
+b_name = get(gcbo,'Tag');
+cn = str2double(regexp(b_name, '\d+', 'match'));
+
+eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',0);'])
 USER_DATA = get(handles.wave_clus_aux2,'userdata');
 classes = USER_DATA{6};
-classes(find(classes==14))=0;
+classes(classes==cn)=0;
 USER_DATA{6} = classes;
 USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux2,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes14); 
-cla reset
-axes(handles.isi14); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi14_accept_button,'value',1);
+USER_DATA{15} = true;
+h_figs = get(0,'children');
 
-% --------------------------------------------------------------------
-function isi15_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi15_accept_button,'value',0);
-USER_DATA = get(handles.wave_clus_aux2,'userdata');
-classes = USER_DATA{6};
-classes(find(classes==15))=0;
-USER_DATA{6} = classes;
-USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
+h_fig{1} = findobj(h_figs,'tag','wave_clus_figure');
+h_fig{2} = findobj(h_figs,'tag','wave_clus_aux');
+h_fig{3} = findobj(h_figs,'tag','wave_clus_aux1');
+h_fig{4} = findobj(h_figs,'tag','wave_clus_aux3');
+h_fig{5} = findobj(h_figs,'tag','wave_clus_aux4');
+h_fig{6} = findobj(h_figs,'tag','wave_clus_aux5');
 set(handles.wave_clus_aux2,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes15); 
-cla reset
-axes(handles.isi15); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi15_accept_button,'value',1);
 
-% --------------------------------------------------------------------
-function isi16_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi16_accept_button,'value',0);
-USER_DATA = get(handles.wave_clus_aux2,'userdata');
-classes = USER_DATA{6};
-classes(find(classes==16))=0;
-USER_DATA{6} = classes;
-USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux2,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes16); 
-cla reset
-axes(handles.isi16); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi16_accept_button,'value',1);
+for h = h_fig
+    set(h{1},'userdata',USER_DATA)
+end
 
-% --------------------------------------------------------------------
-function isi17_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi17_accept_button,'value',0);
-USER_DATA = get(handles.wave_clus_aux2,'userdata');
-classes = USER_DATA{6};
-classes(find(classes==17))=0;
-USER_DATA{6} = classes;
-USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux2,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes17); 
-cla reset
-axes(handles.isi17); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi17_accept_button,'value',1);
-
-% --------------------------------------------------------------------
-function isi18_reject_button_Callback(hObject, eventdata, handles)
-set(gcbo,'value',1);
-set(handles.isi18_accept_button,'value',0);
-USER_DATA = get(handles.wave_clus_aux2,'userdata');
-classes = USER_DATA{6};
-classes(find(classes==18))=0;
-USER_DATA{6} = classes;
-USER_DATA{9} = classes;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux2,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-axes(handles.spikes18); 
-cla reset
-axes(handles.isi18); 
-cla reset
-set(gcbo,'value',0);
-set(handles.isi18_accept_button,'value',1);
-
+set(hObject,'value',0);
+eval(['cla(handles.spikes' int2str(cn) ',''reset'');']);
+eval(['cla(handles.isi' int2str(cn) ',''reset'');']);
+eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',1);']);
 
 
 % FIX buttons
@@ -292,7 +193,7 @@ if get(handles.fix14_button,'value') ==1
     par.fix14 = 1;
 else
     USER_DATA{33} = [];
-    par.fix14 = 0
+    par.fix14 = 0;
 end
 USER_DATA{1} = par;
 h_figs=get(0,'children');
