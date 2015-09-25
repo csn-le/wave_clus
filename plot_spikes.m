@@ -334,3 +334,4 @@ for i =1:figs_num
 end
 
 mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
+drawnow

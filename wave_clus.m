@@ -634,35 +634,39 @@ end
 mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
 
 
-% function manual_clus_button_Callback(hObject, eventdata, handles)
-%     rect = getrect(handles.projections)
-%     USER_DATA = get(handles.wave_clus_figure,'userdata');
-%     xind = rect(1);
-%     xend = rect(1) + rect(3);
-%     ymin = rect(2);
-%     ymax = rect(2) +rect(4);
-%     
-%     spikes = USER_DATA{2};
-%     forced = USER_DATA{13};
-%     classes = USER_DATA{6};
-%     USER_DATA{14} = forced;
-%     USER_DATA{9} = classes(:)';    %save classes in classes_bk
-% 
-%     sp_selected =
-% 
-%     
-%     clus_n = max(classes)+1
-%     forced(sp_selected) = 0;
-%     classes(sp_selected)= clus_n;
-%     handles.setclus = 1;
-%     handles.force = 0;
-%     handles.merge = 0;
-%     handles.reject = 0;
-%     handles.undo = 0;
-%     USER_DATA{6} = classes(:)';
-%     USER_DATA{13} = new_forced;
-%     set(handles.wave_clus_figure,'userdata',USER_DATA)
-%     plot_spikes(handles);
+function manual_clus_button_Callback(hObject, eventdata, handles)
+    rect = getrect(handles.projections);
+    USER_DATA = get(handles.wave_clus_figure,'userdata');
+    xind = ceil(rect(1));
+    xend = floor(rect(1) + rect(3));
+    ymin = rect(2);
+    ymax = rect(2) +rect(4);
+    
+    spikes = USER_DATA{2};
+    forced = USER_DATA{13};
+    classes = USER_DATA{6};
+    USER_DATA{14} = forced;
+    USER_DATA{9} = classes(:)';    %save classes in classes_bk
+
+    [Mh, Mpos] = max(spikes');
+    [mh ,mpos] = min(spikes');
+    
+    sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos >= xind & Mpos <= xend);
+    sp_selected = sp_selected |(mh >= ymin & mh <= ymax) & (mpos >= xind & mpos <= xend);
+
+    
+    clus_n = max(classes) + 1;
+    forced(sp_selected) = 0;
+    classes(sp_selected)= clus_n;
+    handles.setclus = 1;
+    handles.force = 0;
+    handles.merge = 0;
+    handles.reject = 0;
+    handles.undo = 0;
+    USER_DATA{6} = classes(:)';
+    USER_DATA{13} = forced;
+    set(handles.wave_clus_figure,'userdata',USER_DATA)
+    plot_spikes(handles);
 
 
 
@@ -845,15 +849,16 @@ function isi_reject_button_Callback(hObject, eventdata, handles)
 set(hObject,'value',1);
 b_name = get(gcbo,'Tag');
 cn = str2double(regexp(b_name, '\d+', 'match'));
+
+eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',0);'])
+USER_DATA = get(handles.wave_clus_figure,'userdata');
+classes = USER_DATA{6};
 if cn == 3
     if nnz(classes==3)==0
         nlab = imread('filelist_wc.xlj','jpg'); 
         figure('color','k'); image(nlab); axis off; set(gcf,'NumberTitle','off');
     end
 end
-eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',0);'])
-USER_DATA = get(handles.wave_clus_figure,'userdata');
-classes = USER_DATA{6};
 classes(classes==cn) = 0;
 USER_DATA{6} = classes;
 USER_DATA{15} = true;
