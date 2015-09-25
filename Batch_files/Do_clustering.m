@@ -159,7 +159,7 @@ for fnum = 1:length(filenames)
         class_in = classes(classes~=0,:);
         class_out = force_membership_wc(f_in, class_in, f_out, par);
         forced = classes==0;
-        classes = class_out;
+        classes(classes==0) = class_out;
         forced(classes==0) =0;
         class0 = find(classes==0);
         class1 = find(classes==1);
@@ -171,7 +171,6 @@ for fnum = 1:length(filenames)
     else
         forced = zeros(1, size(spikes,1));
     end
-    
     
     figure
     set(gcf,'PaperOrientation','Landscape','PaperPosition',[0.25 0.25 10.5 8]) 
@@ -198,8 +197,6 @@ for fnum = 1:length(filenames)
     hold on
     cluster=zeros(nspk,2);
     cluster(:,2)= index';
-    num_clusters = length(find([length(class1) length(class2) length(class3)...
-            length(class4) length(class5) length(class0)] >= par.min_clus));
     clus_pop = [clus_pop length(class0)];
     if length(class0) > par.min_clus; 
         subplot(3,5,6); 
@@ -367,10 +364,11 @@ for fnum = 1:length(filenames)
     current_par = par;
     par = struct;
     par = update_parameters(par, current_par, 'relevant');
+    par.min_clus_rel = current_par.min_clus_rel;
     cluster_class = cluster;
     %<----  Add here auxiliar parameters
     
-    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'index', 'par','inspk','ipermut','forced')
+    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'index', 'par','inspk','forced')
     if exist('ipermut','var')
         save(['times_' data_handler.nick_name],'ipermut','-append')
     end

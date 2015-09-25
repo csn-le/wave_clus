@@ -160,8 +160,14 @@ classes(classes==cn)=0;
 USER_DATA{6} = classes;
 USER_DATA{9} = classes;
 USER_DATA{15} = true;
-h_figs = get(0,'children');
 
+forced = USER_DATA{13};
+USER_DATA{14} = forced;
+new_forced(classes==cn) = 0;
+clear forced
+USER_DATA{13} = new_forced;
+
+h_figs = get(0,'children');
 h_fig{1} = findobj(h_figs,'tag','wave_clus_figure');
 h_fig{2} = findobj(h_figs,'tag','wave_clus_aux1');
 h_fig{3} = findobj(h_figs,'tag','wave_clus_aux2');

@@ -633,9 +633,84 @@ for i=4:par.max_clus
 end    
 mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
 
-function unforce_button_Callback(hObject, eventdata, handles)
-    warning('Not implemented button')
 
+% function manual_clus_button_Callback(hObject, eventdata, handles)
+%     rect = getrect(handles.projections)
+%     USER_DATA = get(handles.wave_clus_figure,'userdata');
+%     xind = rect(1);
+%     xend = rect(1) + rect(3);
+%     ymin = rect(2);
+%     ymax = rect(2) +rect(4);
+%     
+%     spikes = USER_DATA{2};
+%     forced = USER_DATA{13};
+%     classes = USER_DATA{6};
+%     USER_DATA{14} = forced;
+%     USER_DATA{9} = classes(:)';    %save classes in classes_bk
+% 
+%     sp_selected =
+% 
+%     
+%     clus_n = max(classes)+1
+%     forced(sp_selected) = 0;
+%     classes(sp_selected)= clus_n;
+%     handles.setclus = 1;
+%     handles.force = 0;
+%     handles.merge = 0;
+%     handles.reject = 0;
+%     handles.undo = 0;
+%     USER_DATA{6} = classes(:)';
+%     USER_DATA{13} = new_forced;
+%     set(handles.wave_clus_figure,'userdata',USER_DATA)
+%     plot_spikes(handles);
+
+
+
+function unforce_button_Callback(hObject, eventdata, handles)
+    set(handles.spike_features_button,'value',0);
+    USER_DATA = get(handles.wave_clus_figure,'userdata');
+    forced = USER_DATA{13};
+    classes = USER_DATA{6};
+    USER_DATA{9} = classes(:)';    %save classes in classes_bk
+    par = USER_DATA{1};
+    USER_DATA{14} = forced;     %save forced in forced_bk
+    new_forced = zeros(size(forced));
+    % Fixed clusters are not considered for forcing
+    if get(handles.fix1_button,'value') ==1     
+        fix_class = USER_DATA{20}';
+        new_forced(fix_class) =forced(fix_class);
+    end
+    if get(handles.fix2_button,'value') ==1     
+        fix_class = USER_DATA{21}';
+        new_forced(fix_class) =forced(fix_class);
+    end
+    if get(handles.fix3_button,'value') ==1     
+        fix_class = USER_DATA{22}';
+        new_forced(fix_class) =forced(fix_class);
+    end
+    % Get fixed clusters from aux figures
+    for i=4:par.max_clus
+        eval(['fixx = par.fix' num2str(i) ';']);
+        if fixx == 1
+            fix_class = USER_DATA{22+i-3}';
+            new_forced(fix_class) =forced(fix_class);
+        end
+    end
+        
+    classes(forced & ~new_forced) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
+    handles.setclus = 1;
+    handles.force = 0;
+    handles.merge = 0;
+    handles.reject = 0;
+    handles.undo = 0;
+    USER_DATA{6} = classes(:)';
+    USER_DATA{13} = new_forced;
+    set(handles.wave_clus_figure,'userdata',USER_DATA)
+    plot_spikes(handles);
+    
+    
+    
+    
 % PLOT ALL PROJECTIONS BUTTON
 % --------------------------------------------------------------------
 function Plot_all_projections_button_Callback(hObject, eventdata, handles)
@@ -782,8 +857,14 @@ classes = USER_DATA{6};
 classes(classes==cn) = 0;
 USER_DATA{6} = classes;
 USER_DATA{15} = true;
-h_figs = get(0,'children');
 
+forced = USER_DATA{13};
+USER_DATA{14} = forced;
+new_forced(classes==cn) = 0;
+clear forced
+USER_DATA{13} = new_forced;
+
+h_figs = get(0,'children');
 h_fig{1} = findobj(h_figs,'tag','wave_clus_aux');
 h_fig{2} = findobj(h_figs,'tag','wave_clus_aux1');
 h_fig{3} = findobj(h_figs,'tag','wave_clus_aux2');
