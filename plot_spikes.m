@@ -147,8 +147,9 @@ for i = 1:nclusters
     end
 end
 nclusters = cont;
-%class0 = setdiff( 1:size(spikes,1), sort(clustered) );
-class0 = find(non_clustered);
+rejected = USER_DATA{15};
+class0 = find(non_clustered & ~rejected);
+
 clear non_clustered
 
 
@@ -182,7 +183,7 @@ if handles.force==1
 elseif  handles.setclus
     forced = USER_DATA{13};
     USER_DATA{14} = forced;
-    new_forced = zeros(size(forced));
+    new_forced = false(size(forced));
     new_forced(fix_class2) = forced(fix_class2);
     clear forced
     USER_DATA{13} = new_forced;
@@ -224,7 +225,6 @@ USER_DATA{10} = clustering_results;
 USER_DATA{11} = clustering_results_bk; 
 
 
-USER_DATA{15} = false;
 set(handles.wave_clus_figure,'userdata',USER_DATA)
 
 for i=20:52

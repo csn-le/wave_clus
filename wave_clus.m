@@ -38,17 +38,18 @@ function varargout = wave_clus(varargin)
 % USER_DATA{10} = clustering_results
 % USER_DATA{11} = clustering_results_bk
 % USER_DATA{12} = ipermut, indexes of the previously permuted spikes for clustering taking random number of points 
-% USER_DATA{13} = forced, boolean vector,  
-% USER_DATA{14} = forced_bk, boolean vector,  
-% USER_DATA{15} = clus_rejected in case if needed call plot_spikes before save
-% USER_DATA{16} - USER_DATA{19}, for future changes
+% USER_DATA{13} = forced, boolean vector for forced spikes,  
+% USER_DATA{14} = forced_bk, backup boolean vector for forced spikes,  
+% USER_DATA{15} = rejected, boolean vector for rejected spikes 
+% USER_DATA{16} = rejected_bk,  backup boolean vector for rejected spikes
+% USER_DATA{17} - USER_DATA{19}, for future changes
 % USER_DATA{20} - USER_DATA{42}, fix clusters
 
 folder = fileparts(mfilename('fullpath'));
 if isempty(strfind(path, folder))
     addpath(folder);
     addpath([folder filesep 'Batch_files']);
-    addpath([folder filesep 'Force_files']);
+    addpath([folder filesep 'Batch_files' filesep 'Force_files']);
     addpath([folder filesep 'SPC']);
     addpath([folder filesep 'Raw_data_readers']);
 end
@@ -181,7 +182,7 @@ handles.par.fnamespc = 'data_wc';
 handles.par = update_par(data_handler,handles.par);
 
 if data_handler.with_results %data have _times files
-    [clu, tree, spikes, index, inspk, ipermut,classes,forced] = data_handler.load_results();
+    [clu, tree, spikes, index, inspk, ipermut, classes, forced, rejected] = data_handler.load_results();
    
 else    
     if data_handler.with_spikes  %data have some time of _spikes files
@@ -234,7 +235,8 @@ else
     save(fname_in,'inspk_aux','-ascii');                      %Input file for SPC
     
     [clu,tree] = run_cluster(handles.par);
-    forced = zeros(size(spikes,1) ,1);
+    forced = false(size(spikes,1) ,1);
+    rejected = false(1, size(spikes,1));
 end
 
 if data_handler.with_raw && handles.par.sample_segment          %raw exists
@@ -266,6 +268,9 @@ if exist('ipermut','var') && ~isempty(ipermut)
     USER_DATA{12} = ipermut;
 end
 USER_DATA{13} = forced;
+USER_DATA{14} = forced;
+USER_DATA{15} = rejected;  %the clusters numbers are sorted
+USER_DATA{16} = rejected;  %the clusters numbers are sorted
 
 set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
 
@@ -309,7 +314,6 @@ USER_DATA{8} = temp;
 clustering_results_bk = clustering_results; % old clusters for undo actions
 USER_DATA{10} = clustering_results;
 USER_DATA{11} = clustering_results_bk;
-USER_DATA{15} = false;  %the clusters numbers are sorted
 handles.force = 0;
 handles.merge = 0;
 handles.reject = 0;
@@ -341,16 +345,18 @@ min_clus = round(aux);
 set(handles.min_clus_edit,'string',num2str(min_clus));
 
 USER_DATA = get(handles.wave_clus_figure,'userdata');
+rejected = USER_DATA{15};
+USER_DATA{16} = rejected;
 par = USER_DATA{1};
 par.min_clus = min_clus;
 clu = USER_DATA{4};
-classes = clu(temp,3:end)+1;
+classes = clu(temp, 3:end) + 1;
+classes(rejected) = 0;
 tree = USER_DATA{5};
 USER_DATA{1} = par;
 USER_DATA{6} = classes(:)';
 USER_DATA{8} = temp;
 USER_DATA{9} = classes(:)';                                     %backup for non-forced classes.
-
 
 handles.minclus = min_clus;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
@@ -413,6 +419,7 @@ tree = USER_DATA{5};
 USER_DATA{1} = par;
 USER_DATA{6} = classes(:)';
 USER_DATA{9} = classes(:)';                                    %backup for non-forced classes.
+USER_DATA{16} = USER_DATA{15};
 
 clustering_results = USER_DATA{10};
 clustering_results(:,5) = par.min_clus;
@@ -444,7 +451,7 @@ end
 % --- Executes on button press in save_clusters_button.
 function save_clusters_button_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
-if USER_DATA{15} 
+if any(USER_DATA{15}~=USER_DATA{16} ) %if rejected flags changed
     handles.setclus = 1;
     handles.force = 0;
     handles.merge = 0;
@@ -482,7 +489,8 @@ gui_status.temp =  gui_classes_data(1,1);
 gui_status.classes = gui_classes_data(1:end,3:4);
 
 forced = USER_DATA{13};
-var_list = ' cluster_class par spikes gui_status forced';
+rejected = USER_DATA{15};
+var_list = ' cluster_class par spikes gui_status forced rejected';
 
 if ~isempty(USER_DATA{7})
     inspk = USER_DATA{7};
@@ -611,6 +619,7 @@ forced = forced | (classes==0);
 classes(classes==0) = class_out;
 USER_DATA{13} = forced;
 USER_DATA{6} = classes(:)';
+USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
 set(handles.wave_clus_figure,'userdata',USER_DATA)
 
 clustering_results = USER_DATA{10};
@@ -643,18 +652,16 @@ function manual_clus_button_Callback(hObject, eventdata, handles)
     ymax = rect(2) +rect(4);
     
     spikes = USER_DATA{2};
-    forced = USER_DATA{13};
     classes = USER_DATA{6};
+    forced = USER_DATA{13};
     USER_DATA{14} = forced;
     USER_DATA{9} = classes(:)';    %save classes in classes_bk
-
     [Mh, Mpos] = max(spikes');
     [mh ,mpos] = min(spikes');
     
     sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos >= xind & Mpos <= xend);
     sp_selected = sp_selected |(mh >= ymin & mh <= ymax) & (mpos >= xind & mpos <= xend);
-
-    
+    sp_selected(USER_DATA{15}) = false;  %don't select the rejected
     clus_n = max(classes) + 1;
     forced(sp_selected) = 0;
     classes(sp_selected)= clus_n;
@@ -665,6 +672,7 @@ function manual_clus_button_Callback(hObject, eventdata, handles)
     handles.undo = 0;
     USER_DATA{6} = classes(:)';
     USER_DATA{13} = forced;
+    USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
     set(handles.wave_clus_figure,'userdata',USER_DATA)
     plot_spikes(handles);
 
@@ -709,6 +717,7 @@ function unforce_button_Callback(hObject, eventdata, handles)
     handles.undo = 0;
     USER_DATA{6} = classes(:)';
     USER_DATA{13} = new_forced;
+    USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
     set(handles.wave_clus_figure,'userdata',USER_DATA)
     plot_spikes(handles);
     
@@ -859,10 +868,14 @@ if cn == 3
         figure('color','k'); image(nlab); axis off; set(gcf,'NumberTitle','off');
     end
 end
-classes(classes==cn) = 0;
-USER_DATA{6} = classes;
-USER_DATA{15} = true;
 
+rejected = USER_DATA{15};
+USER_DATA{16} = rejected; %update bk of rejected spikes
+rejected(classes==cn) = true;
+classes(classes==cn) = 0;
+
+USER_DATA{6} = classes;
+USER_DATA{15} = rejected;
 forced = USER_DATA{13};
 USER_DATA{14} = forced;
 new_forced(classes==cn) = 0;
@@ -900,6 +913,9 @@ par = USER_DATA{1};
 clustering_results_bk = USER_DATA{11};
 forced_bk =  USER_DATA{14};
 USER_DATA{13} = forced_bk;
+
+USER_DATA{15} = USER_DATA{16}; %use bk of rejected spikes
+
 USER_DATA{6} = clustering_results_bk(:,2); % old gui classes
 USER_DATA{10} = clustering_results_bk;
 handles.minclus = clustering_results_bk(1,5);

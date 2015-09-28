@@ -70,7 +70,7 @@ par.force_auto = true;                  %automatically force membership (only fo
 % TEMPLATE MATCHING
 par.match = 'y';                    % for template matching
 %par.match = 'n';                   % for no template matching
-par.max_spk = 5000;                 % max. # of spikes before starting templ. match.
+par.max_spk = 8000;                 % max. # of spikes before starting templ. match.
 par.permut = 'y';                   % for selection of random 'par.max_spk' spikes before starting templ. match. 
 % par.permut = 'n';                 % for selection of the first 'par.max_spk' spikes before starting templ. match. 
 

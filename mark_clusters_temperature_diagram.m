@@ -7,6 +7,7 @@ temperature = tree(clustering_results(1,1)+1,2);
 
 % creates cluster-temperature vector to plot in the temperature diagram
 nclasses = max(clustering_results(:,2));
+class_plot = [];
 for i=1:nclasses
     ind = find(clustering_results(:,2)==i);
     classgui_plot(i) = clustering_results(ind(1),2);
