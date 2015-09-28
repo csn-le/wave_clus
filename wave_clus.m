@@ -966,6 +966,31 @@ USER_DATA{1} = par;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 
+% --- Executes on button press in merge_button.
+function reject2clus_Callback(hObject, eventdata, handles)
+    USER_DATA = get(handles.wave_clus_figure,'userdata');
+
+    classes = USER_DATA{6};
+    
+    USER_DATA{9} = classes(:)';    %save classes in classes_bk
+    rejected = USER_DATA{15};
+    USER_DATA{16} =  rejected;     %update bk of rejected spikes
+    clus_n = max(classes) + 1;
+    classes(rejected)= clus_n;
+    USER_DATA{15} = false(size(rejected));
+    
+    handles.setclus = 1;
+    handles.force = 0;
+    handles.merge = 0;
+    handles.reject = 0;
+    handles.undo = 0;
+    USER_DATA{6} = classes(:)';
+    USER_DATA{14} = USER_DATA{13};
+    set(handles.wave_clus_figure,'userdata',USER_DATA)
+    plot_spikes(handles);
+
+
+
 % --- Executes on button press in Plot_polytrode_channels_button.
 function Plot_polytrode_button_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
