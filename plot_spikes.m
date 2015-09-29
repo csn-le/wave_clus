@@ -34,15 +34,6 @@ if get(handles.spike_shapes_button,'value') ==0
     end
 end
 
-% Defines nclusters
-cluster_sizes = zeros(1,par.max_clus);
-cluster_sizes_bkup = zeros(1,par.max_clus);
-ifixflag = zeros(1,par.max_clus);
-
-for i=1:par.max_clus
-    cluster_sizes(i) = nnz(classes==i);
-    cluster_sizes_bkup(i) = nnz(class_bkup==i);   
-end
 
 % Classes should be consecutive numbers
 classes_names = sort(unique(classes));
@@ -63,6 +54,16 @@ for i = 1:min(length(classes_names),par.max_clus)
    end
 end
 
+% Defines nclusters
+cluster_sizes = zeros(1,par.max_clus);
+cluster_sizes_bkup = zeros(1,par.max_clus);
+ifixflag = zeros(1,par.max_clus);
+for i=1:par.max_clus
+    cluster_sizes(i) = nnz(classes==i);
+    cluster_sizes_bkup(i) = nnz(class_bkup==i);   
+end
+
+
 nclusters_bkup = nnz(cluster_sizes >= par.min_clus);
 class_bkup(class_bkup > nclusters_bkup)=0;
 
@@ -72,7 +73,8 @@ else
     sizemin_clus = 1;
 end
 
-nclusters = nnz(cluster_sizes >= sizemin_clus);
+clusn = find(cluster_sizes >= sizemin_clus);
+nclusters = length(clusn);
 
 % Get fixed clusters
 fix_class2 = [];
@@ -86,6 +88,7 @@ if get(handles.fix1_button,'value') ==1
     
     fix_class2 = [fix_class2 fix_class]; 
     nfix_class = [nfix_class 1];
+    clusn = [clusn nclusters];
 end
 if get(handles.fix2_button,'value') ==1     
     nclusters = nclusters +1;
@@ -96,6 +99,7 @@ if get(handles.fix2_button,'value') ==1
     
     fix_class2 = [fix_class2 fix_class]; 
     nfix_class = [nfix_class 2];
+    clusn = [clusn nclusters];
 end
 if get(handles.fix3_button,'value') ==1     
     nclusters = nclusters +1;
@@ -106,6 +110,7 @@ if get(handles.fix3_button,'value') ==1
     
     fix_class2 = [fix_class2 fix_class]; 
     nfix_class = [nfix_class 3];
+    clusn = [clusn nclusters];
 end
 % Get fixed clusters from aux figures
 for i=4:par.max_clus
@@ -119,6 +124,7 @@ for i=4:par.max_clus
         
         fix_class2 = [fix_class2 fix_class];
         nfix_class = [nfix_class i];
+        clusn = [clusn nclusters];
     end
 end
 
@@ -132,8 +138,8 @@ end
 
 % Defines classes
 non_clustered = ones(1,size(spikes,1));
-cont=0;
-for i = 1:nclusters
+cont = 0;
+for i = clusn
     class_temp = find(classes == i);
     if ((ifixflag(i)==1) && (~isempty(class_temp)))
         ifixflagc = 1;

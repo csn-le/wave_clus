@@ -420,7 +420,6 @@ USER_DATA{1} = par;
 USER_DATA{6} = classes(:)';
 USER_DATA{9} = classes(:)';                                    %backup for non-forced classes.
 USER_DATA{16} = USER_DATA{15};
-
 clustering_results = USER_DATA{10};
 clustering_results(:,5) = par.min_clus;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
@@ -576,7 +575,9 @@ spikes = USER_DATA{2};
 classes = USER_DATA{6};
 inspk = USER_DATA{7};
 forced = USER_DATA{13};
-% Fixed clusters are not considered for forcing
+rejected = USER_DATA{15};
+USER_DATA{16} = rejected;
+
 if get(handles.fix1_button,'value') ==1     
     fix_class = USER_DATA{20}';
     classes(fix_class) = -1;
@@ -598,10 +599,11 @@ for i=4:par.max_clus
     end
 end
 
+to_force = (~rejected)' & (classes==0);
 switch par.force_feature
     case 'spk'
         f_in  = spikes(classes>0,:);
-        f_out = spikes(classes==0,:);
+        f_out = spikes(to_force,:);
     case 'wav'
         if isempty(inspk)
             set(handles.file_name,'string','Calculating spike features ...');
@@ -609,14 +611,15 @@ switch par.force_feature
             USER_DATA{7} = inspk;
         end
         f_in  = inspk(classes>0,:);
-        f_out = inspk(classes==0,:);
+        f_out = inspk(to_force,:);
 end
 
 class_in = classes(classes>0);
 class_out = force_membership_wc(f_in, class_in, f_out, par);
-USER_DATA{14} = forced;     %save force in force_bk
-forced = forced | (classes==0);
-classes(classes==0) = class_out;
+USER_DATA{14} = forced;                     % Save force in force_bk.
+forced = forced | to_force;
+
+classes(to_force) = class_out;
 USER_DATA{13} = forced;
 USER_DATA{6} = classes(:)';
 USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
@@ -708,8 +711,9 @@ function unforce_button_Callback(hObject, eventdata, handles)
             new_forced(fix_class) =forced(fix_class);
         end
     end
-        
-    classes(forced & ~new_forced) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
+    rejected = USER_DATA{15};
+    USER_DATA{16} = rejected; %update bk of rejected spikes
+    classes(forced & (~new_forced) & (~rejected)) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
     handles.setclus = 1;
     handles.force = 0;
     handles.merge = 0;
@@ -717,7 +721,7 @@ function unforce_button_Callback(hObject, eventdata, handles)
     handles.undo = 0;
     USER_DATA{6} = classes(:)';
     USER_DATA{13} = new_forced;
-    USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
+    
     set(handles.wave_clus_figure,'userdata',USER_DATA)
     plot_spikes(handles);
     
@@ -872,15 +876,15 @@ end
 rejected = USER_DATA{15};
 USER_DATA{16} = rejected; %update bk of rejected spikes
 rejected(classes==cn) = true;
-classes(classes==cn) = 0;
-
-USER_DATA{6} = classes;
 USER_DATA{15} = rejected;
+
 forced = USER_DATA{13};
 USER_DATA{14} = forced;
-new_forced(classes==cn) = 0;
-clear forced
-USER_DATA{13} = new_forced;
+forced(classes==cn) = 0;
+USER_DATA{13} = forced;
+
+classes(classes==cn) = 0;
+USER_DATA{6} = classes;
 
 h_figs = get(0,'children');
 h_fig{1} = findobj(h_figs,'tag','wave_clus_aux');

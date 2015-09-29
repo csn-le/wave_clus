@@ -153,16 +153,19 @@ cn = str2double(regexp(b_name, '\d+', 'match'));
 eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',0);'])
 USER_DATA = get(handles.wave_clus_aux3,'userdata');
 classes = USER_DATA{6};
-classes(classes==cn)=0;
-USER_DATA{6} = classes;
-USER_DATA{9} = classes;
-USER_DATA{15} = true;
+
+rejected = USER_DATA{15};
+USER_DATA{16} = rejected; %update bk of rejected spikes
+rejected(classes==cn) = true;
+USER_DATA{15} = rejected;
 
 forced = USER_DATA{13};
 USER_DATA{14} = forced;
-new_forced(classes==cn) = 0;
-clear forced
-USER_DATA{13} = new_forced;
+forced(classes==cn) = 0;
+USER_DATA{13} = forced;
+
+classes(classes==cn) = 0;
+USER_DATA{6} = classes;
 
 h_figs = get(0,'children');
 h_fig{1} = findobj(h_figs,'tag','wave_clus_figure');
