@@ -4,7 +4,6 @@ par = USER_DATA{1};
 spikes = USER_DATA{2};
 classes = USER_DATA{6};
 classes = classes(:)';
-class_bkup = USER_DATA{9};
 inspk = USER_DATA{7};
 temp = USER_DATA{8};
 ls = size(spikes,2);
@@ -45,27 +44,12 @@ for i = 1:min(length(classes_names),par.max_clus)
    end
 end
 
-classes_names = sort(unique(class_bkup));
-classes_names = classes_names(classes_names>0);
-for i = 1:min(length(classes_names),par.max_clus)
-   c = classes_names(i);
-   if c ~= i
-       class_bkup(class_bkup == c) = i;
-   end
-end
-
 % Defines nclusters
 cluster_sizes = zeros(1,par.max_clus);
-cluster_sizes_bkup = zeros(1,par.max_clus);
 ifixflag = zeros(1,par.max_clus);
 for i=1:par.max_clus
     cluster_sizes(i) = nnz(classes==i);
-    cluster_sizes_bkup(i) = nnz(class_bkup==i);   
 end
-
-
-nclusters_bkup = nnz(cluster_sizes >= par.min_clus);
-class_bkup(class_bkup > nclusters_bkup)=0;
 
 if handles.setclus == 0 && handles.undo==0 && handles.merge==0 && handles.force==0  
     sizemin_clus = par.min_clus;
@@ -169,7 +153,7 @@ end
 
 % Saves new classes
 USER_DATA{6} = classes;
-USER_DATA{9} = class_bkup;
+%USER_DATA{9} = class_bkup;
 
 % updates 'clustering_results_bk'
 clustering_results = [clustering_results; zeros(size(classes,1)-size(clustering_results,1),5)];

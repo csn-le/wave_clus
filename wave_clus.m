@@ -309,7 +309,6 @@ end
 
 clustering_results(:,5) = repmat(handles.par.min_clus,length(classes),1); % minimum number of clusters
 USER_DATA{6} = classes(:)';
-USER_DATA{9} = classes(:)';         %backup for non-forced classes.
 USER_DATA{8} = temp;
 clustering_results_bk = clustering_results; % old clusters for undo actions
 USER_DATA{10} = clustering_results;
@@ -356,7 +355,6 @@ tree = USER_DATA{5};
 USER_DATA{1} = par;
 USER_DATA{6} = classes(:)';
 USER_DATA{8} = temp;
-USER_DATA{9} = classes(:)';                                     %backup for non-forced classes.
 
 handles.minclus = min_clus;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
@@ -382,8 +380,6 @@ if strcmp( par.temp_plot,'log')
 else
     set(get(handles.temperature_plot,'ylabel'),'vertical','Baseline');
 end
-
-
 
 handles.setclus = 0;
 handles.force = 0;
@@ -418,7 +414,6 @@ classes = clu(temp,3:end)+1;
 tree = USER_DATA{5};
 USER_DATA{1} = par;
 USER_DATA{6} = classes(:)';
-USER_DATA{9} = classes(:)';                                    %backup for non-forced classes.
 USER_DATA{16} = USER_DATA{15};
 clustering_results = USER_DATA{10};
 clustering_results(:,5) = par.min_clus;
@@ -665,7 +660,6 @@ function manual_clus_button_Callback(hObject, eventdata, handles)
     classes = USER_DATA{6};
     forced = USER_DATA{13};
     USER_DATA{14} = forced;
-    USER_DATA{9} = classes(:)';    %save classes in classes_bk
     [Mh, Mpos] = max(spikes');
     [mh ,mpos] = min(spikes');
     
@@ -693,7 +687,6 @@ function unforce_button_Callback(hObject, eventdata, handles)
     USER_DATA = get(handles.wave_clus_figure,'userdata');
     forced = USER_DATA{13};
     classes = USER_DATA{6};
-    USER_DATA{9} = classes(:)';    %save classes in classes_bk
     par = USER_DATA{1};
     USER_DATA{14} = forced;     %save forced in forced_bk
     new_forced = zeros(size(forced));
@@ -893,6 +886,12 @@ USER_DATA{13} = forced;
 classes(classes==cn) = 0;
 USER_DATA{6} = classes;
 
+clustering_results = USER_DATA{10};
+USER_DATA{11} = clustering_results; % Save backup
+clustering_results(:,2) = classes;
+USER_DATA{10} = clustering_results; 
+
+
 h_figs = get(0,'children');
 h_fig{1} = findobj(h_figs,'tag','wave_clus_aux');
 h_fig{2} = findobj(h_figs,'tag','wave_clus_aux1');
@@ -983,7 +982,6 @@ function reject2clus_Callback(hObject, eventdata, handles)
 
     classes = USER_DATA{6};
     
-    USER_DATA{9} = classes(:)';    %save classes in classes_bk
     rejected = USER_DATA{15};
     USER_DATA{16} =  rejected;     %update bk of rejected spikes
     clus_n = max(classes) + 1;

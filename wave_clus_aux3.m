@@ -167,6 +167,11 @@ USER_DATA{13} = forced;
 classes(classes==cn) = 0;
 USER_DATA{6} = classes;
 
+clustering_results = USER_DATA{10};
+USER_DATA{11} = clustering_results; % Save backup
+clustering_results(:,2) = classes;
+USER_DATA{10} = clustering_results; 
+
 h_figs = get(0,'children');
 h_fig{1} = findobj(h_figs,'tag','wave_clus_figure');
 h_fig{2} = findobj(h_figs,'tag','wave_clus_aux');
