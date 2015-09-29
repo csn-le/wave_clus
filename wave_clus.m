@@ -562,8 +562,15 @@ end
 
 % --- Executes on button press in set_parameters_button.
 function set_parameters_button_Callback(hObject, eventdata, handles)
-    %helpdlg('Check the set_parameters files in the subdirectory Wave_clus\Parameters_files');
-    edit([fileparts(mfilename('fullpath')) filesep 'set_parameters.m'])
+    %helpdlg('Check the set_parameters files in the subdirectory
+    %Wave_clus\Parameters_files');
+    this_folder = dir();
+    if ~ismember('set_parameters.m',{this_folder.name})
+         copyfile([fileparts(mfilename('fullpath')) filesep 'set_parameters.m'], [pwd filesep 'set_parameters.m']);
+    end
+    edit([pwd filesep 'set_parameters.m'])
+   
+    
     
 %SETTING OF FORCE MEMBERSHIP
 % --------------------------------------------------------------------
