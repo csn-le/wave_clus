@@ -49,8 +49,9 @@ switch handles.par.temp_plot
             semilogy(handles.temperature_plot, tree_temp,tree_clus,'.','color',num2str(colors(classgui_plot(i))),'MarkerSize',20);
             % text(tree_temp,tree_clus,num2str(classgui_plot(i)));
         end
-        set(get(handles.temperature_plot,'ylabel'),'vertical','Cap');
+        set(get(handles.temperature_plot,'ylabel'),'vertical','Baseline');
 end
+
 xlim(handles.temperature_plot, [0 handles.par.maxtemp])
 xlabel(handles.temperature_plot, 'Temperature'); 
 ylabel(handles.temperature_plot, 'Clusters size');

@@ -294,7 +294,7 @@ else
     temp = find_temp(tree, handles.par); 
     classes = clu(temp,3:end)+1;
     if handles.par.permut == 'n'
-        classes = [classes(:)' zeros(1,max(size(spikes,1)-handles.par.max_spk),0)];
+        classes = [classes zeros(1,max(size(spikes,1)-handles.par.max_spk,0))];
     end
 
     % definition of clustering_results
@@ -358,28 +358,6 @@ USER_DATA{8} = temp;
 
 handles.minclus = min_clus;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-temperature = handles.par.mintemp + temp * handles.par.tempstep;
-
-switch par.temp_plot
-    case 'lin'
-        plot(handles.temperature_plot, [handles.par.mintemp handles.par.maxtemp-handles.par.tempstep],[par.min_clus par.min_clus],'k:',...
-            handles.par.mintemp+(1:handles.par.num_temp)*handles.par.tempstep, ...
-            tree(1:handles.par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
-    case 'log'
-        set(handles.temperature_plot,'yscale','log');
-        semilogy(handles.temperature_plot, [handles.par.mintemp handles.par.maxtemp-handles.par.tempstep], ...
-            [par.min_clus par.min_clus],'k:',...
-            handles.par.mintemp+(1:handles.par.num_temp)*handles.par.tempstep, ...
-            tree(1:handles.par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
-end
-xlim(handles.temperature_plot, [0 handles.par.maxtemp])
-xlabel(handles.temperature_plot, 'Temperature'); 
-ylabel(handles.temperature_plot,'Clusters size');
-if strcmp( par.temp_plot,'log')
-    set(get(handles.temperature_plot,'ylabel'),'vertical','Cap');
-else
-    set(get(handles.temperature_plot,'ylabel'),'vertical','Baseline');
-end
 
 handles.setclus = 0;
 handles.force = 0;

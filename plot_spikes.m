@@ -20,8 +20,7 @@ h_fig3= findobj(h_figs,'tag','wave_clus_aux2');
 h_fig4= findobj(h_figs,'tag','wave_clus_aux3');
 h_fig5= findobj(h_figs,'tag','wave_clus_aux4');
 h_fig6= findobj(h_figs,'tag','wave_clus_aux5');
-close(h_fig1);
-close(h_fig2); close(h_fig3); close(h_fig4); close(h_fig5); close(h_fig6);
+close(h_fig1); close(h_fig2); close(h_fig3); close(h_fig4); close(h_fig5); close(h_fig6);
 if ishandle(10)
 	close(10)
 end
@@ -32,7 +31,6 @@ if get(handles.spike_shapes_button,'value') ==0
         USER_DATA{7} = inspk;
     end
 end
-
 
 % Classes should be consecutive numbers
 classes_names = sort(unique(classes));
@@ -139,9 +137,7 @@ end
 nclusters = cont;
 rejected = USER_DATA{15};
 class0 = find(non_clustered & ~rejected);
-
-clear non_clustered
-
+clear non_clustered rejected
 
 % Redefines classes
 classes = zeros(size(spikes,1),1);
@@ -153,10 +149,8 @@ end
 
 % Saves new classes
 USER_DATA{6} = classes;
-%USER_DATA{9} = class_bkup;
 
 % updates 'clustering_results_bk'
-clustering_results = [clustering_results; zeros(size(classes,1)-size(clustering_results,1),5)];
 clustering_results_bk = clustering_results;
 
 % Forcing
@@ -203,6 +197,7 @@ end
 
 % update new classes
 clustering_results(:,2) = classes;
+clear classes
 % If there are no fix and rejected clusters and undo operations, 
 % original classes are the same as current classes
 if isempty(fix_class2) && handles.reject==0 && handles.undo==0 && handles.merge==0 && handles.force==0
@@ -213,10 +208,7 @@ end
 % Updates clustering_results and clustering_results_bk in USER_DATA
 USER_DATA{10} = clustering_results; 
 USER_DATA{11} = clustering_results_bk; 
-
-
-set(handles.wave_clus_figure,'userdata',USER_DATA)
-
+clear clustering_results_bk; 
 for i=20:52
     USER_DATA{i} = [];
 end
@@ -233,17 +225,19 @@ hold(handles.projections,'on')
 ylimit = [];
 colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
 
+
+
 figs_num = 6;
 opened_figs = cell(1,figs_num);
 for i = 1:nclusters+1
     if ~ (isempty(class0) && i==1)
         %PLOTS SPIKES OR PROJECTIONS
-        
         eval(['max_spikes=min(length(class' num2str(i-1) '), par.max_spikes_plot);']);
         eval(['sup_spikes=length(class' num2str(i-1) ');']);
         permut = randperm(sup_spikes);
+        permut = permut(1:max_spikes);
         if get(handles.spike_shapes_button,'value') ==1 && get(handles.plot_all_button,'value') ==1
-            eval(['plot(handles.projections,spikes(class' num2str(i-1) '(permut(1:max_spikes)),:)'',''' colors(i) ''');'])
+            eval(['line(1:ls,spikes(class' num2str(i-1) '(permut),:),''color'',''' colors(i) ''',''Parent'',handles.projections)']);
             xlim(handles.projections, [1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
             eval(['av   = mean(spikes(class' num2str(i-1) ',:));']);
@@ -252,16 +246,17 @@ for i = 1:nclusters+1
         else
             eval(['plot(handles.projections,inspk(class' num2str(i-1) ',1),inspk(class' num2str(i-1) ',2),''.' colors(i) ''',''markersize'',.5);']);
             axis(handles.projections,'auto');
-        end        
+        end
+    
         if i < 5
             clus_ax = eval(['handles.spikes' num2str(i-1)]); 
             hold(clus_ax,'on')
-            eval(['av   = mean(spikes(class' num2str(i-1) '(:,permut(1:max_spikes)),:));']); % JMG
-            eval(['avup = av + par.to_plot_std * std(spikes(class' num2str(i-1) '(:,permut(1:max_spikes)),:));']); % JMG 
-            eval(['avdw = av - par.to_plot_std * std(spikes(class' num2str(i-1) '(:,permut(1:max_spikes)),:));']); % JMG
+            eval(['av   = mean(spikes(class' num2str(i-1) '(:,permut),:));']); % JMG
+            eval(['avup = av + par.to_plot_std * std(spikes(class' num2str(i-1) '(:,permut),:));']); % JMG 
+            eval(['avdw = av - par.to_plot_std * std(spikes(class' num2str(i-1) '(:,permut),:));']); % JMG
             
             if get(handles.plot_all_button,'value') ==1
-                eval(['plot(clus_ax,spikes(class' num2str(i-1) '(permut(1:max_spikes)),:)'',''color'',''' colors(i) ''')']);
+                eval(['line(1:ls,spikes(class' num2str(i-1) '(permut),:),''color'',''' colors(i) ''',''Parent'',clus_ax)']);
                 if i==1
                     plot(clus_ax,1:ls,av,'c','linewidth',2)
                     plot(clus_ax,1:ls,avup,'c','linewidth',.5)
