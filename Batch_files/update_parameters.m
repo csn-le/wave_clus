@@ -46,4 +46,10 @@ if strcmp(type,'none')
     end
     
 end
+
+
+if isfield(par,'ref')
+    new_par.ref_ms = par.ref /par.sr *1000;
+end
+
 end

@@ -27,9 +27,14 @@ classdef readInData < handle
             obj.with_psegment = false;
             obj.with_gui_status = false;
             with_par = false;
+            times_selected = false;
             
+
+            if strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat')
+                times_selected = true;
+                obj.nick_name = fnam(7:end);
+            end
             if (~isfield('reset_results',par_gui)) || (~par_gui.reset_results)
-            
                 %Search for previous results
                 if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
                     obj.with_results = true;
@@ -61,26 +66,30 @@ classdef readInData < handle
                 end
             end
             % Search raw data
-            if exist([ext(2:end) '_wc_reader'],'file')
-                obj.file_reader = eval([ext(2:end) '_wc_reader(obj.par,obj.par.filename)']);
-                [sr, obj.max_segments, obj.with_raw, with_spikes] = obj.file_reader.get_info();
-                obj.with_spikes = obj.with_spikes || with_spikes;
-                
-                if ~with_par                                                                                            %if didn't load sr from previous results 
-                    if isempty(sr)
-                        disp('Wave_clus didn''t find a sampling rate in file. It will use the set in set_parameters.m')  %use default sr (from set_parameters) 
-                    else
-                        obj.par.sr = sr;                                                                                %load sr from raw data
-                    end
-                end
+            if times_selected
+                disp ('Raw data don''t selected. Only spikes and previous results available.')
             else
-                if ~(obj.with_results || obj.with_wc_spikes)
-                    ME = MException('MyComponent:noSuchExt', 'File type ''%s'' isn''t supported',ext);
-                    throw(ME)
+                if exist([ext(2:end) '_wc_reader'],'file')
+                    obj.file_reader = eval([ext(2:end) '_wc_reader(obj.par,obj.par.filename)']);
+                    [sr, obj.max_segments, obj.with_raw, with_spikes] = obj.file_reader.get_info();
+                    obj.with_spikes = obj.with_spikes || with_spikes;
+
+                    if ~with_par                                                                                            %if didn't load sr from previous results 
+                        if isempty(sr)
+                            disp('Wave_clus didn''t find a sampling rate in file. It will use the set in set_parameters.m')  %use default sr (from set_parameters) 
+                        else
+                            obj.par.sr = sr;                                                                                %load sr from raw data
+                        end
+                    end
                 else
-                    disp ('File type isn''t supported.')
-                    disp ('Using Wave_clus data found.')
-                end
+                    if ~(obj.with_results || obj.with_wc_spikes)
+                        ME = MException('MyComponent:noSuchExt', 'File type ''%s'' isn''t supported',ext);
+                        throw(ME)
+                    else
+                        disp ('File type isn''t supported.')
+                        disp ('Using Wave_clus data found.')
+                    end
+                end 
             end
             
 
