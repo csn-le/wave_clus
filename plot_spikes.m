@@ -1,4 +1,5 @@
 function plot_spikes(handles)
+set(handles.file_name,'string','Plotting...'); drawnow;
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 spikes = USER_DATA{2};
@@ -164,7 +165,7 @@ if handles.force==1
         clustering_results(ind2,3) = otemp; % update original temperatures with forced class
         clustering_results(ind2,4) = oclass; % update original class with forced class
     end
-elseif  handles.setclus
+elseif  ~handles.setclus
     forced = USER_DATA{13};
     USER_DATA{14} = forced;
     new_forced = false(size(forced));
@@ -212,6 +213,14 @@ clear clustering_results_bk;
 for i=20:52
     USER_DATA{i} = [];
 end
+
+set(handles.fix1_button,'value',0);
+set(handles.fix2_button,'value',0);
+set(handles.fix3_button,'value',0);
+for i=4:par.max_clus
+    eval(['par.fix' num2str(i) '=0;']);
+end
+
 set(handles.wave_clus_figure,'userdata',USER_DATA)
 
 % Clear plots
@@ -319,4 +328,5 @@ for i =1:figs_num
 end
 
 mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
+set(handles.file_name,'string', par.file_name_to_show);
 drawnow

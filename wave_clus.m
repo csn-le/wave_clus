@@ -180,6 +180,7 @@ handles.par.fnamespc = 'data_wc';
 
 
 handles.par = update_par(data_handler,handles.par);
+handles.par.file_name_to_show = [pathname filename];
 
 if data_handler.with_results %data have _times files
     [clu, tree, spikes, index, inspk, ipermut, classes, forced, rejected] = data_handler.load_results();
@@ -241,9 +242,8 @@ end
 
 if data_handler.with_raw && handles.par.sample_segment          %raw exists
     [xd_sub, sr_sub] = data_handler.get_signal_sample();
-    Plot_continuous_data(xd_sub, sr_sub, handles)
+    Plot_continuous_data(xd_sub, sr_sub, handles); drawnow
     clear xd_sub
-    drawnow
 end
 
 %Fixing lost elements of clu . Skiped elements will be  class -1 because in
@@ -317,22 +317,17 @@ handles.force = 0;
 handles.merge = 0;
 handles.reject = 0;
 handles.minclus = handles.par.min_clus;
-handles.setclus = 0;
+handles.setclus = 1;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 % mark clusters when new data is loaded
 guidata(hObject, handles); %this is need for plot the isi histograms
 
 plot_spikes(handles); %This function edit userdata
-USER_DATA = get(handles.wave_clus_figure,'userdata');
-clustering_results = USER_DATA{10};
-mark_clusters_temperature_diagram(handles,tree,clustering_results);
-set(handles.file_name,'string',[pathname filename]);
-
+set(handles.file_name,'string',handles.par.file_name_to_show);
 
 % --- Executes on button press in change_temperature_button.
 function change_temperature_button_Callback(hObject, eventdata, handles)
-hold(handles.temperature_plot,'off')
 [temp,aux,button] = ginput(1);                                          %gets the mouse input
 if button == 3
 	return
@@ -358,27 +353,15 @@ USER_DATA{8} = temp;
 
 handles.minclus = min_clus;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-
 handles.setclus = 0;
 handles.force = 0;
 handles.merge = 0;
 handles.reject = 0;
 handles.undo = 0;
+set(handles.min_clus_edit,'string',num2str(handles.minclus));
 plot_spikes(handles);
-USER_DATA = get(handles.wave_clus_figure,'userdata');
-clustering_results = USER_DATA{10};
-mark_clusters_temperature_diagram(handles,tree,clustering_results);
 
-set(handles.wave_clus_figure,'userdata',USER_DATA);
 
-set(handles.fix1_button,'value',0);
-set(handles.fix2_button,'value',0);
-set(handles.fix3_button,'value',0);
-for i=4:par.max_clus
-    eval(['par.fix' num2str(i) '=0;']);
-end    
-USER_DATA{1} = par;
-set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 
 % --- Change min_clus_edit     
@@ -396,8 +379,6 @@ USER_DATA{16} = USER_DATA{15};
 clustering_results = USER_DATA{10};
 clustering_results(:,5) = par.min_clus;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
-
-mark_clusters_temperature_diagram(handles,tree,clustering_results)
 handles.setclus = 0;
 handles.force = 0;
 handles.merge = 0;
@@ -405,19 +386,7 @@ handles.undo = 0;
 handles.reject = 0;
 handles.minclus = par.min_clus;
 plot_spikes(handles);
-USER_DATA = get(handles.wave_clus_figure,'userdata');
-clustering_results = USER_DATA{10};
-set(handles.wave_clus_figure,'userdata',USER_DATA);
-mark_clusters_temperature_diagram(handles,tree,clustering_results)
 
-set(handles.force_button,'value',0);
-set(handles.force_button,'string','Force');
-set(handles.fix1_button,'value',0);
-set(handles.fix2_button,'value',0);
-set(handles.fix3_button,'value',0);
-for i=4:par.max_clus
-    eval(['par.fix' num2str(i) '=0;']);
-end
 
 
 % --- Executes on button press in save_clusters_button.
@@ -532,6 +501,8 @@ if ~isempty(h_fig6)
     set(gcf,'paperposition',[.25 .25 10.5 7.8])
     eval(['print(h_fig6,''-djpeg'',''fig2print_' outfile(7:end) 'f' ''')' ]);
 end
+set(hObject,'value',0);
+
 
 % --- Executes on button press in set_parameters_button.
 function set_parameters_button_Callback(hObject, eventdata, handles)
@@ -543,7 +514,6 @@ function set_parameters_button_Callback(hObject, eventdata, handles)
     end
     edit([pwd filesep 'set_parameters.m'])
    
-    
     
 %SETTING OF FORCE MEMBERSHIP
 % --------------------------------------------------------------------
@@ -614,17 +584,6 @@ handles.reject = 0;
 handles.undo = 0;
 plot_spikes(handles);
 
-USER_DATA = get(handles.wave_clus_figure,'userdata');
-set(handles.wave_clus_figure,'userdata',USER_DATA);
-
-set(handles.fix1_button,'value',0);
-set(handles.fix2_button,'value',0);
-set(handles.fix3_button,'value',0);
-for i=4:par.max_clus
-    eval(['par.fix' num2str(i) '=0;']);
-end    
-mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
-
 
 function manual_clus_button_Callback(hObject, eventdata, handles)
     rect = getrect(handles.projections);
@@ -691,7 +650,7 @@ function unforce_button_Callback(hObject, eventdata, handles)
     end
     rejected = USER_DATA{15};
     USER_DATA{16} = rejected; %update bk of rejected spikes
-    classes(forced & (~new_forced) & (~rejected)) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
+    classes(forced(:) & (~new_forced(:)) & (~rejected(:))) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
     handles.setclus = 1;
     handles.force = 0;
     handles.merge = 0;
@@ -702,8 +661,7 @@ function unforce_button_Callback(hObject, eventdata, handles)
     
     set(handles.wave_clus_figure,'userdata',USER_DATA)
     plot_spikes(handles);
-    
-    
+
     
     
 % PLOT ALL PROJECTIONS BUTTON
@@ -894,7 +852,7 @@ function undo_button_Callback(hObject, eventdata, handles)
 handles.force = 0;
 handles.merge = 0;
 handles.undo = 1;
-handles.setclus = 0;
+handles.setclus = 1;
 handles.reject = 0;
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
@@ -910,21 +868,8 @@ handles.minclus = clustering_results_bk(1,5);
 USER_DATA{8} = clustering_results_bk(1,1); % old gui temperatures
 set(handles.wave_clus_figure,'userdata',USER_DATA)
 plot_spikes(handles) % plot_spikes updates USER_DATA{11}
-USER_DATA = get(handles.wave_clus_figure,'userdata');
-tree = USER_DATA{5};
-clustering_results_bk = USER_DATA{11};
+set(handles.min_clus_edit,'string',num2str(handles.minclus));
 
-mark_clusters_temperature_diagram(handles,tree,clustering_results_bk)
-min_clus = handles.minclus;
-set(handles.min_clus_edit,'string',num2str(min_clus));
-set(handles.fix1_button,'value',0);
-set(handles.fix2_button,'value',0);
-set(handles.fix3_button,'value',0);
-for i=4:par.max_clus
-    eval(['par.fix' num2str(i) '=0;']);
-end  
-USER_DATA{1} = par;
-set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 
 % --- Executes on button press in merge_button.
@@ -932,26 +877,14 @@ function merge_button_Callback(hObject, eventdata, handles)
 handles.force = 0;
 handles.merge = 1;
 handles.undo = 0;
-handles.setclus = 0;
+handles.setclus = 1;
 handles.reject = 0;
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 clustering_results = USER_DATA{10};
 handles.minclus = clustering_results(1,5);
 plot_spikes(handles)
-USER_DATA = get(handles.wave_clus_figure,'userdata');
-tree = USER_DATA{5};
-clustering_results = USER_DATA{10};
-mark_clusters_temperature_diagram(handles,tree,clustering_results)
-set(handles.wave_clus_figure,'userdata',USER_DATA)
-set(handles.fix1_button,'value',0);
-set(handles.fix2_button,'value',0);
-set(handles.fix3_button,'value',0);
-for i=4:par.max_clus
-    eval(['par.fix' num2str(i) '=0;']);
-end  
-USER_DATA{1} = par;
-set(handles.wave_clus_figure,'userdata',USER_DATA);
+
 
 
 % --- Executes on button press in merge_button.

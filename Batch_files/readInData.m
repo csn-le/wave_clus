@@ -79,7 +79,7 @@ classdef readInData < handle
                     throw(ME)
                 else
                     disp ('File type isn''t supported.')
-                    disp ('Using Wave_clus data found it.')
+                    disp ('Using Wave_clus data found.')
                 end
             end
             

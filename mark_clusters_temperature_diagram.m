@@ -31,13 +31,12 @@ switch handles.par.temp_plot
             tree_clus = tree(temp_plot(i),4+class_plot(i));
             tree_temp = tree(temp_plot(i)+1,2);
             plot(handles.temperature_plot, tree_temp,tree_clus,'.','color',num2str(colors(classgui_plot(i))),'MarkerSize',20);
-            % text(tree_temp,tree_clus,num2str(classgui_plot(i)));
         end
         set(get(gca,'ylabel'),'vertical','Baseline');
     case 'log'
         % draw diagram
         set(handles.temperature_plot,'yscale','log');
-         semilogy(handles.temperature_plot, [handles.par.mintemp handles.par.maxtemp-handles.par.tempstep], ...
+        semilogy(handles.temperature_plot, [handles.par.mintemp handles.par.maxtemp-handles.par.tempstep], ...
             [handles.par.min.clus handles.par.min.clus],'k:',...
             handles.par.mintemp+(1:handles.par.num_temp)*handles.par.tempstep, ...
             tree(1:handles.par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
@@ -47,7 +46,6 @@ switch handles.par.temp_plot
             tree_clus = tree(temp_plot(i),4+class_plot(i));
             tree_temp = tree(temp_plot(i)+1,2);
             semilogy(handles.temperature_plot, tree_temp,tree_clus,'.','color',num2str(colors(classgui_plot(i))),'MarkerSize',20);
-            % text(tree_temp,tree_clus,num2str(classgui_plot(i)));
         end
         set(get(handles.temperature_plot,'ylabel'),'vertical','Baseline');
 end
