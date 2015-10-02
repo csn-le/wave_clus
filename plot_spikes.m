@@ -228,7 +228,7 @@ for i=1:4
     cla(eval(['handles.spikes' num2str(i-1)]),'reset');
     cla(eval(['handles.isi' num2str(i-1)]),'reset');
 end    
-cla(handles.projections); reset(gca)
+cla(handles.projections); 
 hold(handles.projections,'on')
 % Plot clusters
 ylimit = [];

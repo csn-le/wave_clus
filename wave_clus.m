@@ -346,7 +346,6 @@ par.min_clus = min_clus;
 clu = USER_DATA{4};
 classes = clu(temp, 3:end) + 1;
 classes(rejected) = 0;
-tree = USER_DATA{5};
 USER_DATA{1} = par;
 USER_DATA{6} = classes(:)';
 USER_DATA{8} = temp;
@@ -358,7 +357,6 @@ handles.force = 0;
 handles.merge = 0;
 handles.reject = 0;
 handles.undo = 0;
-set(handles.min_clus_edit,'string',num2str(handles.minclus));
 plot_spikes(handles);
 
 
@@ -367,7 +365,7 @@ plot_spikes(handles);
 % --- Change min_clus_edit     
 function min_clus_edit_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
-par = USER_DATA{1};
+par = USER_DATA{1};  
 par.min_clus = str2num(get(hObject, 'String'));
 clu = USER_DATA{4};
 temp = USER_DATA{8};
@@ -585,27 +583,38 @@ handles.undo = 0;
 plot_spikes(handles);
 
 
-function manual_clus_button_Callback(hObject, eventdata, handles)
-    rect = getrect(handles.projections);
+function manual_clus_button_Callback(hObject, eventdata,handles, cl)
     USER_DATA = get(handles.wave_clus_figure,'userdata');
+    spikes = USER_DATA{2};
+    classes = USER_DATA{6};
+    forced = USER_DATA{13};
+    
+    
+    if cl == -1
+        rect = getrect(handles.projections);
+        valids = ~USER_DATA{15}; %First, I don't select the rejected
+    else
+        eval(['rect = getrect(handles.spikes' num2str(cl) ');']);
+        valids = ~USER_DATA{15}(:) & (classes(:)==cl); %First, I don't select the rejected
+
+    end
     xind = ceil(rect(1));
     xend = floor(rect(1) + rect(3));
     ymin = rect(2);
     ymax = rect(2) +rect(4);
-    
-    spikes = USER_DATA{2};
-    classes = USER_DATA{6};
-    forced = USER_DATA{13};
-    USER_DATA{14} = forced;
-    [Mh, Mpos] = max(spikes');
-    [mh ,mpos] = min(spikes');
-    
+    [Mh, Mpos] = max(spikes(valids,1:end)');
+    [mh ,mpos] = min(spikes(valids,1:end)');
     sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos >= xind & Mpos <= xend);
     sp_selected = sp_selected |(mh >= ymin & mh <= ymax) & (mpos >= xind & mpos <= xend);
-    sp_selected(USER_DATA{15}) = false;  %don't select the rejected
+    
+    valids(valids==1) = sp_selected;
+    
     clus_n = max(classes) + 1;
-    forced(sp_selected) = 0;
-    classes(sp_selected)= clus_n;
+    USER_DATA{14} = forced;
+    
+    forced(valids) = 0;
+    classes(valids)= clus_n;
+    
     handles.setclus = 1;
     handles.force = 0;
     handles.merge = 0;
