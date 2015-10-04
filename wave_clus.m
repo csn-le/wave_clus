@@ -310,20 +310,24 @@ end
 clustering_results(:,5) = repmat(handles.par.min_clus,length(classes),1); % minimum number of clusters
 USER_DATA{6} = classes(:)';
 USER_DATA{8} = temp;
-clustering_results_bk = clustering_results; % old clusters for undo actions
 USER_DATA{10} = clustering_results;
-USER_DATA{11} = clustering_results_bk;
+USER_DATA{11} = clustering_results;
 handles.force = 0;
 handles.merge = 0;
 handles.reject = 0;
 handles.minclus = handles.par.min_clus;
-handles.setclus = 1;
+handles.setclus = 0;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 
+clear clustering_results classes rejected spikes
 % mark clusters when new data is loaded
 guidata(hObject, handles); %this is need for plot the isi histograms
 
 plot_spikes(handles); %This function edit userdata
+USER_DATA = get(handles.wave_clus_figure,'userdata');
+USER_DATA{13} = forced;
+USER_DATA{14} = forced;
+set(handles.wave_clus_figure,'userdata',USER_DATA);
 set(handles.file_name,'string',handles.par.file_name_to_show);
 
 % --- Executes on button press in change_temperature_button.

@@ -67,11 +67,11 @@ switch system_type
         run_linux = sprintf('./cluster_linux.exe %s.run',fname);
 	    unix(run_linux);
     case {'GLNXA64', 'GLNXI64'}
-        if exist([pwd '/cluster_linux64'],'file') == 0
-            directory = which('cluster_linux64');
+        if exist([pwd '/cluster_linux64.exe'],'file') == 0
+            directory = which('cluster_linux64.exe');
             copyfile(directory,pwd);
         end
-        run_linux = sprintf('./cluster_linux64 %s.run',fname);
+        run_linux = sprintf('./cluster_linux64.exe %s.run',fname);
 	    unix(run_linux);        
     otherwise 
     	ME = MException('MyComponent:NotSupportedArq', '%s type of computer not supported.',com_type);
