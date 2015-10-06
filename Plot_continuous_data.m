@@ -33,4 +33,6 @@ ypmin = max(-thrmax/2, min(xf_detect));
 
 %axis(handles.cont_data, [0 lx/sr_sub ypmin ypmax])
 ylim(handles.cont_data, [ypmin ypmax])
+xlim(handles.cont_data, [0 lx/sr_sub])
+
 %xlabel('Time (sec)')

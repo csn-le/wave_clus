@@ -364,8 +364,6 @@ handles.undo = 0;
 plot_spikes(handles);
 
 
-
-
 % --- Change min_clus_edit     
 function min_clus_edit_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
@@ -510,12 +508,7 @@ set(hObject,'value',0);
 function set_parameters_button_Callback(hObject, eventdata, handles)
     %helpdlg('Check the set_parameters files in the subdirectory
     %Wave_clus\Parameters_files');
-    this_folder = dir();
-    if ~ismember('set_parameters.m',{this_folder.name})
-         copyfile([fileparts(mfilename('fullpath')) filesep 'set_parameters.m'], [pwd filesep 'set_parameters.m']);
-    end
-    edit([pwd filesep 'set_parameters.m'])
-   
+    set_parameters_ui()
     
 %SETTING OF FORCE MEMBERSHIP
 % --------------------------------------------------------------------

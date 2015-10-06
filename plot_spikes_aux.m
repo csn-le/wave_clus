@@ -1,5 +1,4 @@
 function plot_spikes_aux(handles, plot_number)
-
 if ~exist('plot_number','var') || (plot_number== 0)
 	USER_DATA = get(handles.wave_clus_aux,'userdata');
 	plot_number= 0;

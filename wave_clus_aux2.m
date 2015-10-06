@@ -83,11 +83,6 @@ varargout{1} = handles.output;
 
 h_figs=get(0,'children');
 h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux4');
-h_fig5 = findobj(h_figs,'tag','wave_clus_aux5');
 USER_DATA = get(h_fig,'UserData');
 par = USER_DATA{1};
 
@@ -99,26 +94,11 @@ for i = 14:18
 	
 	eval(['set(handles.isi' si '_nbins,''string'',par.nbins' si ');']);
 	eval(['set(handles.isi' si '_bin_step,''string'',par.bin_step' si ');']);
-	
-	% That's for passing the fix button settings to plot_spikes.
-	if eval(['get(handles.fix' si '_button,''value'')']) ==1     
-		eval(['par.fix' si ' = 1;']);
-	else
-		eval(['par.fix' si ' = 0;']);
-	end
 end
 
 
 USER_DATA{1} = par;
 set(handles.wave_clus_aux2,'userdata',USER_DATA)
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-set(h_fig5,'userdata',USER_DATA)
-
-
 plot_spikes_aux(handles,2)
 
 

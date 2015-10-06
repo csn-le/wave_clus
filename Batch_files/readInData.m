@@ -30,7 +30,7 @@ classdef readInData < handle
             times_selected = false;
             
 
-            if strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat')
+            if length(fnam)>10 && strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat')
                 times_selected = true;
                 obj.nick_name = fnam(7:end);
             end
