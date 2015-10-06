@@ -1,4 +1,4 @@
-function Do_clustering(input)
+function Do_clustering(input, par_input)
 
 % PROGRAM Do_clustering.
 % Does clustering on all files in Files.txt
@@ -50,6 +50,8 @@ end
 for fnum = 1:length(filenames)
     filename = filenames{fnum};
     par = set_parameters();
+    
+    
     par.filename = filename;
     par.reset_results = true;
     
@@ -62,6 +64,10 @@ for fnum = 1:length(filenames)
     par.nick_name = data_handler.nick_name;
     par.fnamespc = par.fname;                  %filename if "save clusters" button is pressed
 
+    if exist('par_input','var')
+        par = update_parameters(par,par_input,'relevant');
+    end
+    
     if data_handler.with_spikes            %data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes

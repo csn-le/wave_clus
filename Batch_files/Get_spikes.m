@@ -1,4 +1,4 @@
-function Get_spikes(input)
+function Get_spikes(input, par_input)
 
 
 if isnumeric(input) || strcmp(input,'all')
@@ -51,7 +51,9 @@ for filename = 1: size(filenames,1)
 
     data_handler = readInData(par);
     par = data_handler.par;
-
+    if exist('par_input','var')
+        par = update_parameters(par,par_input,'detect');
+    end
 
     if data_handler.with_spikes            %data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
@@ -73,7 +75,8 @@ for filename = 1: size(filenames,1)
     current_par = par;
     par = struct;
     par = update_parameters(par, current_par, 'detect');
-
+    
+    
     %<----  Add here auxiliar parameters
 
     if par.sample_segment
