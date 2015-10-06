@@ -580,18 +580,27 @@ handles.undo = 0;
 plot_spikes(handles);
 
 
-function manual_clus_button_Callback(hObject, eventdata,handles, cl)
-    USER_DATA = get(handles.wave_clus_figure,'userdata');
+function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
+    
+    if isfield(handles_local,'wave_clus_figure')
+        USER_DATA = get(handles.wave_clus_figure,'userdata');
+         handles = handles_local;
+    else
+        h_figs=get(0,'children');
+        h_fig = findobj(h_figs,'tag','wave_clus_figure');
+        USER_DATA = get(h_fig,'UserData');
+        handles =guidata(h_fig);
+    end
+
     spikes = USER_DATA{2};
     classes = USER_DATA{6};
-    forced = USER_DATA{13};
-    
+    forced = USER_DATA{13};   
     
     if cl == -1
-        rect = getrect(handles.projections);
+        rect = getrect(handles_local.projections);
         valids = ~USER_DATA{15}; %First, I don't select the rejected
     else
-        eval(['rect = getrect(handles.spikes' num2str(cl) ');']);
+        eval(['rect = getrect(handles_local.spikes' num2str(cl) ');']);
         valids = ~USER_DATA{15}(:) & (classes(:)==cl); %First, I don't select the rejected
 
     end
@@ -620,7 +629,13 @@ function manual_clus_button_Callback(hObject, eventdata,handles, cl)
     USER_DATA{6} = classes(:)';
     USER_DATA{13} = forced;
     USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
-    set(handles.wave_clus_figure,'userdata',USER_DATA)
+    
+    if isfield(handles,'wave_clus_figure')
+        set(handles.wave_clus_figure,'userdata',USER_DATA)
+    else
+        set(h_fig,'userdata',USER_DATA)
+    end
+
     plot_spikes(handles);
 
 
@@ -689,7 +704,7 @@ cn = regexp(b_name, '\d+', 'match');
 
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 classes = USER_DATA{6};
-eval(['fix_class = find(classes==' cn{1} ');']);
+fix_class = find(classes== str2double(cn{1}));
 
 if get(eval(['handles.fix' cn{1} '_button']),'value') ==1
     USER_DATA{19+str2double(cn{1})} = fix_class;  %20 for class 1, etc
