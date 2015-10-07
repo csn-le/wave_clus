@@ -175,27 +175,29 @@ eval(['cla(handles.spikes' int2str(cn) ',''reset'');']);
 eval(['cla(handles.isi' int2str(cn) ',''reset'');']);
 eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',1);']);
 
+
 % FIX buttons
 % --------------------------------------------------------
-function fix29_button_Callback(hObject, eventdata, handles)
+function fix_button_Callback(hObject, eventdata, handles, cn)
 USER_DATA = get(handles.wave_clus_aux5,'userdata');
 par = USER_DATA{1};
 classes = USER_DATA{6};
-fix_class = find(classes==29);
-if get(handles.fix29_button,'value') ==1
-    USER_DATA{48} = fix_class;
-    par.fix29 = 1;
+fix_class = find(classes==cn);
+
+if get(eval(['handles.fix' num2str(cn) '_button']),'value') ==1
+    USER_DATA{19+cn} = fix_class;
+    eval(['par.fix' num2str(cn) '= 1;'])
 else
-    USER_DATA{48} = [];
-    par.fix29 = 0;
+    USER_DATA{19+cn} = [];
+    eval(['par.fix' num2str(cn) '= 0;'])
 end
 USER_DATA{1} = par;
 h_figs=get(0,'children');
 h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
+h_fig1 = findobj(h_figs,'tag','wave_clus_aux1');
+h_fig2 = findobj(h_figs,'tag','wave_clus_aux2');
+h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
+h_fig4 = findobj(h_figs,'tag','wave_clus_aux');
 h_fig5 = findobj(h_figs,'tag','wave_clus_aux4');
 set(handles.wave_clus_aux5,'userdata',USER_DATA);
 set(h_fig,'userdata',USER_DATA)
@@ -204,115 +206,4 @@ set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
 set(h_fig4,'userdata',USER_DATA)
 set(h_fig5,'userdata',USER_DATA)
-% --------------------------------------------------------
-function fix30_button_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-classes = USER_DATA{6};
-fix_class = find(classes==30);
-if get(handles.fix30_button,'value') ==1
-    USER_DATA{49} = fix_class;
-    par.fix30 = 1;
-else
-    USER_DATA{49} = [];
-    par.fix30 = 0;
-end
-USER_DATA{1} = par;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
-h_fig5 = findobj(h_figs,'tag','wave_clus_aux4');
-set(handles.wave_clus_aux5,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-set(h_fig5,'userdata',USER_DATA)
-% --------------------------------------------------------
-function fix31_button_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-classes = USER_DATA{6};
-fix_class = find(classes==31);
-if get(handles.fix31_button,'value') ==1
-    USER_DATA{50} = fix_class;
-    par.fix31 = 1;
-else
-    USER_DATA{50} = [];
-    par.fix31 = 0;
-end
-USER_DATA{1} = par;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
-h_fig5 = findobj(h_figs,'tag','wave_clus_aux4');
-set(handles.wave_clus_aux5,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-set(h_fig5,'userdata',USER_DATA)
-% --------------------------------------------------------
-function fix32_button_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-classes = USER_DATA{6};
-fix_class = find(classes==32);
-if get(handles.fix32_button,'value') ==1
-    USER_DATA{51} = fix_class;
-    par.fix32 = 1;
-else
-    USER_DATA{51} = [];
-    par.fix32 = 0;
-end
-USER_DATA{1} = par;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
-h_fig5 = findobj(h_figs,'tag','wave_clus_aux4');
-set(handles.wave_clus_aux5,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-set(h_fig5,'userdata',USER_DATA)
-% --------------------------------------------------------
-function fix33_button_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux4,'userdata');
-par = USER_DATA{1};
-classes = USER_DATA{6};
-fix_class = find(classes==33);
-if get(handles.fix33_button,'value') ==1
-    USER_DATA{52} = fix_class;
-    par.fix33 = 1;
-else
-    USER_DATA{52} = [];
-    par.fix33 = 0;
-end
-USER_DATA{1} = par;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
-h_fig5 = findobj(h_figs,'tag','wave_clus_aux4');
-set(handles.wave_clus_aux5,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig4,'userdata',USER_DATA)
-set(h_fig5,'userdata',USER_DATA)
+

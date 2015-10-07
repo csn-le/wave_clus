@@ -194,10 +194,14 @@ h_fig = findobj(h_figs,'tag','wave_clus_figure');
 h_fig1 = findobj(h_figs,'tag','wave_clus_aux1');
 h_fig2 = findobj(h_figs,'tag','wave_clus_aux2');
 h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
+h_fig4 = findobj(h_figs,'tag','wave_clus_aux4');
+h_fig5 = findobj(h_figs,'tag','wave_clus_aux5');
 set(handles.wave_clus_aux,'userdata',USER_DATA);
 set(h_fig,'userdata',USER_DATA)
 set(h_fig1,'userdata',USER_DATA)
 set(h_fig2,'userdata',USER_DATA)
 set(h_fig3,'userdata',USER_DATA)
+set(h_fig4,'userdata',USER_DATA)
+set(h_fig5,'userdata',USER_DATA)
 
 

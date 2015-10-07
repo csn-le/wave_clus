@@ -174,116 +174,20 @@ eval(['cla(handles.spikes' int2str(cn) ',''reset'');']);
 eval(['cla(handles.isi' int2str(cn) ',''reset'');']);
 eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',1);']);
 
-
 % FIX buttons
 % --------------------------------------------------------
-function fix14_button_Callback(hObject, eventdata, handles)
+function fix_button_Callback(hObject, eventdata, handles, cn)
 USER_DATA = get(handles.wave_clus_aux2,'userdata');
 par = USER_DATA{1};
 classes = USER_DATA{6};
-fix_class = find(classes==14);
-if get(handles.fix14_button,'value') ==1
-    USER_DATA{33} = fix_class;
-    par.fix14 = 1;
+fix_class = find(classes==cn);
+
+if get(eval(['handles.fix' num2str(cn) '_button']),'value') ==1
+    USER_DATA{19+cn} = fix_class;
+    eval(['par.fix' num2str(cn) '= 1;'])
 else
-    USER_DATA{33} = [];
-    par.fix14 = 0;
-end
-USER_DATA{1} = par;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux2,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-% --------------------------------------------------------
-function fix15_button_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux2,'userdata');
-par = USER_DATA{1};
-classes = USER_DATA{6};
-fix_class = find(classes==15);
-if get(handles.fix15_button,'value') ==1
-    USER_DATA{34} = fix_class;
-    par.fix15 = 1;
-else
-    USER_DATA{34} = [];
-    par.fix15 = 0;
-end
-USER_DATA{1} = par;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux2,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-% --------------------------------------------------------
-function fix16_button_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux2,'userdata');
-par = USER_DATA{1};
-classes = USER_DATA{6};
-fix_class = find(classes==16);
-if get(handles.fix16_button,'value') ==1
-    USER_DATA{35} = fix_class;
-    par.fix16 = 1;
-else
-    USER_DATA{35} = [];
-    par.fix16 = 0;
-end
-USER_DATA{1} = par;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux2,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-% --------------------------------------------------------
-function fix17_button_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux2,'userdata');
-par = USER_DATA{1};
-classes = USER_DATA{6};
-fix_class = find(classes==17);
-if get(handles.fix17_button,'value') ==1
-    USER_DATA{36} = fix_class;
-    par.fix17 = 1;
-else
-    USER_DATA{36} = [];
-    par.fix17 = 0;
-end
-USER_DATA{1} = par;
-h_figs=get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux3');
-set(handles.wave_clus_aux2,'userdata',USER_DATA);
-set(h_fig,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-% --------------------------------------------------------
-function fix18_button_Callback(hObject, eventdata, handles)
-USER_DATA = get(handles.wave_clus_aux2,'userdata');
-par = USER_DATA{1};
-classes = USER_DATA{6};
-fix_class = find(classes==18);
-if get(handles.fix18_button,'value') ==1
-    USER_DATA{37} = fix_class;
-    par.fix18 = 1;
-else
-    USER_DATA{37} = [];
-    par.fix18 = 0;
+    USER_DATA{19+cn} = [];
+    eval(['par.fix' num2str(cn) '= 0;'])
 end
 USER_DATA{1} = par;
 h_figs=get(0,'children');
