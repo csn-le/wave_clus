@@ -1,19 +1,19 @@
-function [spikes,index] = amp_detect_pol(x,handles)
+function [spikes,index] = amp_detect_pol(x, par)
 %detect spikes in a tetrode
 
 %PARAMETERS
-sr = handles.par.sr; % ~28KHz
-w_pre = handles.par.w_pre;
-w_post = handles.par.w_post;
-ref = handles.par.ref; % refractory period (value in counts)
-detect = handles.par.detection;
-stdmin = handles.par.stdmin;
-stdmax = handles.par.stdmax;
-fmin_detect = handles.par.detect_fmin;
-fmax_detect = handles.par.detect_fmax;
-fmin_sort = handles.par.sort_fmin;
-fmax_sort = handles.par.sort_fmax;
-awin = handles.awin;  
+sr =  par.sr; % ~28KHz
+w_pre = par.w_pre;
+w_post = par.w_post;
+ref = ceil(par.ref_ms/1000 * par.sr);
+detect = par.detection;
+stdmin = par.stdmin;
+stdmax = par.stdmax;
+fmin_detect = par.detect_fmin;
+fmax_detect = par.detect_fmax;
+fmin_sort = par.sort_fmin;
+fmax_sort = par.sort_fmax;
+awin = par.alignment_window;  
 
 % SPIKE DETECTION FOR EACH CHANNEL
 % Detects all spike times including all channels
@@ -22,7 +22,7 @@ awin = handles.awin;
 % different channels. 
 index = [];
 for i=1:size(x,1)
-   [indexch,xf(i,:),thr(i)] = index_detect_pol(x(i,:),handles); % spike times and filtered data
+   [indexch,xf(i,:),thr(i)] = index_detect_pol(x(i,:),par); % spike times and filtered data
    index = [index indexch];
    clear indexch;
 end
@@ -47,13 +47,13 @@ end
 % POLY-SPIKE INTERPOLATION
 % interpolation and downsampling is done separately in every channel within
 % each poly-spike which does the interchannel alignment
-switch handles.par.interpolation
+switch par.interpolation
     case 'n'
         spikes(:,end-1:end)=[];       %eliminates borders that were introduced for interpolation 
         spikes(:,1:2)=[];
     case 'y'
         %Does interpolation
-        spikes = int_spikes_pol(spikes,size(x,1),thr,handles);   
+        spikes = int_spikes_pol(spikes,size(x,1),thr,par);   
 end
 
 

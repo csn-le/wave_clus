@@ -10,6 +10,7 @@ par.cont_segment = true;
 par.max_spikes_plot = 2000;              % max. # of spikes to be plotted
 par.print2file = true;                   % If is not true, print the figure (only for batch scripts).
 par.cont_plot_samples = 100000;
+par.to_plot_std = 1;                % # of std from mean to plot
 
 % SPC PARAMETERS
 par.mintemp = 0.00;                  % minimum temperature for SPC

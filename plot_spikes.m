@@ -8,8 +8,6 @@ classes = classes(:)';
 inspk = USER_DATA{7};
 temp = USER_DATA{8};
 ls = size(spikes,2);
-par.to_plot_std = 1;                % # of std from mean to plot
-
 minclus = handles.minclus;
 clustering_results = USER_DATA{10};
 

@@ -1,19 +1,19 @@
-function [index,xf,thr] = index_detect_pol(x,handles)
+function [index,xf,thr] = index_detect_pol(x,par)
 % return the spike times within a channel
 
 %PARAMETERS
-sr=handles.par.sr;
-w_pre=handles.par.w_pre;
-w_post=handles.par.w_post;
-ref=handles.par.ref;
-detect = handles.par.detection;
-stdmin = handles.par.stdmin;
-stdmax = handles.par.stdmax;
-fmin_detect = handles.par.detect_fmin;
-fmax_detect = handles.par.detect_fmax;
-fmin_sort = handles.par.sort_fmin;
-fmax_sort = handles.par.sort_fmax;
-awin = handles.awin;  
+sr=par.sr;
+w_pre=par.w_pre;
+w_post=par.w_post;
+ref = ceil(par.ref_ms/1000 * par.sr);
+detect =  par.detection;
+stdmin =  par.stdmin;
+stdmax =  par.stdmax;
+fmin_detect =  par.detect_fmin;
+fmax_detect =  par.detect_fmax;
+fmin_sort =  par.sort_fmin;
+fmax_sort =  par.sort_fmax;
+awin =  par.alignment_window;  
 
 % HIGH-PASS FILTER OF THE DATA
 xf=zeros(length(x),1);

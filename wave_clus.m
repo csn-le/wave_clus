@@ -174,10 +174,6 @@ handles.par.fname = ['data_' data_handler.nick_name];
 handles.par.nick_name = data_handler.nick_name;
 handles.par.fnamesave = handles.par.fname;                  %filename if "save clusters" button is pressed
 handles.par.fnamespc = 'data_wc';
-%handles.par.fname = [handles.par.fname '_wc'];              %Output filename of SPC 
-
-%handles.par.fname = data_handler.nick_name;
-
 
 handles.par = update_par(data_handler,handles.par);
 handles.par.file_name_to_show = [pathname filename];
@@ -690,7 +686,7 @@ function unforce_button_Callback(hObject, eventdata, handles)
 function Plot_all_projections_button_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
-if strcmp(par.filename(1:4),'poly')
+if par.channels > 1
     Plot_amplitudes(handles)
 else
     Plot_all_features(handles)
@@ -936,7 +932,7 @@ function reject2clus_Callback(hObject, eventdata, handles)
 function Plot_polytrode_button_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
-if strcmp(par.filename(1:9),'polytrode')
+if par.channels > 1
     Plot_polytrode(handles)
 end
 

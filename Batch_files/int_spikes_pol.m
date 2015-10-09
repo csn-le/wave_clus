@@ -1,18 +1,18 @@
-function [spikes1] = int_spikes_pol(spikes,nch,thr,handles); 
+function [spikes1] = int_spikes_pol(spikes,nch,thr,par); 
 %Interpolates with cubic splines to improve alignment.
 
-w_pre = handles.par.w_pre;
-w_post = handles.par.w_post;
-ref=handles.par.ref;
-detect = handles.par.detection;
-int_factor = handles.par.int_factor;
+w_pre = par.w_pre;
+w_post = par.w_post;
+ref = ceil(par.ref_ms/1000 * par.sr);
+detect = par.detection;
+int_factor = par.int_factor;
 nspk = size(spikes,1);
 s = 1:size(spikes,2)/nch; % length of the single spike
 ints = 1/int_factor:1/int_factor:size(spikes,2)/nch; 
 intspikes = zeros(1,length(ints));
 lspk = w_pre + w_post; % length of a spike
 spikes1 = zeros(nspk,lspk*nch);
-awin = handles.awin;  
+awin = par.alignment_window;  
 lsa = w_pre + w_post + 2*awin; % spike length with extra samples for alignment
 
 switch detect

@@ -5,7 +5,6 @@ par = USER_DATA{1};
 spikes = USER_DATA{2};
 classes = USER_DATA{6};
 nclusters = max(classes);
-par.to_plot_std = 1;
 ls = size(spikes,2); % polytrode spike length
 lch = par.w_pre + par.w_post; % spike length
 nchannels = ls/lch;
