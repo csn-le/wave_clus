@@ -170,11 +170,11 @@ classdef readInData < handle
                 x = double(x);
             end
 
-            if ~obj.with_psegment && obj.n_to_read == 1 && obj.par.sample_segment
+            if ~obj.with_psegment && obj.n_to_read == 1 && obj.par.cont_segment
                 lplot = min(floor(60*obj.par.sr), length(x));
                 xf_detect = spike_detection_filter(x(1:lplot), obj.par);
                 
-                max_samples = 100000;
+                max_samples = obj.par.cont_plot_samples;
                 sub = floor(lplot/max_samples);
                 obj.sample_signal.xd_sub = xf_detect(1:sub:end) ;
                 obj.sample_signal.sr_sub = obj.par.sr/sub ;

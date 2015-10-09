@@ -1,5 +1,8 @@
 function Get_spikes(input, par_input)
+% function Get_spikes(input, par_input)
 
+
+% Saves spikes and spike times.
 
 if isnumeric(input) || strcmp(input,'all')
     filenames = {};
@@ -47,7 +50,7 @@ for filename = 1: size(filenames,1)
     par.filename = filename;
     par.reset_results = true;
 
-    par.sample_segment = true;  %false to don't save the sample in spikes
+    par.cont_segment = true;  %false to don't save the sample in spikes
 
     data_handler = readInData(par);
     par = data_handler.par;
@@ -79,7 +82,7 @@ for filename = 1: size(filenames,1)
     
     %<----  Add here auxiliar parameters
 
-    if par.sample_segment
+    if par.cont_segment
         [psegment, sr_psegment] = data_handler.get_signal_sample();
         save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par','psegment','sr_psegment')
         clear psegment

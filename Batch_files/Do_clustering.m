@@ -55,7 +55,7 @@ for fnum = 1:length(filenames)
     par.filename = filename;
     par.reset_results = true;
     
-    par.sample_segment = true;  %maybe true and save the sample in spikes
+    par.cont_segment = true;  %maybe true and save the sample in spikes
 
     data_handler = readInData(par);
     par = data_handler.par;
@@ -336,7 +336,7 @@ for fnum = 1:length(filenames)
     fclose(fout);
 
     
-    if par.sample_segment
+    if par.cont_segment
         subplot(3,1,1)      
         box off; hold on
         %these lines are for plotting continuous data 

@@ -6,10 +6,11 @@ par.sr = 30000;                      %sampling rate (in Hz). This parameter will
                                                                                                                                 
                                                                                                                                 
 % PLOTTING PARAMETERS                                                                                                           
-par.sample_segment = true;                                                                                                      
+par.cont_segment = true;
 par.max_spikes_plot = 2000;              % max. # of spikes to be plotted                                                       
 par.print2file = true;                   % If is not true, print the figure (only for batch scripts).                           
-                                                                                                                                
+par.cont_plot_samples = 100000;       
+                                                                                                                
 % SPC PARAMETERS                                                                                                                
 par.mintemp = 0.00;                  % minimum temperature for SPC                                                              
 par.maxtemp = 0.201;                 % maximum temperature for SPC                                                              

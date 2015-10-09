@@ -240,7 +240,7 @@ else
     rejected = false(1, size(spikes,1));
 end
 
-if data_handler.with_raw && handles.par.sample_segment          %raw exists
+if data_handler.with_raw && handles.par.cont_segment         %raw exists
     [xd_sub, sr_sub] = data_handler.get_signal_sample();
     Plot_continuous_data(xd_sub, sr_sub, handles); drawnow
     clear xd_sub
