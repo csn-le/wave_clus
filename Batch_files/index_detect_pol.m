@@ -26,7 +26,7 @@ else
     xf=fix_filter(x);                   %Does a bandpass filtering between [300 3000] without the toolbox.
     xf_detect = xf;
 end
-lx=length(xf);
+lx = length(xf);
 clear x;
 
 noise_std_detect = median(abs(xf_detect))/0.6745;

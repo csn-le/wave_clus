@@ -44,15 +44,16 @@ else
     throw(ME)
 end
 
-for filename = 1: size(filenames,1)
-    
+for fnum = 1:length(filenames)
+    filename = filenames{fnum};
     par = set_parameters();
     par.filename = filename;
     par.reset_results = true;
 
     par.cont_segment = true;  %false to don't save the sample in spikes
-
+    
     data_handler = readInData(par);
+    
     par = data_handler.par;
     if exist('par_input','var')
         par = update_parameters(par,par_input,'detect');

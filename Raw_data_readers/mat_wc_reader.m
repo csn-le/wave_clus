@@ -76,7 +76,6 @@ classdef mat_wc_reader < handle
             end
             
             with_spikes = obj.spikes_file;
-
             if obj.sr_infile
                 sr = obj.sr;
             else

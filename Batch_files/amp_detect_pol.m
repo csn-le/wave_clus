@@ -2,7 +2,7 @@ function [spikes,index] = amp_detect_pol(x, par)
 %detect spikes in a tetrode
 
 %PARAMETERS
-sr =  par.sr; % ~28KHz
+sr =  par.sr;
 w_pre = par.w_pre;
 w_post = par.w_post;
 ref = ceil(par.ref_ms/1000 * par.sr);
