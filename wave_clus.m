@@ -186,6 +186,8 @@ else
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
             [spikes] = spike_alignment(spikes,handles.par);
+        elseif isfield(handles.par,'channels')
+                handles.par.inputs = handles.par.inputs * handles.par.channels;
         end
     else    
         set(handles.file_name,'string','Detecting spikes ...'); drawnow

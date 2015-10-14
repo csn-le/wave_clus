@@ -8,7 +8,7 @@ nclusters = max(classes);
 ls = size(spikes,2); % polytrode spike length
 lch = par.w_pre + par.w_post; % spike length
 nchannels = ls/lch;
-filename = par.filename;
+filename = par.nick_name;
 
 
 h_figs=get(0,'children');
@@ -36,15 +36,14 @@ for j=1:nchannels
             eval(['av   = mean(spikes(class' num2str(i) ',' num2str(j-1) '*lch + 1 : j*lch ));']);
             eval(['avup = av + par.to_plot_std * std(spikes(class' num2str(i) ',' num2str(j-1) '*lch + 1 : j*lch));']);
             eval(['avdw = av - par.to_plot_std * std(spikes(class' num2str(i) ',' num2str(j-1) '*lch + 1 : j*lch));']);
-            eval(['max_spikes=min(length(class' num2str(i) '),par.max_spikes);']);
+            eval(['max_spikes=min(length(class' num2str(i) '),par.max_spikes_plot);']);
             eval(['sup_spikes=length(class' num2str(i) ');']);
             permut=randperm(sup_spikes);
 
             if i < 6
                 h_fig1 = 100;
                 figure(h_fig1)
-                t = strcat(char(filename(1:9)) );
-                set(gcf,'numbertitle','off','name',t)
+                set(gcf,'numbertitle','off','name',filename)
                 if nchannels>4
                     subplot(nchannels,5,i+5*(j-1))
                 else
@@ -71,8 +70,7 @@ for j=1:nchannels
             elseif i < 11
                 h_fig2 = 101;
                 figure(h_fig2)
-                t = strcat(char(filename(1:9)), '_aux' );
-                set(gcf,'numbertitle','off','name',t)
+                set(gcf,'numbertitle','off','name',[filename '_aux'])
                 if nchannels>4
                     subplot(nchannels,5,i-5+5*(j-1))
                 else
@@ -98,8 +96,7 @@ for j=1:nchannels
             elseif i < 16
                 h_fig3 = 102;
                 figure(h_fig3)
-                t = strcat(char(filename(1:9)), '_aux1' );
-                set(gcf,'numbertitle','off','name',t)
+                set(gcf,'numbertitle','off','name',[filename '_aux1'])
                 if nchannels>4
                     subplot(nchannels,5,i-10+5*(j-1))
                 else
@@ -125,8 +122,7 @@ for j=1:nchannels
             elseif i < 21
                 h_fig4 = 103;
                 figure(h_fig4)
-                t = strcat(char(filename(1:9)), '_aux2' );
-                set(gcf,'numbertitle','off','name',t)
+                set(gcf,'numbertitle','off','name',[filename '_aux2'])
                 if nchannels>4
                     subplot(nchannels,5,i-15+5*(j-1))
                 else
@@ -160,22 +156,22 @@ end
 if ~isempty(h_fig1)
     figure(100); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
     set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig1,''-djpeg'',''fig2print_ch_' filename(1:end-4) ''')' ]);
+    eval(['print(h_fig1,''-djpeg'',''fig2print_ch_' filename ''')' ]);
 end
 if ~isempty(h_fig2)
     figure(101); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
     set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig2,''-djpeg'',''fig2print_ch_' filename(1:end-4) 'a' ''')' ]);
+    eval(['print(h_fig2,''-djpeg'',''fig2print_ch_' filename 'a' ''')' ]);
 end
 if ~isempty(h_fig3)
     figure(102); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
     set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig3,''-djpeg'',''fig2print_ch_' filename(1:end-4) 'b' ''')' ]);
+    eval(['print(h_fig3,''-djpeg'',''fig2print_ch_' filename 'b' ''')' ]);
 end
 if ~isempty(h_fig4)
     figure(103); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
     set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig4,''-djpeg'',''fig2print_ch_' filename(1:end-4) 'd' ''')' ]);
+    eval(['print(h_fig4,''-djpeg'',''fig2print_ch_' filename 'd' ''')' ]);
 end
 
 

@@ -27,20 +27,22 @@ classdef readInData < handle
             obj.with_psegment = false;
             obj.with_gui_status = false;
             with_par = false;
-            wc_times_selected = false;
-            wc_spikes_selected = false;
+
             
             if length(fnam)>7 && strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat')
-                wc_times_selected = true;
+                obj.with_results = true;
                 obj.nick_name = fnam(7:end);
+                disp ('Raw data doesn''t selected. Only previous results available.')
+
             end
             if length(fnam)>8 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat')
-                wc_spikes_selected = true;
+                obj.with_wc_spikes = true;
                 obj.nick_name = fnam(1:end-7);
+                disp ('Raw data doesn''t selected. Only spikes available.')
             end
             
             
-            if (~isfield(par_gui,'reset_results')) || (~ par_gui.reset_results) || wc_times_selected
+            if (~isfield(par_gui,'reset_results')) || (~ par_gui.reset_results) ||  obj.with_results
                 %Search for previous results
                 if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
                     obj.with_results = true;
@@ -55,7 +57,7 @@ classdef readInData < handle
                     end
                 end
             end
-            if (~isfield(par_gui,'reset_results')) || (~ par_gui.reset_results) || wc_spikes_selected
+            if (~isfield(par_gui,'reset_results')) || (~ par_gui.reset_results) || obj.with_wc_spikes
 
                 %Search for previously detected spikes
                 if exist([obj.nick_name '_spikes.mat'],'file')
@@ -74,30 +76,26 @@ classdef readInData < handle
                 end
             end
             % Search raw data
-            if wc_times_selected || wc_spikes_selected
-                disp ('Raw data don''t selected. Only spikes and/or previous results available.')
-            else
-                if exist([ext(2:end) '_wc_reader'],'file')
-                    obj.file_reader = eval([ext(2:end) '_wc_reader(obj.par,obj.par.filename)']);
-                    [sr, obj.max_segments, obj.with_raw, with_spikes] = obj.file_reader.get_info();
-                    obj.with_spikes = obj.with_spikes || with_spikes;
-                    if ~with_par                                                                                            %if didn't load sr from previous results 
-                        if isempty(sr)
-                            disp('Wave_clus didn''t find a sampling rate in file. It will use the set in set_parameters.m')  %use default sr (from set_parameters) 
-                        else
-                            obj.par.sr = sr;                                                                                %load sr from raw data
-                        end
-                    end
-                else
-                    if ~(obj.with_results || obj.with_wc_spikes)
-                        ME = MException('MyComponent:noSuchExt', 'File type ''%s'' isn''t supported',ext);
-                        throw(ME)
+            if exist([ext(2:end) '_wc_reader'],'file')
+                obj.file_reader = eval([ext(2:end) '_wc_reader(obj.par,obj.par.filename)']);
+                [sr, obj.max_segments, obj.with_raw, with_spikes] = obj.file_reader.get_info();
+                obj.with_spikes = obj.with_spikes || with_spikes;
+                if ~with_par                                                                                            %if didn't load sr from previous results 
+                    if isempty(sr)
+                        disp('Wave_clus didn''t find a sampling rate in file. It will use the set in set_parameters.m')  %use default sr (from set_parameters) 
                     else
-                        disp ('File type isn''t supported.')
-                        disp ('Using Wave_clus data found.')
+                        obj.par.sr = sr;                                                                                %load sr from raw data
                     end
-                end 
-            end
+                end
+            else
+                if ~(obj.with_results || obj.with_wc_spikes)
+                    ME = MException('MyComponent:noSuchExt', 'File type ''%s'' isn''t supported',ext);
+                    throw(ME)
+                else
+                    disp ('File type isn''t supported.')
+                    disp ('Using Wave_clus data found.')
+                end
+            end 
             
             if ~isfield(obj.par,'channels')
                  obj.par.channels = 1;
