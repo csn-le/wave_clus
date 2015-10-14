@@ -27,19 +27,20 @@ classdef readInData < handle
             obj.with_psegment = false;
             obj.with_gui_status = false;
             with_par = false;
-            wc_file_selected = false;
+            wc_times_selected = false;
+            wc_spikes_selected = false;
             
             if length(fnam)>7 && strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat')
-                wc_file_selected = true;
+                wc_times_selected = true;
                 obj.nick_name = fnam(7:end);
             end
             if length(fnam)>8 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat')
-                wc_file_selected = true;
+                wc_spikes_selected = true;
                 obj.nick_name = fnam(1:end-7);
             end
             
             
-            if (~isfield('reset_results',par_gui)) || (~par_gui.reset_results)
+            if (~isfield(par_gui,'reset_results')) || (~ par_gui.reset_results) || wc_times_selected
                 %Search for previous results
                 if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
                     obj.with_results = true;
@@ -53,6 +54,8 @@ classdef readInData < handle
                         obj.with_gui_status = true;
                     end
                 end
+            end
+            if (~isfield(par_gui,'reset_results')) || (~ par_gui.reset_results) || wc_spikes_selected
 
                 %Search for previously detected spikes
                 if exist([obj.nick_name '_spikes.mat'],'file')
@@ -71,7 +74,7 @@ classdef readInData < handle
                 end
             end
             % Search raw data
-            if wc_file_selected
+            if wc_times_selected || wc_spikes_selected
                 disp ('Raw data don''t selected. Only spikes and/or previous results available.')
             else
                 if exist([ext(2:end) '_wc_reader'],'file')
@@ -164,11 +167,11 @@ classdef readInData < handle
         function x = get_segment(obj)
             
             if ~ obj.with_raw
-                ME = MException('MyComponent:noRawFound', 'Wave_Clus couldn''t find the raw data',ext);
+                ME = MException('MyComponent:noRawFound', 'Wave_Clus couldn''t find the raw data');
                 throw(ME)
             end
             if obj.n_to_read > obj.max_segments
-                ME = MException('MyComponent:allFileReaded', 'The raw data is already fully loaded',ext);
+                ME = MException('MyComponent:allFileReaded', 'The raw data is already fully loaded');
                 throw(ME)
             end
             

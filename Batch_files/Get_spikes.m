@@ -22,7 +22,7 @@ if isnumeric(input) || strcmp(input,'all')
             if strcmp(input,'all')
                 filenames = [filenames {fname}];
             else
-                aux = regexp(f, '\d+', 'match');
+                aux = regexp(fname, '\d+', 'match');
                 if ismember(str2num(aux{1}),input)
                     filenames = [filenames {fname}];   
                 end
@@ -47,6 +47,7 @@ end
 for fnum = 1:length(filenames)
     filename = filenames{fnum};
     par = set_parameters();
+    par.cont_segment = true;
     par.filename = filename;
     par.reset_results = true;
 
@@ -83,7 +84,7 @@ for fnum = 1:length(filenames)
     
     %<----  Add here auxiliar parameters
 
-    if par.cont_segment
+    if current_par.cont_segment
         [psegment, sr_psegment] = data_handler.get_signal_sample();
         save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par','psegment','sr_psegment')
         clear psegment

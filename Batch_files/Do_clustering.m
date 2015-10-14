@@ -7,26 +7,25 @@ function Do_clustering(input, par_input)
 
 if isnumeric(input) || strcmp(input,'all')
     filenames = {};
-    se = supported_wc_extensions();
+    spikes_label = '_spikes.mat';
     dirnames = dir();
     dirnames = {dirnames.name};
     
     for i = 1:length(dirnames)
         fname = dirnames{i};
-        [unused, f, ext] = fileparts(fname);
-        ext = lower(ext(2:end));
-        if any(strcmp(ext,se)) 
-            if strcmp(ext,'mat')
-                sprintf('Skipped file ''%s''. The ''.mat'' files should be added by name.\n',fname);
-                continue
-            end
-            if strcmp(input,'all')
-                filenames = [filenames {fname}];
-            else
-                aux = regexp(f, '\d+', 'match');
-                if ismember(str2num(aux{1}),input)
-                    filenames = [filenames {fname}];   
-                end
+        
+        if length(fname) < 12 
+            continue
+        end
+        if ~ strcmp(fname(end-10:end),'_spikes.mat')
+            continue
+        end
+        if strcmp(input,'all')
+            filenames = [filenames {fname}];
+        else
+            aux = regexp(fname, '\d+', 'match');
+            if ismember(str2num(aux{1}),input)
+                filenames = [filenames {fname}];   
             end
         end
     end
@@ -51,14 +50,17 @@ for fnum = 1:length(filenames)
     filename = filenames{fnum};
     par = set_parameters();
     
-    
     par.filename = filename;
     par.reset_results = true;
-    
     par.cont_segment = true;  %maybe true and save the sample in spikes
 
     data_handler = readInData(par);
     par = data_handler.par;
+    
+    if isfield(par,'channels')
+        par.inputs = par.inputs * par.channels;
+    end
+    
     par.fname_in = 'tmp_data_wc';                       % temporary filename used as input for SPC
     par.fname = ['data_' data_handler.nick_name];
     par.nick_name = data_handler.nick_name;
@@ -74,15 +76,8 @@ for fnum = 1:length(filenames)
             [spikes] = spike_alignment(spikes,par);
         end
     else
-        index = [];
-        spikes = [];
-        for n = 1:data_handler.max_segments
-            x = data_handler.get_segment();
-                %<----  Add here extra processing of the signal (x)
-            [new_spikes, thr, new_index]  = amp_detect(x, par);
-            index = [index data_handler.index2ts(new_index)];           %new_index to ms
-            spikes = [spikes; new_spikes];
-        end
+        ME = MException('MyComponent:noValidInput', 'Files selected doesn''t include spikes');
+        throw(ME)
     end
         
     % LOAD SPIKES
@@ -336,7 +331,7 @@ for fnum = 1:length(filenames)
     fclose(fout);
 
     
-    if par.cont_segment
+    if par.cont_segment && data_handler.with_raw
         subplot(3,1,1)      
         box off; hold on
         %these lines are for plotting continuous data 
@@ -355,14 +350,13 @@ for fnum = 1:length(filenames)
             ylim([-thrmax thrmax])
         end
     end
-    
+    subplot(3,1,1)
     title([pwd '/' filename],'Interpreter','none','Fontsize',14)
-    %     title([pwd '   Channel  ' num2str(channel)],'Interpreter','none','Fontsize',14)
     if par.print2file;
         set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
         set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    %         eval(['print -djpeg fig2printNSX_ch' num2str(channel)]);
-        eval(['print -dpng fig2print_' filename]);
+    
+        eval(['print -dpng fig2print_' filename(1:end-5) '.png']);
     else
         print
     end 
