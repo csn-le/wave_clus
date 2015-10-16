@@ -178,7 +178,7 @@ handles.par.file_name_to_show = [pathname filename];
 if data_handler.with_results %data have _times files
     [clu, tree, spikes, index, inspk, ipermut, classes, forced, rejected] = data_handler.load_results();
    
-else    
+else
     if data_handler.with_spikes  %data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
@@ -195,7 +195,6 @@ else
             [new_spikes, temp_aux_th, new_index]  = amp_detect(x, handles.par);
             index = [index data_handler.index2ts(new_index)]; %new_index to ms
             spikes = [spikes; new_spikes];
-            
         end
     end
     
@@ -243,7 +242,7 @@ end
 
 %Fixing lost elements of clu . Skiped elements will be  class -1 because in
 %all the uses of clu are like: clu(temp,3:end)+1
-if handles.par.permut == 'y'
+if handles.par.permut == 'y' && ~isempty(clu)
     clu_aux = zeros(size(clu,1),size(spikes,1)) -1;% + 1000; %when update classes from clu, not selected go to cluster 1001
     clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
     clu_aux(:,1:2) = clu(:,1:2);
@@ -301,6 +300,9 @@ else
     handles.undo = 0;
 end
 
+if data_handler.with_results && ~ data_handler.with_spc
+    temp = -1;
+end
 
 clustering_results(:,5) = repmat(handles.par.min_clus,length(classes),1); % minimum number of clusters
 USER_DATA{6} = classes(:)';
@@ -328,6 +330,11 @@ set(handles.wave_clus_figure,'userdata',USER_DATA);
 if isfield(handles,'force_unforce_button') && (nnz(forced)>0)
 	set(handles.force_unforce_button,'Value',1)
 end
+if isfield(handles,'edit_max_force_dist')
+    set(handles.edit_max_force_dist,'string',num2str(handles.par.template_sdnum));
+end
+
+
 set(handles.file_name,'string',handles.par.file_name_to_show);
 
 % --- Executes on button press in change_temperature_button.
@@ -387,7 +394,6 @@ handles.undo = 0;
 handles.reject = 0;
 handles.minclus = par.min_clus;
 plot_spikes(handles);
-
 
 
 % --- Executes on button press in save_clusters_button.
@@ -517,6 +523,7 @@ function set_parameters_button_Callback(hObject, eventdata, handles)
     %helpdlg('Check the set_parameters files in the subdirectory
     %Wave_clus\Parameters_files');
     set_parameters_ui()
+
     
 %SETTING OF FORCE MEMBERSHIP
 % --------------------------------------------------------------------
@@ -628,7 +635,6 @@ function unforce_button_Callback(hObject, eventdata, handles)
     plot_spikes(handles);
     
     
-    
 function force_unforce_button_Callback(hObject, eventdata, handles)    
     
     USER_DATA = get(handles.wave_clus_figure,'userdata');
@@ -691,11 +697,9 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
         handles.force = 1;
         handles.setclus = 1;
     else
-        clu = USER_DATA{4};
-        temp = USER_DATA{8};
-        classes = clu(temp,3:end)+1;
-        USER_DATA{6} = classes(:)';       
-        
+%         clu = USER_DATA{4};
+%         temp = USER_DATA{8};
+%         classes = clu(temp,3:end)+1;       
         
         new_forced = zeros(size(forced));
         % Fixed clusters are not considered for forcing
@@ -730,10 +734,7 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
     handles.reject = 0;
     handles.undo = 0;
     set(handles.wave_clus_figure,'userdata',USER_DATA)
-
     plot_spikes(handles);
-
-
 
 
 
@@ -741,13 +742,13 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
 function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
     
     if isfield(handles_local,'wave_clus_figure')
-        USER_DATA = get(handles.wave_clus_figure,'userdata');
-         handles = handles_local;
+        USER_DATA = get(handles_local.wave_clus_figure,'userdata');
+        handles = handles_local;
     else
-        h_figs=get(0,'children');
+        h_figs = get(0,'children');
         h_fig = findobj(h_figs,'tag','wave_clus_figure');
         USER_DATA = get(h_fig,'UserData');
-        handles =guidata(h_fig);
+        handles = guidata(h_fig);
     end
 
     spikes = USER_DATA{2};
@@ -1047,6 +1048,15 @@ function reject2clus_Callback(hObject, eventdata, handles)
     USER_DATA{14} = USER_DATA{13};
     set(handles.wave_clus_figure,'userdata',USER_DATA)
     plot_spikes(handles);
+
+
+% --- Change min_clus_edit     
+function max_force_dist_edit_Callback(hObject, eventdata, handles)
+    USER_DATA = get(handles.wave_clus_figure,'userdata');
+    par = USER_DATA{1};  
+    par.template_sdnum = str2num(get(hObject, 'String'));
+    USER_DATA{1} = par;
+    set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 
 

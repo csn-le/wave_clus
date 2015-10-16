@@ -325,6 +325,8 @@ for i =1:figs_num
     end
 end
 
-mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
+if temp > 0
+    mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
+end
 set(handles.file_name,'string', par.file_name_to_show);
 drawnow

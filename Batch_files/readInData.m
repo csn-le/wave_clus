@@ -12,12 +12,13 @@ classdef readInData < handle
         file_reader
         with_wc_spikes
         with_psegment
+        with_spc
     end 
 	methods 
-        function obj = readInData(par_gui)
-            [unused, fnam, ext] = fileparts(par_gui.filename);
+        function obj = readInData(par_ui)
+            [unused, fnam, ext] = fileparts(par_ui.filename);
             ext = lower(ext);
-            obj.par = par_gui;
+            obj.par = par_ui;
             obj.nick_name = fnam;
             obj.n_to_read = 1;
             obj.with_results = false;
@@ -26,42 +27,46 @@ classdef readInData < handle
             obj.with_wc_spikes = false;
             obj.with_psegment = false;
             obj.with_gui_status = false;
+            obj.with_spc = false;
             with_par = false;
-
+            results_selected = false;
             
             if length(fnam)>7 && strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat')
                 obj.with_results = true;
+                results_selected = true;
                 obj.nick_name = fnam(7:end);
                 disp ('Raw data doesn''t selected. Only previous results available.')
 
             end
             if length(fnam)>8 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat')
                 obj.with_wc_spikes = true;
+                results_selected =true;
                 obj.nick_name = fnam(1:end-7);
                 disp ('Raw data doesn''t selected. Only spikes available.')
             end
             
             
-            if (~isfield(par_gui,'reset_results')) || (~ par_gui.reset_results) ||  obj.with_results
+            if (~isfield(par_ui,'reset_results')) || (~ par_ui.reset_results) ||  obj.with_results
                 %Search for previous results
+                finfo = whos('-file',['times_' obj.nick_name '.mat']);
+                if ~ismember('spikes',{finfo.name})
+                    ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_times'' file');
+                    throw(ME)
+                end
+                if ismember('par',{finfo.name})
+                    load(['times_' obj.nick_name '.mat'],'par');
+                    obj.par = update_parameters(obj.par, par, 'relevant');
+                    with_par = true;
+                end
+                if ismember('gui_status',{finfo.name})  
+                    obj.with_gui_status = true;
+                end
                 if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
+                    obj.with_spc = true;
                     obj.with_results = true;
-                    finfo = whos('-file',['times_' obj.nick_name '.mat']);
-                    if ~ismember('spikes',{finfo.name})
-                        ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_times'' file');
-                        throw(ME)
-                    end
-                    if ismember('par',{finfo.name})
-                        load(['times_' obj.nick_name '.mat'],'par');
-                        obj.par = update_parameters(obj.par, par, 'relevant');
-                        with_par = true;
-                    end
-                    if ismember('gui_status',{finfo.name})  
-                        obj.with_gui_status = true;
-                    end
                 end
             end
-            if (~isfield(par_gui,'reset_results')) || (~ par_gui.reset_results) || obj.with_wc_spikes
+            if (~isfield(par_ui,'reset_results')) || (~ par_ui.reset_results) || obj.with_wc_spikes
 
                 %Search for previously detected spikes
                 if exist([obj.nick_name '_spikes.mat'],'file')
@@ -99,6 +104,8 @@ classdef readInData < handle
                 if ~(obj.with_results || obj.with_wc_spikes)
                     ME = MException('MyComponent:noSuchExt', 'File type ''%s'' isn''t supported',ext);
                     throw(ME)
+                elseif results_selected
+                    disp ('Wave_clus data selected. Raw data wasn''t loaded.')
                 else
                     disp ('File type isn''t supported.')
                     disp ('Using Wave_clus data found.')
@@ -158,8 +165,13 @@ classdef readInData < handle
             % cluster_class(:,1);
             index = cluster_class(:,2);
             classes = cluster_class(:,1);
-         	clu = load(['data_' obj.nick_name '.dg_01.lab']);
-         	tree = load(['data_' obj.nick_name '.dg_01']);
+            if obj.with_spc
+                clu = load(['data_' obj.nick_name '.dg_01.lab']);
+                tree = load(['data_' obj.nick_name '.dg_01']);
+            else
+                clu = [];
+                tree = [];
+            end
         end
 
         function [saved_gui_status, temp,gui_classes] = get_gui_status(obj)

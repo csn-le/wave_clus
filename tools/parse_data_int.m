@@ -2,6 +2,11 @@ function parse_data_int(filename, max_memo_GB)
 % max_memo_GB is an idea of the number of GB allocated for the data to be
 % stored in RAM, so it is used to compute the number of segments in which
 % the data should be split for processing
+% Based in read_intan_data.m version 1.1, June 26, 2010
+% (c) 2010, Intan Technologies, LLC
+% For more information, see http://www.intantech.com
+% For updates and latest version, see http://www.intantech.com/software.html
+
 
 [unused, fname, ext] = fileparts(filename);
 ext = lower(ext(2:end));
@@ -18,14 +23,6 @@ else
 end
 
 
-% amps = vector listing active amplifier channels
-% data = matrix of electrode-referred amplifier signals (in microvolts)
-% aux = matrix of six auxiliary TTL input signals
-
-% Based in read_intan_data.m version 1.1, June 26, 2010
-% (c) 2010, Intan Technologies, LLC
-% For more information, see http://www.intantech.com
-% For updates and latest version, see http://www.intantech.com/software.html
 
 fid = fopen(filename, 'r');
 
