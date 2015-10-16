@@ -47,6 +47,10 @@ classdef readInData < handle
                 if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
                     obj.with_results = true;
                     finfo = whos('-file',['times_' obj.nick_name '.mat']);
+                    if ~ismember('spikes',{finfo.name})
+                        ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_times'' file');
+                        throw(ME)
+                    end
                     if ismember('par',{finfo.name})
                         load(['times_' obj.nick_name '.mat'],'par');
                         obj.par = update_parameters(obj.par, par, 'relevant');
@@ -64,6 +68,10 @@ classdef readInData < handle
                     obj.with_wc_spikes = true;
                     obj.with_spikes = true;
                     finfo = whos('-file', [obj.nick_name '_spikes.mat']);
+                    if ~ismember('spikes',{finfo.name})
+                        ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_spikes'' file');
+                        throw(ME)
+                    end
                     if ismember('par',{finfo.name}) && ~ with_par 
                         load([obj.nick_name '_spikes.mat'],'par'); 
                         obj.par = update_parameters(obj.par,par,'detect');

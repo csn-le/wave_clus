@@ -90,7 +90,6 @@ set(handles.isi1_accept_button,'value',1);
 set(handles.isi2_accept_button,'value',1);
 set(handles.isi3_accept_button,'value',1);
 set(handles.spike_shapes_button,'value',1);
-set(handles.force_button,'value',0);
 set(handles.plot_all_button,'value',1);
 set(handles.plot_average_button,'value',0);
 set(handles.fix1_button,'value',0);
@@ -150,8 +149,6 @@ for i = 1:3
     eval(['set(handles.isi' si '_bin_step,''string'',handles.par.bin_step);']);
 end
 
-set(handles.force_button,'value',0);
-set(handles.force_button,'string','Force');
 set(handles.isi0_nbins,'string',handles.par.nbins);
 set(handles.isi0_bin_step,'string',handles.par.bin_step);
 
@@ -187,7 +184,7 @@ else
         if ~data_handler.with_wc_spikes
             [spikes] = spike_alignment(spikes,handles.par);
         elseif isfield(handles.par,'channels')
-                handles.par.inputs = handles.par.inputs * handles.par.channels;
+        	handles.par.inputs = handles.par.inputs * handles.par.channels;
         end
     else    
         set(handles.file_name,'string','Detecting spikes ...'); drawnow
@@ -238,7 +235,7 @@ else
     rejected = false(1, size(spikes,1));
 end
 
-if data_handler.with_raw && handles.par.cont_segment         %raw exists
+if (data_handler.with_raw || data_handler.with_psegment) && handles.par.cont_segment         %raw exists
     [xd_sub, sr_sub] = data_handler.get_signal_sample();
     Plot_continuous_data(xd_sub, sr_sub, handles); drawnow
     clear xd_sub
@@ -326,6 +323,11 @@ USER_DATA = get(handles.wave_clus_figure,'userdata');
 USER_DATA{13} = forced;
 USER_DATA{14} = forced;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
+
+
+if isfield(handles,'force_unforce_button') && (nnz(forced)>0)
+	set(handles.force_unforce_button,'Value',1)
+end
 set(handles.file_name,'string',handles.par.file_name_to_show);
 
 % --- Executes on button press in change_temperature_button.
@@ -360,7 +362,9 @@ handles.merge = 0;
 handles.reject = 0;
 handles.undo = 0;
 plot_spikes(handles);
-
+if isfield(handles,'force_unforce_button')
+	set(handles.force_unforce_button,'Value',0)
+end
 
 % --- Change min_clus_edit     
 function min_clus_edit_Callback(hObject, eventdata, handles)
@@ -370,7 +374,6 @@ par.min_clus = str2num(get(hObject, 'String'));
 clu = USER_DATA{4};
 temp = USER_DATA{8};
 classes = clu(temp,3:end)+1;
-tree = USER_DATA{5};
 USER_DATA{1} = par;
 USER_DATA{6} = classes(:)';
 USER_DATA{16} = USER_DATA{15};
@@ -388,9 +391,11 @@ plot_spikes(handles);
 
 
 % --- Executes on button press in save_clusters_button.
-function save_clusters_button_Callback(hObject, eventdata, handles)
+function save_clusters_button_Callback(hObject, eventdata, handles, developer_mode)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
-if any(USER_DATA{15}~=USER_DATA{16} ) %if rejected flags changed
+classes = USER_DATA{6};
+clustering_results = USER_DATA{10};
+if any(clustering_results(:,2)~=classes ) %if classes changed without update clustering results
     handles.setclus = 1;
     handles.force = 0;
     handles.merge = 0;
@@ -428,8 +433,8 @@ gui_status.temp =  gui_classes_data(1,1);
 gui_status.classes = gui_classes_data(1:end,3:4);
 
 forced = USER_DATA{13};
-rejected = USER_DATA{15};
-var_list = ' cluster_class par spikes gui_status forced rejected';
+
+var_list = ' cluster_class par spikes gui_status forced';
 
 if ~isempty(USER_DATA{7})
     inspk = USER_DATA{7};
@@ -440,7 +445,12 @@ if ~isempty(USER_DATA{12})
     ipermut = USER_DATA{12};
     var_list = strcat(var_list , ' ipermut');
 end
-            
+       
+if developer_mode
+	rejected = USER_DATA{15};
+	var_list = strcat(var_list , 'rejected');
+end
+
 currentver = version;
 if currentver(1) >= 7
     var_list = strcat(var_list , ' -v6;');
@@ -511,7 +521,6 @@ function set_parameters_button_Callback(hObject, eventdata, handles)
 %SETTING OF FORCE MEMBERSHIP
 % --------------------------------------------------------------------
 function force_button_Callback(hObject, eventdata, handles)
-%set(gcbo,'value',1);
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 spikes = USER_DATA{2};
@@ -567,7 +576,6 @@ USER_DATA{13} = forced;
 USER_DATA{6} = classes(:)';
 USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
 set(handles.wave_clus_figure,'userdata',USER_DATA)
-
 clustering_results = USER_DATA{10};
 handles.minclus = clustering_results(1,5);
 handles.setclus = 1;
@@ -577,7 +585,159 @@ handles.reject = 0;
 handles.undo = 0;
 plot_spikes(handles);
 
+function unforce_button_Callback(hObject, eventdata, handles)
+    USER_DATA = get(handles.wave_clus_figure,'userdata');
+    forced = USER_DATA{13};
+    classes = USER_DATA{6};
+    par = USER_DATA{1};
+    USER_DATA{14} = forced;     %save forced in forced_bk
+    new_forced = zeros(size(forced));
+    % Fixed clusters are not considered for forcing
+    if get(handles.fix1_button,'value') ==1     
+        fix_class = USER_DATA{20}';
+        new_forced(fix_class) =forced(fix_class);
+    end
+    if get(handles.fix2_button,'value') ==1     
+        fix_class = USER_DATA{21}';
+        new_forced(fix_class) =forced(fix_class);
+    end
+    if get(handles.fix3_button,'value') ==1     
+        fix_class = USER_DATA{22}';
+        new_forced(fix_class) =forced(fix_class);
+    end
+    % Get fixed clusters from aux figures
+    for i=4:par.max_clus
+        eval(['fixx = par.fix' num2str(i) ';']);
+        if fixx == 1
+            fix_class = USER_DATA{22+i-3}';
+            new_forced(fix_class) =forced(fix_class);
+        end
+    end
+    rejected = USER_DATA{15};
+    USER_DATA{16} = rejected; %update bk of rejected spikes
+    classes(forced(:) & (~new_forced(:)) & (~rejected(:))) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
+    handles.setclus = 1;
+    handles.force = 0;
+    handles.merge = 0;
+    handles.reject = 0;
+    handles.undo = 0;
+    USER_DATA{6} = classes(:)';
+    USER_DATA{13} = new_forced;
+    
+    set(handles.wave_clus_figure,'userdata',USER_DATA)
+    plot_spikes(handles);
+    
+    
+    
+function force_unforce_button_Callback(hObject, eventdata, handles)    
+    
+    USER_DATA = get(handles.wave_clus_figure,'userdata');
+    par = USER_DATA{1};
+    classes = USER_DATA{6};
+    forced = USER_DATA{13};
+    USER_DATA{14} = forced;     %save forced in forced_bk
+    rejected = USER_DATA{15};
+    USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
+    button_state = get(hObject,'Value');
+    if button_state == get(hObject,'Max')
+        spikes = USER_DATA{2};
+        inspk = USER_DATA{7};
+        USER_DATA{16} = rejected;
+        
+        if get(handles.fix1_button,'value') ==1     
+            fix_class = USER_DATA{20}';
+            classes(fix_class) = -1;
+        end
+        if get(handles.fix2_button,'value') ==1     
+            fix_class = USER_DATA{21}';
+            classes(fix_class) = -1;
+        end
+        if get(handles.fix3_button,'value') ==1     
+            fix_class = USER_DATA{22}';
+            classes(fix_class )= -1;
+        end
+        % Get fixed clusters from aux figures
+        for i=4:par.max_clus
+            eval(['fixx = par.fix' num2str(i) ';']);
+            if fixx == 1
+                fix_class = USER_DATA{22+i-3}';
+                classes(fix_class) = -1;
+            end
+        end
 
+        to_force = (~rejected)' & (classes==0);
+        switch par.force_feature
+            case 'spk'
+                f_in  = spikes(classes>0,:);
+                f_out = spikes(to_force,:);
+            case 'wav'
+                if isempty(inspk)
+                    set(handles.file_name,'string','Calculating spike features ...');
+                    [inspk] = wave_features(spikes,par);        % Extract spike features.
+                    USER_DATA{7} = inspk;
+                end
+                f_in  = inspk(classes>0,:);
+                f_out = inspk(to_force,:);
+        end
+
+        class_in = classes(classes>0);
+        class_out = force_membership_wc(f_in, class_in, f_out, par);
+        forced = forced | to_force;
+        classes(to_force) = class_out;
+        USER_DATA{13} = forced;
+        
+        clustering_results = USER_DATA{10};
+        handles.minclus = clustering_results(1,5);
+        handles.force = 1;
+        handles.setclus = 1;
+    else
+        clu = USER_DATA{4};
+        temp = USER_DATA{8};
+        classes = clu(temp,3:end)+1;
+        USER_DATA{6} = classes(:)';       
+        
+        
+        new_forced = zeros(size(forced));
+        % Fixed clusters are not considered for forcing
+        if get(handles.fix1_button,'value') ==1     
+            fix_class = USER_DATA{20}';
+            new_forced(fix_class) =forced(fix_class);
+        end
+        if get(handles.fix2_button,'value') ==1     
+            fix_class = USER_DATA{21}';
+            new_forced(fix_class) =forced(fix_class);
+        end
+        if get(handles.fix3_button,'value') ==1     
+            fix_class = USER_DATA{22}';
+            new_forced(fix_class) =forced(fix_class);
+        end
+        % Get fixed clusters from aux figures
+        for i=4:par.max_clus
+            eval(['fixx = par.fix' num2str(i) ';']);
+            if fixx == 1
+                fix_class = USER_DATA{22+i-3}';
+                new_forced(fix_class) =forced(fix_class);
+            end
+        end
+        classes(forced(:) & (~new_forced(:)) & (~rejected(:))) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
+        USER_DATA{13} = new_forced;
+        handles.force = 0;
+        handles.setclus = 0;
+    end
+    USER_DATA{6} = classes(:)';
+    
+    handles.merge = 0;
+    handles.reject = 0;
+    handles.undo = 0;
+    set(handles.wave_clus_figure,'userdata',USER_DATA)
+
+    plot_spikes(handles);
+
+
+
+
+
+    
 function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
     
     if isfield(handles_local,'wave_clus_figure')
@@ -634,51 +794,6 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
         set(h_fig,'userdata',USER_DATA)
     end
 
-    plot_spikes(handles);
-
-
-
-function unforce_button_Callback(hObject, eventdata, handles)
-    set(handles.spike_features_button,'value',0);
-    USER_DATA = get(handles.wave_clus_figure,'userdata');
-    forced = USER_DATA{13};
-    classes = USER_DATA{6};
-    par = USER_DATA{1};
-    USER_DATA{14} = forced;     %save forced in forced_bk
-    new_forced = zeros(size(forced));
-    % Fixed clusters are not considered for forcing
-    if get(handles.fix1_button,'value') ==1     
-        fix_class = USER_DATA{20}';
-        new_forced(fix_class) =forced(fix_class);
-    end
-    if get(handles.fix2_button,'value') ==1     
-        fix_class = USER_DATA{21}';
-        new_forced(fix_class) =forced(fix_class);
-    end
-    if get(handles.fix3_button,'value') ==1     
-        fix_class = USER_DATA{22}';
-        new_forced(fix_class) =forced(fix_class);
-    end
-    % Get fixed clusters from aux figures
-    for i=4:par.max_clus
-        eval(['fixx = par.fix' num2str(i) ';']);
-        if fixx == 1
-            fix_class = USER_DATA{22+i-3}';
-            new_forced(fix_class) =forced(fix_class);
-        end
-    end
-    rejected = USER_DATA{15};
-    USER_DATA{16} = rejected; %update bk of rejected spikes
-    classes(forced(:) & (~new_forced(:)) & (~rejected(:))) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
-    handles.setclus = 1;
-    handles.force = 0;
-    handles.merge = 0;
-    handles.reject = 0;
-    handles.undo = 0;
-    USER_DATA{6} = classes(:)';
-    USER_DATA{13} = new_forced;
-    
-    set(handles.wave_clus_figure,'userdata',USER_DATA)
     plot_spikes(handles);
 
     
@@ -813,7 +928,7 @@ b_name = get(gcbo,'Tag');
 cn = regexp(b_name, '\d+', 'match');
 eval(['set(handles.isi' cn{1} '_reject_button,''value'',0);']);
 
-function isi_reject_button_Callback(hObject, eventdata, handles)
+function isi_reject_button_Callback(hObject, eventdata, handles,developer_mode)
 set(hObject,'value',1);
 b_name = get(gcbo,'Tag');
 cn = str2double(regexp(b_name, '\d+', 'match'));
@@ -828,11 +943,12 @@ if cn == 3
     end
 end
 
-rejected = USER_DATA{15};
-USER_DATA{16} = rejected; %update bk of rejected spikes
-rejected(classes==cn) = true;
-USER_DATA{15} = rejected;
-
+if developer_mode
+    rejected = USER_DATA{15};
+    USER_DATA{16} = rejected; %update bk of rejected spikes
+    rejected(classes==cn) = true;
+    USER_DATA{15} = rejected;
+end
 forced = USER_DATA{13};
 USER_DATA{14} = forced;
 forced(classes==cn) = 0;
@@ -877,6 +993,10 @@ USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 clustering_results_bk = USER_DATA{11};
 forced_bk =  USER_DATA{14};
+
+if isfield(handles,'force_unforce_button')
+	set(handles.force_unforce_button,'Value',any(forced_bk))
+end
 USER_DATA{13} = forced_bk;
 
 USER_DATA{15} = USER_DATA{16}; %use bk of rejected spikes

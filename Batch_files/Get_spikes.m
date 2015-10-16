@@ -1,10 +1,20 @@
 function Get_spikes(input, par_input)
 % function Get_spikes(input, par_input)
+% Saves spikes, spike times (in ms), used parameters and a sample segment 
+% of the continuous data (optional) in filename_spikes.mat.
+%input must be: 
+%               A .txt file with the names of the files to use.
+%               A matlab cell with the names of the files to use.
+%               A vector, in this case the function will proccess all the
+%                   supported files with that numbers in the folder
+%                   (except .mat files). 
+%                   (ipunt=2 don't implies 20 or viceversa)
+%               'all', in this case the functions will process all the
+%                   supported files in the folder (except .mat files).
+%par_input must be a cell with some of the detecction parameters. All the
+%parameters included will overwrite the parameters load from set_parameters()
 
-
-% Saves spikes and spike times.
-
-if isnumeric(input) || strcmp(input,'all')
+if isnumeric(input) || strcmp(input,'all')  %cases for numeric or 'all' input
     filenames = {};
     se = supported_wc_extensions();
     dirnames = dir();
@@ -22,7 +32,7 @@ if isnumeric(input) || strcmp(input,'all')
             if strcmp(input,'all')
                 filenames = [filenames {fname}];
             else
-                aux = regexp(fname, '\d+', 'match');
+                aux = regexp(f, '\d+', 'match');
                 if ismember(str2num(aux{1}),input)
                     filenames = [filenames {fname}];   
                 end
@@ -30,14 +40,14 @@ if isnumeric(input) || strcmp(input,'all')
         end
     end
     
-elseif ischar(input) && length(input) > 4
+elseif ischar(input) && length(input) > 4  %case for .txt input
     if  strcmp (input(end-3:end),'.txt')
         filenames =  textread(input,'%s');
     else
         filenames = {input};
     end
     
-elseif iscellstr(input)
+elseif iscellstr(input)   %case for cell input
     filenames = input;
 else
     ME = MException('MyComponent:noValidInput', 'Invalid input arguments');
@@ -49,9 +59,9 @@ for fnum = 1:length(filenames)
     par = set_parameters();
     par.cont_segment = true;
     par.filename = filename;
-    par.reset_results = true;
+    par.reset_results = true;  %for don't load times_ or _spikes files
 
-    par.cont_segment = true;  %false to don't save the sample in spikes
+    par.cont_segment = true;  %false to don't save the segment of the continuous data in the spikes file
     
     data_handler = readInData(par);
     

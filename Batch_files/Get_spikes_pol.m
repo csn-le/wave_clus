@@ -1,4 +1,13 @@
 function Get_spikes_pol(polytrodes, par_input)
+% function Get_spikes_pol(polytrodes, par_input)
+% Make polytrode spikes detecting and concatenating the spikes of all the
+% channels in the polytrodesN.txt used. 
+% Saves spikes, spike times (in ms) and used parameters in filename_spikes.mat.
+
+% input must be a vector with the numbers(N) of polytrodesN.txt to use.
+
+% par_input must be a cell with some of the detecction parameters. All the
+% parameters included will overwrite the parameters load from set_parameters()
 
 
 
@@ -29,6 +38,11 @@ for k = 1:length(polytrodes)
         par_ch{i} = par;
         par_ch{i}.filename = electrodes{i};
         data_handler_ch{i} = readInData(par_ch{i});
+        if ~data_handler_ch{i}.with_raw
+        	ME = MException('MyComponent:FileError', 'The file %s doesn''t have raw data',electrodes{i});
+            throw(ME)
+        end
+        
         par_ch{i} = data_handler_ch{i}.par;
         min_num_seg =  min(data_handler_ch{i}.max_segments, min_num_seg);
     end

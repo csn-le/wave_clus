@@ -1,4 +1,4 @@
-function index = nearest_mahal(x,mu,sigma)
+function index = nearest_mahal(x,mu,inv_sigma)
 % function index = nearest_mahal(x,mu,sigma)
 % x is a vector
 % mu(i,:) is the mean of the ith Gaussian
@@ -13,7 +13,7 @@ if( N == 0 )
     index = 0;
 else
     for i=1:N,
-        d(i) = (x-mu(i,:))*inv(sigma(:,:,i))*(x-mu(i,:))';
+        d(i) = (x-mu(i,:))*inv_sigma(:,:,i)*(x-mu(i,:))';
     end
     [m index] = min(d);
 end

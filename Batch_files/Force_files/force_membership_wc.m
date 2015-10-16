@@ -39,14 +39,14 @@ switch par.template_type
         end
         
     case 'ml'
-        [mu sigma] = fit_gaussian(f_in,class_in);
+        [mu inv_sigma] = fit_gaussian(f_in,class_in);
         for i=1:nspk,
-            class_out(i) = ML_gaussian(f_out(i,:),mu,sigma);
+            class_out(i) = ML_gaussian(f_out(i,:),mu,inv_sigma);
         end
     case 'mahal'
-        [mu sigma] = fit_gaussian(f_in,class_in);
+        [mu inv_sigma] = fit_gaussian(f_in,class_in);
         for i=1:nspk,
-            class_out(i) = nearest_mahal(f_out(i,:),mu,sigma);
+            class_out(i) = nearest_mahal(f_out(i,:),mu,inv_sigma);
         end
         
     otherwise

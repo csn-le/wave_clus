@@ -4,6 +4,23 @@ function Do_clustering(input, par_input)
 % Does clustering on all files in Files.txt
 % Runs after Get_spikes.
 
+% function Do_clustering(input, par_input)
+% Saves spikes, spike times (in ms), coefficients used (inspk), used 
+%parameters, random spikes selected for clustering (ipermut), spikes forced
+%in a class (forced) results (cluster_class)
+
+%input must be: 
+%               A .txt file with the names of the spikes files to use.
+%               A matlab cell with the names of the spikes files to use.
+%               A vector, in this case the function will proccessall the
+%                   '_spikes.mat' files with that numbers in the folder.
+%                   (ipunt=2 don't implies 20 or viceversa)
+%               'all', in this case the functions will process all the
+%                '_spikes.mat' files in the folder.
+%par_input must be a cell with some of the detecction parameters. All the
+%parameters included will overwrite the parameters load from set_parameters()
+
+
 
 if isnumeric(input) || strcmp(input,'all')
     filenames = {};
@@ -76,8 +93,9 @@ for fnum = 1:length(filenames)
             [spikes] = spike_alignment(spikes,par);
         end
     else
-        ME = MException('MyComponent:noValidInput', 'Files selected doesn''t include spikes');
+        warning('MyComponent:noValidInput', 'File: %s doesn''t include spikes', filename);
         throw(ME)
+        continue
     end
         
     % LOAD SPIKES
@@ -87,8 +105,8 @@ for fnum = 1:length(filenames)
     
 	
     if nspk < 16     
-        ME = MException('MyComponent:noValidInput', 'Not enough spikes in the file');
-        throw(ME)
+        warning('MyComponent:noValidInput', 'Not enough spikes in the file');
+        continue
     end
     
     % CALCULATES INPUTS TO THE CLUSTERING ALGORITHM. 

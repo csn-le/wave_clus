@@ -1,4 +1,4 @@
-function index = ML_gaussian(x,mu,sigma)
+function index = ML_gaussian(x,mu,inv_sigma)
 % function index = ML_gaussian(x,mu,sigma)
 % x is a vector drawn from some multivariate gaussian
 % mu(i,:) is the mean of the ith Gaussian
@@ -13,7 +13,7 @@ if( N == 0 )
 else
     for i=1:N,
         % leave out factor of 1/(2*pi)^(N/2) since it doesn't affect argmax
-        p(i) = 1/sqrt(det(sigma(:,:,i)))*exp(-0.5*(x-mu(i,:))*inv(sigma(:,:,i))*(x-mu(i,:))');
+        p(i) = sqrt(det(inv_sigma(:,:,i)))*exp(-0.5*(x-mu(i,:))*inv_sigma(:,:,i)*(x-mu(i,:))');
     end
     [m index] = max(p);
 end

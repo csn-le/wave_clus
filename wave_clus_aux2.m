@@ -129,7 +129,7 @@ draw_histograms(handles, str2double(cn{1}),USER_DATA);
 % Reject buttons
 
 % --------------------------------------------------------------------
-function isi_reject_button_Callback(hObject, eventdata, handles)
+function isi_reject_button_Callback(hObject, eventdata, handles, developer_mode)
 set(hObject,'value',1);
 b_name = get(gcbo,'Tag');
 cn = str2double(regexp(b_name, '\d+', 'match'));
@@ -138,10 +138,12 @@ eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',0);'])
 USER_DATA = get(handles.wave_clus_aux2,'userdata');
 classes = USER_DATA{6};
 
-rejected = USER_DATA{15};
-USER_DATA{16} = rejected; %update bk of rejected spikes
-rejected(classes==cn) = true;
-USER_DATA{15} = rejected;
+if developer_mode
+    rejected = USER_DATA{15};
+    USER_DATA{16} = rejected; %update bk of rejected spikes
+    rejected(classes==cn) = true;
+    USER_DATA{15} = rejected;
+end
 
 forced = USER_DATA{13};
 USER_DATA{14} = forced;
