@@ -39,5 +39,3 @@ else
     end
     index = conforming(i);
 end
-
-

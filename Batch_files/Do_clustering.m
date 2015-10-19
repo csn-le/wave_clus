@@ -22,7 +22,7 @@ function Do_clustering(input, par_input)
 
 
 
-if isnumeric(input) || strcmp(input,'all')
+if isnumeric(input) || any(strcmp(input,'all'))
     filenames = {};
     spikes_label = '_spikes.mat';
     dirnames = dir();

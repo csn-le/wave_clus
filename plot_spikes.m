@@ -244,7 +244,7 @@ for i = 1:nclusters+1
         permut = randperm(sup_spikes);
         permut = permut(1:max_spikes);
         if get(handles.spike_shapes_button,'value') ==1 && get(handles.plot_all_button,'value') ==1
-            eval(['line(1:ls,spikes(class' num2str(i-1) '(permut),:),''color'',''' colors(i) ''',''Parent'',handles.projections)']);
+            eval(['line(1:ls,spikes(class' num2str(i-1) '(permut),:)'',''color'',''' colors(i) ''',''Parent'',handles.projections)']);
             xlim(handles.projections, [1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
             eval(['av   = mean(spikes(class' num2str(i-1) ',:));']);
@@ -263,7 +263,7 @@ for i = 1:nclusters+1
             eval(['avdw = av - par.to_plot_std * std(spikes(class' num2str(i-1) '(:,permut),:));']); % JMG
             
             if get(handles.plot_all_button,'value') ==1
-                eval(['line(1:ls,spikes(class' num2str(i-1) '(permut),:),''color'',''' colors(i) ''',''Parent'',clus_ax)']);
+                eval(['line(1:ls,spikes(class' num2str(i-1) '(permut),:)'',''color'',''' colors(i) ''',''Parent'',clus_ax)']);
                 if i==1
                     plot(clus_ax,1:ls,av,'c','linewidth',2)
                     plot(clus_ax,1:ls,avup,'c','linewidth',.5)

@@ -14,7 +14,7 @@ function Get_spikes(input, par_input)
 %par_input must be a cell with some of the detecction parameters. All the
 %parameters included will overwrite the parameters load from set_parameters()
 
-if isnumeric(input) || strcmp(input,'all')  %cases for numeric or 'all' input
+if isnumeric(input) || any(strcmp(input,'all'))  %cases for numeric or 'all' input
     filenames = {};
     se = supported_wc_extensions();
     dirnames = dir();
@@ -62,9 +62,12 @@ for fnum = 1:length(filenames)
     par.reset_results = true;  %for don't load times_ or _spikes files
 
     par.cont_segment = true;  %false to don't save the segment of the continuous data in the spikes file
-    
-    data_handler = readInData(par);
-    
+    try
+        data_handler = readInData(par);
+    catch MExc
+        warning(MExc.message);
+        continue
+    end
     par = data_handler.par;
     if exist('par_input','var')
         par = update_parameters(par,par_input,'detect');
