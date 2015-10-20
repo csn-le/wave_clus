@@ -412,6 +412,7 @@ end
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 spikes = USER_DATA{2};
 used_par = USER_DATA{1};
+index = USER_DATA{3};
 classes = USER_DATA{6};
 gui_classes_data = USER_DATA{10};
 
@@ -440,7 +441,7 @@ gui_status.classes = gui_classes_data(1:end,3:4);
 
 forced = USER_DATA{13};
 
-var_list = ' cluster_class par spikes gui_status forced';
+var_list = ' cluster_class par spikes gui_status forced index';
 
 if ~isempty(USER_DATA{7})
     inspk = USER_DATA{7};

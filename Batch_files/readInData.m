@@ -48,22 +48,24 @@ classdef readInData < handle
             
             if (~isfield(par_ui,'reset_results')) || (~ par_ui.reset_results) ||  obj.with_results
                 %Search for previous results
-                finfo = whos('-file',['times_' obj.nick_name '.mat']);
-                if ~ismember('spikes',{finfo.name})
-                    ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_times'' file');
-                    throw(ME)
-                end
-                if ismember('par',{finfo.name})
-                    load(['times_' obj.nick_name '.mat'],'par');
-                    obj.par = update_parameters(obj.par, par, 'relevant');
-                    with_par = true;
-                end
-                if ismember('gui_status',{finfo.name})  
-                    obj.with_gui_status = true;
-                end
-                if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file') && exist(['times_' obj.nick_name '.mat'],'file')
-                    obj.with_spc = true;
-                    obj.with_results = true;
+                if exist(['times_' obj.nick_name '.mat'],'file')
+                    finfo = whos('-file',['times_' obj.nick_name '.mat']);
+                    if ~ismember('spikes',{finfo.name})
+                        ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_times'' file');
+                        throw(ME)
+                    end
+                    if ismember('par',{finfo.name})
+                        load(['times_' obj.nick_name '.mat'],'par');
+                        obj.par = update_parameters(obj.par, par, 'relevant');
+                        with_par = true;
+                    end
+                    if ismember('gui_status',{finfo.name})  
+                        obj.with_gui_status = true;
+                    end
+                    if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file')
+                        obj.with_spc = true;
+                        obj.with_results = true;
+                    end
                 end
             end
             if (~isfield(par_ui,'reset_results')) || (~ par_ui.reset_results) || obj.with_wc_spikes

@@ -1,4 +1,10 @@
 function new_par = update_parameters(new_par, par, type)
+% This function overwrite or create fields from par in new_par. The fields 
+%   used will be only the ones with type 'type' present in 'par'.
+% new_par a struct() could be empty.
+% par a struct() with parameters.
+% type a string: 'detect' for parameters used in detection an alignment of
+%   spikes. 'relevant' for parameters used in detection or clustering.
 
 
 detection_params = {'channels','segments_length', 'sr','tmax','tmin','w_pre', ...
