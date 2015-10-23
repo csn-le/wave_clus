@@ -17,7 +17,7 @@ function Do_clustering(input, par_input)
 %                   (ipunt=2 don't implies 20 or viceversa)
 %               'all', in this case the functions will process all the
 %                '_spikes.mat' files in the folder.
-%par_input must be a cell with some of the detecction parameters. All the
+%par_input must be a struct with some of the detecction parameters. All the
 %parameters included will overwrite the parameters load from set_parameters()
 
 
@@ -81,17 +81,14 @@ for fnum = 1:length(filenames)
     par.fname_in = 'tmp_data_wc';                       % temporary filename used as input for SPC
     par.fname = ['data_' data_handler.nick_name];
     par.nick_name = data_handler.nick_name;
-    par.fnamespc = par.fname;                  %filename if "save clusters" button is pressed
+    par.fnamespc = par.fname;                  		%filename if "save clusters" button is pressed
 
     if exist('par_input','var')
         par = update_parameters(par,par_input,'relevant');
     end
     
-    if data_handler.with_spikes            %data have some time of _spikes files
+    if data_handler.with_spikes            			%data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
-        if ~data_handler.with_wc_spikes
-            [spikes] = spike_alignment(spikes,par);
-        end
     else
         warning('MyComponent:noValidInput', 'File: %s doesn''t include spikes', filename);
         throw(ME)
@@ -349,7 +346,7 @@ for fnum = 1:length(filenames)
     fclose(fout);
 
     
-    if par.cont_segment && data_handler.with_raw
+    if par.cont_segment && data_handler.with_psegment
         subplot(3,1,1)      
         box off; hold on
         %these lines are for plotting continuous data 

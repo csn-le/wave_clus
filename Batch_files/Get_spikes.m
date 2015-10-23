@@ -11,7 +11,7 @@ function Get_spikes(input, par_input)
 %                   (ipunt=2 don't implies 20 or viceversa)
 %               'all', in this case the functions will process all the
 %                   supported files in the folder (except .mat files).
-%par_input must be a cell with some of the detecction parameters. All the
+%par_input must be a struct with some of the detecction parameters. All the
 %parameters included will overwrite the parameters load from set_parameters()
 
 if isnumeric(input) || any(strcmp(input,'all'))  %cases for numeric or 'all' input
@@ -57,11 +57,9 @@ end
 for fnum = 1:length(filenames)
     filename = filenames{fnum};
     par = set_parameters();
-    par.cont_segment = true;
     par.filename = filename;
     par.reset_results = true;  %for don't load times_ or _spikes files
-
-    par.cont_segment = true;  %false to don't save the segment of the continuous data in the spikes file
+    par.cont_segment = true;  %false doesn't save the segment of the continuous data in the spikes file
     try
         data_handler = readInData(par);
     catch MExc
@@ -73,7 +71,7 @@ for fnum = 1:length(filenames)
         par = update_parameters(par,par_input,'detect');
     end
 
-    if data_handler.with_spikes            %data have some time of _spikes files
+    if data_handler.with_spikes            %data have some type of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
             [spikes] = spike_alignment(spikes,par);
@@ -81,12 +79,14 @@ for fnum = 1:length(filenames)
     else    
         index = [];
         spikes = [];
+        threshold = [];
         for n = 1:data_handler.max_segments
             x = data_handler.get_segment();
                 %<----  Add here extra processing of the signal (x)
-            [new_spikes, temp_aux_th, new_index]  = amp_detect(x, par);
+            [new_spikes, aux_th, new_index]  = amp_detect(x, par);
             index = [index data_handler.index2ts(new_index)]; %new_index to ms
             spikes = [spikes; new_spikes];
+            threshold = 
         end
     end
 

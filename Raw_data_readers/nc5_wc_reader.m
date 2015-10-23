@@ -1,8 +1,24 @@
+%Class for handle 'nc5' files.
+
+%The classes used by readInData need the methods:
+%   - A constructor, with inputs par (parameters) and 
+%     raw_filename (name with the extension used in the name of the class).
+%   - A get_info() method that return: [sr, max_segments, with_raw, with_spikes]
+%       sr : sampling rate in Hz. A empty vector if the sr in the parameters
+%            should be use.
+%       max_segments: total number of segments of raw data to read. Numbers
+%                   of times that set_segment(i) will be call.
+%       with_raw: Boolean, true if the raw file has a continouos signal.
+%       with_spikes: Boolean, true if the raw file has only the detected spikes.
+%   - A get_segment(i) method:
+%   - A index2ts(index,i) method trat 
+%           
+
 classdef nc5_wc_reader < handle
-	properties
+	properties    
         sr
         max_segments
-        %channel
+        %channel        
         opened_file
         segmentLength
         open_file

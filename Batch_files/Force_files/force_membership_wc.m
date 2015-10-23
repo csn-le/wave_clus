@@ -44,10 +44,21 @@ switch par.template_type
             class_out(i) = ML_gaussian(f_out(i,:),mu,inv_sigma);
         end
     case 'mahal'
-        [mu inv_sigma] = fit_gaussian(f_in,class_in);
-        for i=1:nspk,
-            class_out(i) = nearest_mahal(f_out(i,:),mu,inv_sigma);
+        max_class =  max(class_in);
+        mdistance = zeros(max_class, nspk);
+        maxdist   = zeros(1, max_class);
+        for i = 1:max_class
+           mdistance(i,:) = mahal(f_out, f_in(class_in ==i, :));
+           maxdist(i) = std(mahal(f_in(class_in ==i, :), f_in(class_in ==i, :)));
         end
+        sdnum = par.template_sdnum;
+        for i = 1:nspk
+             [d winner] = min(mdistance(:,i));
+             if d <sdnum*maxdist(winner)
+                 class_out(i) = winner;
+             end
+        end
+        
         
     otherwise
         sprintf('force_membership(): <%s> is not a known template type.\n',par.template_type);

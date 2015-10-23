@@ -1,18 +1,20 @@
 classdef readInData < handle
+    %This calss will handle different types of data, and present a easy and
+    %common interface.
 	properties
-        par
-        nick_name
-        with_raw
-        with_spikes
-        with_results
-        with_gui_status
-        n_to_read
-        sample_signal
-        max_segments
-        file_reader
-        with_wc_spikes
-        with_psegment
-        with_spc
+        par             % parameters used, this will be updated with the data readed.
+        nick_name       % name of the file without extension.
+        with_raw        % boolean flag. True if the raw data was found and supported.
+        with_spikes     % boolean flag. True if a file with spikes was readed.
+        with_results    % boolean flag. True if 'times_' file was found.
+        with_gui_status % boolean flag. True if the 'times_' includes GUI data.
+        n_to_read       % number of segments of raw data not readed.
+        sample_signal   % segment of continuous downsampled signal that wave_clus plot
+        max_segments    % total number of segments of raw data to read.
+        file_reader     % object member of the class that handle the file extension.
+        with_wc_spikes  % boolean flag. True if '_spikes' file was found.
+        with_psegment   % boolean flag. True if the continuous segment was found in the '_spikes' file.
+        with_spc        % boolean flag. True if the '.dg_01' files created for the SPC algorithm were found.
     end 
 	methods 
         function obj = readInData(par_ui)
@@ -31,14 +33,14 @@ classdef readInData < handle
             with_par = false;
             results_selected = false;
             
-            if length(fnam)>7 && strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat')
+            if length(fnam)>7 && strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat') %if a 'times' file was selected.
                 obj.with_results = true;
                 results_selected = true;
                 obj.nick_name = fnam(7:end);
                 disp ('Raw data doesn''t selected. Only previous results available.')
 
             end
-            if length(fnam)>8 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat')
+            if length(fnam)>8 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat') %if a 'spikes' file was selected.
                 obj.with_wc_spikes = true;
                 results_selected =true;
                 obj.nick_name = fnam(1:end-7);

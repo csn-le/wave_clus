@@ -1,5 +1,6 @@
 function Plot_continuous_data(xf_detect, sr_sub,handles)
-% PLOT CONTINUOUS DATA
+% Function that plot the segment of continuous data. 
+% It will try to plot a minute, maximun.
 
 detect = handles.par.detection;
 stdmin = handles.par.stdmin;
@@ -31,8 +32,6 @@ end
 ypmax = min(thrmax, max(xf_detect));
 ypmin = max(-thrmax/2, min(xf_detect));
 
-%axis(handles.cont_data, [0 lx/sr_sub ypmin ypmax])
 ylim(handles.cont_data, [ypmin ypmax])
 xlim(handles.cont_data, [0 lx/sr_sub])
-
 %xlabel('Time (sec)')

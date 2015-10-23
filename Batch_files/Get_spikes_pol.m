@@ -6,7 +6,7 @@ function Get_spikes_pol(polytrodes, par_input)
 
 % input must be a vector with the numbers(N) of polytrodesN.txt to use.
 
-% par_input must be a cell with some of the detecction parameters. All the
+% par_input must be a struct with some of the detecction parameters. All the
 % parameters included will overwrite the parameters load from set_parameters()
 
 

@@ -45,16 +45,6 @@ function varargout = wave_clus(varargin)
 % USER_DATA{17} - USER_DATA{19}, for future changes
 % USER_DATA{20} - USER_DATA{42}, fix clusters
 
-folder = fileparts(mfilename('fullpath'));
-if isempty(strfind(path, folder))
-    addpath(folder);
-    addpath([folder filesep 'Batch_files']);
-    addpath([folder filesep 'Batch_files' filesep 'Force_files']);
-    addpath([folder filesep 'SPC']);
-    addpath([folder filesep 'Raw_data_readers']);
-end
-
-
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -301,7 +291,8 @@ else
 end
 
 if data_handler.with_results && ~ data_handler.with_spc
-    temp = -1;
+    temp = -1;                              % This will work as a flag for not drawing the temperature diagram
+    cla(handles.temperature_plot,'reset');
 end
 
 clustering_results(:,5) = repmat(handles.par.min_clus,length(classes),1); % minimum number of clusters
