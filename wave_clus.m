@@ -162,7 +162,7 @@ handles.par.nick_name = data_handler.nick_name;
 handles.par.fnamesave = handles.par.fname;                  %filename if "save clusters" button is pressed
 handles.par.fnamespc = 'data_wc';
 
-handles.par = update_par(data_handler,handles.par);
+handles.par = data_handler.update_par(handles.par);
 handles.par.file_name_to_show = [pathname filename];
 
 if data_handler.with_results %data have _times files
@@ -473,39 +473,32 @@ h_fig5 = findobj(h_figs,'tag','wave_clus_aux4');
 h_fig6 = findobj(h_figs,'tag','wave_clus_aux5');
 
 if ~isempty(h_fig)
-    figure(h_fig); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-    set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig,''-djpeg'',''fig2print_' outfile(7:end)  ''',''-r800'')' ]);
+    figure(h_fig); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
+    eval(['print(h_fig,''-dpng'',''fig2print_' outfile(7:end)  ''',''-r300'')' ]);
 end
 if ~isempty(h_fig1)
-    figure(h_fig1); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-    set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig1,''-djpeg'',''fig2print_' outfile(7:end) 'a' ''',''-r800'')' ]);
+    figure(h_fig1); set(gcf,'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
+    eval(['print(h_fig1,''-dpng'',''fig2print_' outfile(7:end) 'a' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig2)
-    figure(h_fig2); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-    set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig2,''-djpeg'',''fig2print_' outfile(7:end) 'b' ''',''-r800'')' ]);
+    figure(h_fig2); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
+    eval(['print(h_fig2,''-dpng'',''fig2print_' outfile(7:end) 'b' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig3)
-    figure(h_fig3); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-    set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig3,''-djpeg'',''fig2print_' outfile(7:end) 'c' ''',''-r800'')' ]);
+    figure(h_fig3); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
+    eval(['print(h_fig3,''-dpng'',''fig2print_' outfile(7:end) 'c' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig4)
-    figure(h_fig4); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-    set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig4,''-djpeg'',''fig2print_' outfile(7:end) 'd' ''',''-r800'')' ]);
+    figure(h_fig4); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
+    eval(['print(h_fig4,''-dpng'',''fig2print_' outfile(7:end) 'd' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig5)
-    figure(h_fig5); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-    set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig5,''-djpeg'',''fig2print_' outfile(7:end) 'e' ''',''-r800'')' ]);
+    figure(h_fig5); set(gcf,'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
+    eval(['print(h_fig5,''-dpng'',''fig2print_' outfile(7:end) 'e' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig6)
-    figure(h_fig6); set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-    set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    eval(['print(h_fig6,''-djpeg'',''fig2print_' outfile(7:end) 'f' ''')' ]);
+    figure(h_fig6); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
+    eval(['print(h_fig6,''-dpng'',''fig2print_' outfile(7:end) 'f' ''',''-r300'')' ]);
 end
 set(hObject,'value',0);
 

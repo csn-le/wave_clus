@@ -24,7 +24,9 @@ classdef mat_wc_reader < handle
                 obj.sr = sr;
             else
                 obj.sr_infile = false;
-                obj.sr = par.sr; 
+                if isfield(par,'sr')
+                    obj.sr = par.sr;
+                end
             end
             
             if ismember('spikes',{finfo.name}) && ismember('index',{finfo.name})

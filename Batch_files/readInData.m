@@ -120,7 +120,10 @@ classdef readInData < handle
                  obj.par.channels = 1;
             end
 
-            obj.par.ref = floor(obj.par.ref_ms *obj.par.sr/1000);
+            if isfield(obj.par,'sr')
+                obj.par.ref = floor(obj.par.ref_ms *obj.par.sr/1000);
+            end
+            
         end
         
         function par = update_par(obj,par)

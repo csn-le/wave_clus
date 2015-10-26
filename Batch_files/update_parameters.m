@@ -4,7 +4,7 @@ function new_par = update_parameters(new_par, par, type)
 % new_par a struct() could be empty.
 % par a struct() with parameters.
 % type a string: 'detect' for parameters used in detection an alignment of
-%   spikes. 'relevant' for parameters used in detection or clustering.
+%   spikes. 'clus' for parameters used in detection or clustering. 'relevant' for both.
 
 
 detection_params = {'channels','segments_length', 'sr','tmax','tmin','w_pre', ...
@@ -17,7 +17,10 @@ detection_params = {'channels','segments_length', 'sr','tmax','tmin','w_pre', ..
 clus_params = {'inputs','scales','features','template_sdnum', 'template_k', ...
     'template_k_min','template_type','force_feature','match', ...
     'max_spk','permut','mintemp', 'maxtemp', 'tempstep','SWCycles',...
-    'KNearNeighb', 'num_temp', 'min_clus','max_clus','randomseed'};
+    'KNearNeighb', 'num_temp', 'min_clus','max_clus','randomseed','min_clus_rel','force_auto'};
+
+batch_ploting_params = {'temp_plot','max_spikes_plot','print2file'};
+
 
 new_par_names = fieldnames(new_par);
 load_par_names = fieldnames(par);
@@ -26,6 +29,15 @@ if strcmp(type,'detect') || strcmp(type,'relevant')
         if ismember(detection_params(i),load_par_names)
             field = char(detection_params(i));
             new_par.(field ) = par.(field );
+        end
+    end
+end
+
+if strcmp(type,'clus') || strcmp(type,'relevant')
+    for i= 1:length(batch_ploting_params)
+        if ismember(batch_ploting_params(i),load_par_names)
+            field = char(batch_ploting_params(i));
+            new_par.(field ) = par.(field );       
         end
     end
 end

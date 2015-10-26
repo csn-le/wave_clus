@@ -61,12 +61,16 @@ else
     throw(ME)
 end
 
-
+par_file = set_parameters();
 
 for fnum = 1:length(filenames)
     filename = filenames{fnum};
-    par = set_parameters();
+    par = struct;
+    par = update_parameters(par,par_file,'clus');
     
+    if isfield(par,'channels')
+        par.inputs = par.inputs * par.channels;
+    end
     par.filename = filename;
     par.reset_results = true;
     par.cont_segment = true;  %maybe true and save the sample in spikes
@@ -84,7 +88,7 @@ for fnum = 1:length(filenames)
     par.fnamespc = par.fname;                  		%filename if "save clusters" button is pressed
 
     if exist('par_input','var')
-        par = update_parameters(par,par_input,'relevant');
+        par = update_parameters(par,par_input,'clus');
     end
     
     if data_handler.with_spikes            			%data have some time of _spikes files
@@ -103,6 +107,36 @@ for fnum = 1:length(filenames)
 	
     if nspk < 16     
         warning('MyComponent:noValidInput', 'Not enough spikes in the file');
+        figure
+        set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto') 
+        if par.cont_segment && data_handler.with_psegment
+            subplot(3,1,1)      
+            box off; hold on
+            %these lines are for plotting continuous data 
+            [xd_sub, sr_sub] = data_handler.get_signal_sample();
+            plot((1:length(xd_sub))/sr_sub,xd_sub)
+            thrmax = thr*par.stdmax/par.stdmin;
+            if strcmp(par.detection,'pos')
+                line([0 length(xd_sub)/sr_sub],[thr thr],'color','r')
+                ylim([-thrmax/2 thrmax])
+            elseif strcmp(par.detection,'neg')
+                line([0 length(xd_sub)/sr_sub],[-thr -thr],'color','r')
+                ylim([-thrmax thrmax/2])
+            else
+                line([0 length(xd_sub)/sr_sub],[thr thr],'color','r')
+                line([0 length(xd_sub)/sr_sub],[-thr -thr],'color','r')
+                ylim([-thrmax thrmax])
+            end
+        end
+        subplot(3,1,1)
+        title([pwd '/' filename],'Interpreter','none','Fontsize',14)
+        set(cfg, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto');
+        if par.print2file;
+            eval(['print -dpng fig2print_' filename(1:end-5) '.png']);
+        else
+            print
+        end 
+        
         continue
     end
     
@@ -189,8 +223,8 @@ for fnum = 1:length(filenames)
     end
     
     figure
-    set(gcf,'PaperOrientation','Landscape','PaperPosition',[0.25 0.25 10.5 8]) 
-
+    set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto') 
+    set(gcf,'units','normalized','outerposition',[0 0 1 1])
     %PLOTS
     clf
     clus_pop = [];
@@ -338,7 +372,12 @@ for fnum = 1:length(filenames)
     numclus=length(clus_pop)-1;
     outfileclus='cluster_results.txt';
     fout=fopen(outfileclus,'at+');
-    fprintf(fout,'%s\t %s\t %g\t %d\t %g\t', char(filename), features_name, temperature, numclus, par.stdmin);
+    if isfield(par,'stdmin')
+        stdmin = par.stdmin;
+    else
+        stdmin = NaN;
+    end
+    fprintf(fout,'%s\t %s\t %g\t %d\t %g\t', char(filename), features_name, temperature, numclus, stdmin);
     for ii=1:numclus
         fprintf(fout,'%d\t',clus_pop(ii));
     end
@@ -367,18 +406,16 @@ for fnum = 1:length(filenames)
     end
     subplot(3,1,1)
     title([pwd '/' filename],'Interpreter','none','Fontsize',14)
+    set(gcf, 'paperunits', 'inches', 'papertype', 'A4', 'paperpositionmode', 'auto') 
     if par.print2file;
-        set(gcf,'papertype','usletter','paperorientation','portrait','paperunits','inches')
-        set(gcf,'paperposition',[.25 .25 10.5 7.8])
-    
-        eval(['print -dpng fig2print_' filename(1:end-5) '.png']);
+        print(gcf,'-dpng',['fig2print_' filename(1:end-5) '.png'],'-r300');
     else
         print
     end 
     
     current_par = par;
     par = struct;
-    par = update_parameters(par, current_par, 'relevant');
+    par = update_parameters(par, current_par, 'clus');
     par.min_clus_rel = current_par.min_clus_rel;
     cluster_class = cluster;
     %<----  Add here auxiliar parameters

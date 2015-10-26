@@ -58,7 +58,7 @@ for fnum = 1:length(filenames)
     filename = filenames{fnum};
     par = set_parameters();
     par.filename = filename;
-    par.reset_results = true;  %for don't load times_ or _spikes files
+    par.reset_results = true;  %if true,  don't load times_ or _spikes files
     par.cont_segment = true;  %false doesn't save the segment of the continuous data in the spikes file
     try
         data_handler = readInData(par);
@@ -86,7 +86,7 @@ for fnum = 1:length(filenames)
             [new_spikes, aux_th, new_index]  = amp_detect(x, par);
             index = [index data_handler.index2ts(new_index)]; %new_index to ms
             spikes = [spikes; new_spikes];
-            threshold = 
+            threshold = [threshold, aux_th];
         end
     end
 
@@ -106,6 +106,8 @@ for fnum = 1:length(filenames)
     end
 
     clear spikes
-    
+    if exist('threshold','var')
+        save([data_handler.nick_name '_spikes'],'threshold','-append')
+    end
 end
 end
