@@ -1,4 +1,4 @@
-function Do_clustering(input, par_input)
+function Do_clustering(input, parallel,par_input)
 
 % PROGRAM Do_clustering.
 % Does clustering on all files in Files.txt
@@ -19,8 +19,9 @@ function Do_clustering(input, par_input)
 %                '_spikes.mat' files in the folder.
 %par_input must be a struct with some of the detecction parameters. All the
 %parameters included will overwrite the parameters load from set_parameters()
-
-
+if exist(parallel,'var') && parallel == true
+    matlabpool('open')
+end
 
 if isnumeric(input) || any(strcmp(input,'all'))
     filenames = {};
@@ -63,7 +64,7 @@ end
 
 par_file = set_parameters();
 
-for fnum = 1:length(filenames)
+parfor fnum = 1:length(filenames)
     filename = filenames{fnum};
     par = struct;
     par = update_parameters(par,par_file,'clus');
@@ -73,8 +74,7 @@ for fnum = 1:length(filenames)
     end
     par.filename = filename;
     par.reset_results = true;
-    par.cont_segment = true;  %maybe true and save the sample in spikes
-
+    
     data_handler = readInData(par);
     par = data_handler.par;
     
@@ -90,6 +90,133 @@ for fnum = 1:length(filenames)
     if exist('par_input','var')
         par = update_parameters(par,par_input,'clus');
     end
+    
+    if data_handler.with_spikes            			%data have some time of _spikes files
+        [spikes, index] = data_handler.load_spikes(); 
+    else
+        warning('MyComponent:noValidInput', 'File: %s doesn''t include spikes', filename);
+        throw(ME)
+        continue
+    end
+        
+    % LOAD SPIKES
+    nspk = size(spikes,1);
+    naux = min(par.max_spk,size(spikes,1));
+    par.min_clus = max(par.min_clus,par.min_clus_rel*naux);
+    
+	
+    if nspk < 16     
+        warning('MyComponent:noValidInput', 'Not enough spikes in the file');
+        continue
+    end
+    
+    % CALCULATES INPUTS TO THE CLUSTERING ALGORITHM. 
+    inspk = wave_features(spikes,par);     %takes wavelet coefficients.
+
+    % SELECTION OF SPIKES FOR SPC 
+    if par.permut == 'n'
+        % GOES FOR TEMPLATE MATCHING IF TOO MANY SPIKES.
+        if size(spikes,1)> par.max_spk;
+            % take first 'par.max_spk' spikes as an input for SPC
+            inspk_aux = inspk(1:naux,:);
+        else
+            inspk_aux = inspk;
+        end
+
+        %INTERACTION WITH SPC
+        save(par.fname_in,'inspk_aux','-ascii');
+        [clu, tree] = run_cluster(par);
+        [temp] = find_temp(tree,par);
+
+        %DEFINE CLUSTERS
+        class1 = find(clu(temp,3:end)==0);
+        class2 = find(clu(temp,3:end)==1);
+        class3 = find(clu(temp,3:end)==2);
+        class4 = find(clu(temp,3:end)==3);
+        class5 = find(clu(temp,3:end)==4);
+
+    else
+        % GOES FOR TEMPLATE MATCHING IF TOO MANY SPIKES.
+        if size(spikes,1)> par.max_spk;
+            % random selection of spikes for SPC 
+            ipermut = randperm(length(inspk));
+            ipermut(naux+1:end) = [];
+            inspk_aux = inspk(ipermut,:);
+        else
+            ipermut = randperm(size(inspk,1));
+            inspk_aux = inspk(ipermut,:);
+        end
+
+        %INTERACTION WITH SPC
+        save(par.fname_in,'inspk_aux','-ascii');
+        [clu, tree] = run_cluster(par);
+        [temp] = find_temp(tree,par);
+
+        %DEFINE CLUSTERS
+        class1=ipermut(clu(temp,3:end)==0);
+        class2=ipermut(clu(temp,3:end)==1);
+        class3=ipermut(clu(temp,3:end)==2);
+        class4=ipermut(clu(temp,3:end)==3);
+        class5=ipermut(clu(temp,3:end)==4);
+        
+    end
+    
+    class0 = setdiff(1:size(spikes,1), sort([class1 class2 class3 class4 class5]));
+    whos class*
+    
+    
+    % IF TEMPLATE MATCHING WAS DONE, THEN FORCE
+    if (size(spikes,1)> par.max_spk || ...
+            (par.force_auto))
+        classes = zeros(size(spikes,1),1);
+        if length(class1)>=par.min_clus; classes(class1) = 1; end
+        if length(class2)>=par.min_clus; classes(class2) = 2; end
+        if length(class3)>=par.min_clus; classes(class3) = 3; end
+        if length(class4)>=par.min_clus; classes(class4) = 4; end
+        if length(class5)>=par.min_clus; classes(class5) = 5; end
+        f_in  = spikes(classes~=0,:);
+        f_out = spikes(classes==0,:);
+        class_in = classes(classes~=0,:);
+        class_out = force_membership_wc(f_in, class_in, f_out, par);
+        forced = classes==0;
+        classes(classes==0) = class_out;
+        forced(classes==0) =0;
+        class0 = find(classes==0);
+        class1 = find(classes==1);
+        class2 = find(classes==2);
+        class3 = find(classes==3);
+        class4 = find(classes==4);
+        class5 = find(classes==5);
+        
+    else
+        forced = zeros(1, size(spikes,1));
+    end
+    current_par = par;
+    par = struct;
+    par = update_parameters(par, current_par, 'clus');
+    par.min_clus_rel = current_par.min_clus_rel;
+    cluster_class = cluster;
+    %<----  Add here auxiliar parameters
+    
+    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'index', 'par','inspk','forced')
+    if exist('ipermut','var')
+        save(['times_' data_handler.nick_name],'ipermut','-append')
+    end
+end
+
+for fnum = 1:length(filenames)
+    filename = filenames{fnum};
+    par = struct;
+    par.filename = filename;
+
+    par.cont_segment = true;  %maybe true and save the sample in spikes
+
+    data_handler = readInData(par);
+    par = data_handler.par;
+    
+    par.nick_name = data_handler.nick_name;
+
+    %% (FC)
     
     if data_handler.with_spikes            			%data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
@@ -425,6 +552,12 @@ for fnum = 1:length(filenames)
         save(['times_' data_handler.nick_name],'ipermut','-append')
     end
 end
+
+
+if exist(parallel,'var') && parallel == true
+    matlabpool('close')
+end
+
 end
 
 

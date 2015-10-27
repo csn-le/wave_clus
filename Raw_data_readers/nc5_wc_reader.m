@@ -10,9 +10,11 @@
 %                   of times that set_segment(i) will be call.
 %       with_raw: Boolean, true if the raw file has a continouos signal.
 %       with_spikes: Boolean, true if the raw file has only the detected spikes.
-%   - A get_segment(i) method:
-%   - A index2ts(index,i) method trat 
-%           
+%   - A get_segment(i) method, that should return the continuous segment
+%       number i. It will be call in order from i=1 to i=max_segment (if it's necessary).
+%   - A index2ts(index,i) method that return a vector of times in ms,
+%       with the times of the 'index' elements of the segment i.
+     
 
 classdef nc5_wc_reader < handle
 	properties    
