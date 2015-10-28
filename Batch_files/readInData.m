@@ -152,7 +152,7 @@ classdef readInData < handle
         end
         
         
-        function [clu, tree, spikes, index, inspk, ipermut, classes, forced, rejected] = load_results(obj)
+        function [clu, tree, spikes, index, inspk, ipermut, classes, forced, Temp] = load_results(obj)
         	
             if ~ obj.with_results
             	ME = MException('MyComponent:noClusFound', 'This file don''t have a associated ''times_%s.mat'' file',obj.nick_name);
@@ -165,13 +165,15 @@ classdef readInData < handle
             if ~exist('forced','var')
             	forced = false(size(spikes,1), 1);
             end
-            if ~exist('rejected','var')
-            	rejected = false(1,size(spikes,1));
-            end
+           
             
             % cluster_class(:,1);
             index = cluster_class(:,2);
             classes = cluster_class(:,1);
+            
+            if ~exist('Temp','var')
+            	Temp = ones(max(classes));
+            end
             if obj.with_spc
                 clu = load(['data_' obj.nick_name '.dg_01.lab']);
                 tree = load(['data_' obj.nick_name '.dg_01']);
@@ -180,12 +182,24 @@ classdef readInData < handle
                 tree = [];
             end
         end
+        
+        function [rejected] = load_rejected(obj)
+        	
+            if ~ obj.with_results
+            	ME = MException('MyComponent:noClusFound', 'This file don''t have a associated ''times_%s.mat'' file',obj.nick_name);
+            	throw(ME)
+            end
+            load(['times_' obj.nick_name '.mat']);
+            if ~exist('rejected','var')
+            	rejected = false(1,size(spikes,1));
+            end
+        end
+        
 
-        function [saved_gui_status, temp,gui_classes] = get_gui_status(obj)
+        function [original_classes, current_temp] = get_gui_status(obj)
             load(['times_' obj.nick_name '.mat'],'gui_status','cluster_class'); 
-            temp = gui_status.temp;
-            saved_gui_status = gui_status.classes;
-            gui_classes = cluster_class(:,1);
+            current_temp = gui_status.current_temp;
+            original_classes = gui_status.original_classes;
         end
             
             

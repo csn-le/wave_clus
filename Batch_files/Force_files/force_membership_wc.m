@@ -49,12 +49,12 @@ switch par.template_type
         maxdist   = zeros(1, max_class);
         for i = 1:max_class
            mdistance(i,:) = mahal(f_out, f_in(class_in ==i, :));
-           maxdist(i) = std(mahal(f_in(class_in ==i, :), f_in(class_in ==i, :)));
+           maxdist(i) = sqrt(mean(mahal(f_in(class_in ==i, :), f_in(class_in ==i, :))));
         end
         sdnum = par.template_sdnum;
         for i = 1:nspk
              [d winner] = min(mdistance(:,i));
-             if d <sdnum*maxdist(winner)
+             if sqrt(d) < sdnum*maxdist(winner)
                  class_out(i) = winner;
              end
         end

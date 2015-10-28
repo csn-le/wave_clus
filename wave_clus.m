@@ -166,8 +166,8 @@ handles.par = data_handler.update_par(handles.par);
 handles.par.file_name_to_show = [pathname filename];
 
 if data_handler.with_results %data have _times files
-    [clu, tree, spikes, index, inspk, ipermut, classes, forced, rejected] = data_handler.load_results();
-   
+    [clu, tree, spikes, index, inspk, ipermut, classes, forced,temp] = data_handler.load_results();
+    rejected = data_handler.load_rejected();
 else
     if data_handler.with_spikes  %data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
@@ -259,17 +259,23 @@ USER_DATA{16} = rejected;  %the clusters numbers are sorted
 set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
 
 if  data_handler.with_gui_status
-    [saved_gui_status, temp] = data_handler.get_gui_status();
-    clustering_results(:,1) = repmat(temp,length(classes),1);
+    [saved_gui_status, current_temp] = data_handler.get_gui_status();
+    clustering_results = zeros(length(classes),4);
+    clustering_results(:,1) = repmat(current_temp,length(classes),1);
+    for i=1:max(classes)
+      clustering_results(classes==i,3)  = temp(i);
+    end
+    
     clustering_results(:,2) = classes'; % GUI classes 
-    clustering_results(:,3:4) = saved_gui_status;
+    clustering_results(:,4) = saved_gui_status;
     handles.undo = 1;
     
 elseif data_handler.with_results
-    temp = 1;
-    clustering_results(:,1) = repmat(temp,length(classes),1); % GUI temperatures
+    clustering_results(:,1) = repmat(temp(1),length(classes),1); % GUI temperatures
     clustering_results(:,2) = classes'; % GUI classes 
-    clustering_results(:,3) = repmat(temp,length(classes),1); % original temperatures 
+    for i=1:max(classes)
+    	clustering_results(classes==i,3)  = temp(i);
+    end 
     clustering_results(:,4) = classes'; % original classes 
     handles.undo = 1;
     
@@ -297,7 +303,11 @@ end
 
 clustering_results(:,5) = repmat(handles.par.min_clus,length(classes),1); % minimum number of clusters
 USER_DATA{6} = classes(:)';
-USER_DATA{8} = temp;
+if exist('current_temp','var')
+    USER_DATA{8} = current_temp;
+else
+    USER_DATA{8} = temp(1);
+end
 USER_DATA{10} = clustering_results;
 USER_DATA{11} = clustering_results;
 handles.force = 0;
@@ -427,12 +437,16 @@ par = struct;
 par = update_parameters(par,used_par,'relevant');
 
 gui_status = struct();
-gui_status.temp =  gui_classes_data(1,1);
-gui_status.classes = gui_classes_data(1:end,3:4);
+gui_status.current_temp =  gui_classes_data(1,1);
+gui_status.original_classes = gui_classes_data(1:end,4);
 
+Temp = zeros(length(classes_names));
+for i = 1:length(classes_names)
+    Temp(i) = gui_classes_data(find(classes==i,1,'first'),3);
+end
 forced = USER_DATA{13};
 
-var_list = ' cluster_class par spikes gui_status forced index';
+var_list = ' cluster_class par spikes gui_status forced index Temp';
 
 if ~isempty(USER_DATA{7})
     inspk = USER_DATA{7};
