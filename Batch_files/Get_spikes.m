@@ -73,23 +73,44 @@ if exist('parallel','var') && parallel == true
     end
 end
 
+if ~exist('par_input','var')
+	par_input = struct;
+end
 
 parfor fnum = 1:length(filenames)
     filename = filenames{fnum};
-    par = set_parameters();
-    par.filename = filename;
-    par.reset_results = true;  %if true,  don't load times_ or _spikes files
-    par.cont_segment = true;  %false doesn't save the segment of the continuous data in the spikes file
     try
-        data_handler = readInData(par);
+        get_spikes_single(filename, par_input);
     catch MExc
         warning(MExc.message);
         continue
     end
-    par = data_handler.par;
-    if exist('par_input','var')
-        par = update_parameters(par,par_input,'detect');
+    
+end
+
+
+if exist('parallel','var') && parallel == true
+    if exist('matlabpool','file')
+        matlabpool('close')
+    else
+        poolobj = gcp('nocreate');
+        delete(poolobj);
     end
+ 
+end
+
+end
+
+
+function get_spikes_single(filename, par_input)
+    
+    par = set_parameters();
+    par.filename = filename;
+    par.reset_results = true;  %if true,  don't load times_ or _spikes files
+    par.cont_segment = true;  %false doesn't save the segment of the continuous data in the spikes file
+    data_handler = readInData(par);
+    par = data_handler.par;
+    par = update_parameters(par,par_input,'detect');
 
     if data_handler.with_spikes            %data have some type of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
@@ -119,27 +140,13 @@ parfor fnum = 1:length(filenames)
 
     if current_par.cont_segment
         [psegment, sr_psegment] = data_handler.get_signal_sample();
+        
         save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par','psegment','sr_psegment')
-        clear psegment
     else
         save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par')
     end
 
-    clear spikes
-    if exist('threshold','var')
+    if ~data_handler.with_spikes
         save([data_handler.nick_name '_spikes'],'threshold','-append')
     end
-end
-
-
-if exist('parallel','var') && parallel == true
-    if exist('matlabpool','file')
-        matlabpool('close')
-    else
-        poolobj = gcp('nocreate');
-        delete(poolobj);
-    end
- 
-end
-
 end
