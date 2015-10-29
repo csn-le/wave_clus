@@ -357,7 +357,7 @@ function do_clustering_single(filename,min_spikes4SPC, par_file)
         par.inputs = par.inputs * par.channels;
     end
     
-    par.fname_in = 'tmp_data_wc';                       % temporary filename used as input for SPC
+    par.fname_in = ['tmp_data_wc' data_handler.nick_name];                       % temporary filename used as input for SPC
     par.fname = ['data_' data_handler.nick_name];
     par.nick_name = data_handler.nick_name;
     par.fnamespc = par.fname;                  		%filename if "save clusters" button is pressed
@@ -479,6 +479,7 @@ function do_clustering_single(filename,min_spikes4SPC, par_file)
  
     
     temp_used = temp;
+    Temp = [];
     for i = 1:5
        if eval(['length(class' num2str(i) ')']) > par.min_clus
             Temp(i) = temp_used;
