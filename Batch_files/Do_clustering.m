@@ -19,13 +19,7 @@ function Do_clustering(input, parallel, par_input)
 %                '_spikes.mat' files in the folder.
 %par_input must be a struct with some of the detecction parameters. All the
 %parameters included will overwrite the parameters load from set_parameters()
-if exist('parallel','var') && parallel == true
-    if exist('matlabpool','file')
-        matlabpool('open')
-    else
-        parpool
-    end
-end
+
 
 if isnumeric(input) || any(strcmp(input,'all'))
     filenames = {};
@@ -65,6 +59,23 @@ else
     throw(ME)
 end
 
+
+if exist('parallel','var') && parallel == true
+    if exist('matlabpool','file')
+        if matlabpool('size') > 0
+            parallel = false;
+        else
+            matlabpool('open');
+        end
+    else
+        poolobj = gcp('nocreate'); % If no pool, do not create new one.
+        if isempty(poolobj)
+            parallel = false;
+        else
+            parpool
+        end
+    end
+end
 
 min_spikes4SPC = 16;
 

@@ -1,4 +1,4 @@
-function Get_spikes(input, par_input)
+function Get_spikes(input, parallel, par_input)
 % function Get_spikes(input, par_input)
 % Saves spikes, spike times (in ms), used parameters and a sample segment 
 % of the continuous data (optional) in filename_spikes.mat.
@@ -13,6 +13,8 @@ function Get_spikes(input, par_input)
 %                   supported files in the folder (except .mat files).
 %par_input must be a struct with some of the detecction parameters. All the
 %parameters included will overwrite the parameters load from set_parameters()
+
+
 
 if isnumeric(input) || any(strcmp(input,'all'))  %cases for numeric or 'all' input
     filenames = {};
@@ -54,7 +56,25 @@ else
     throw(ME)
 end
 
-for fnum = 1:length(filenames)
+if exist('parallel','var') && parallel == true
+    if exist('matlabpool','file')
+        if matlabpool('size') > 0
+            parallel = false;
+        else
+            matlabpool('open');
+        end
+    else
+        poolobj = gcp('nocreate'); % If no pool, do not create new one.
+        if isempty(poolobj)
+            parallel = false;
+        else
+            parpool
+        end
+    end
+end
+
+
+parfor fnum = 1:length(filenames)
     filename = filenames{fnum};
     par = set_parameters();
     par.filename = filename;
@@ -110,4 +130,16 @@ for fnum = 1:length(filenames)
         save([data_handler.nick_name '_spikes'],'threshold','-append')
     end
 end
+
+
+if exist('parallel','var') && parallel == true
+    if exist('matlabpool','file')
+        matlabpool('close')
+    else
+        poolobj = gcp('nocreate');
+        delete(poolobj);
+    end
+ 
+end
+
 end

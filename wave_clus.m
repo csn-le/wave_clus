@@ -460,7 +460,7 @@ end
        
 if developer_mode
 	rejected = USER_DATA{15};
-	var_list = strcat(var_list , 'rejected');
+	var_list = strcat(var_list , ' rejected');
 end
 
 currentver = version;
