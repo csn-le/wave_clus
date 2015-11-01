@@ -312,7 +312,7 @@ draw_histograms(handles, 0:min(nclusters,3),USER_DATA);
 %Resize axis
 ymin = min(ylimit(:,1));
 ymax = max(ylimit(:,2));
-for i=1:3
+for i=1:4
     clus_ax = eval(['handles.spikes' num2str(i-1)]); 
     ylim(clus_ax,[ymin ymax]);
 end

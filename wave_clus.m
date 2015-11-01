@@ -657,12 +657,15 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
     end
     xind = ceil(rect(1));
     xend = floor(rect(1) + rect(3));
+    xD = xend-xind;
     ymin = rect(2);
-    ymax = rect(2) +rect(4);
-    [Mh, Mpos] = max(spikes(valids,1:end)');
-    [mh ,mpos] = min(spikes(valids,1:end)');
-    sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos >= xind & Mpos <= xend);
-    sp_selected = sp_selected |(mh >= ymin & mh <= ymax) & (mpos >= xind & mpos <= xend);
+    ymax = rect(2) + rect(4);
+    yD = ymin - ymax;
+    if xD==0 || yD == 0; return; end
+    [Mh, Mpos] = max(spikes(valids,xind:xend)');
+    [mh ,mpos] = min(spikes(valids,xind:xend)');
+    sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos > 1 & Mpos < xD);
+    sp_selected = sp_selected |((mh >= ymin & mh <= ymax) & (mpos > 1 & mpos < xD));
     
     valids(valids==1) = sp_selected;
     
