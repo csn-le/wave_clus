@@ -123,7 +123,7 @@ text = get(handles.text_editor, 'String');
 fout = fopen([fileparts(mfilename('fullpath')) filesep 'set_parameters.m'],'w');
 
 for row = 1:size(text,1)
-    fprintf(fout, '%s \n', text(row,1:end));
+    fprintf(fout, '%s \n', strtrim(text(row,1:end)));
 end
 
 fclose(fout);

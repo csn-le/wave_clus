@@ -1,4 +1,4 @@
-function Get_spikes(input, parallel, par_input)
+function Get_spikes(input, varargin)
 % function Get_spikes(input, par_input)
 % Saves spikes, spike times (in ms), used parameters and a sample segment 
 % of the continuous data (optional) in filename_spikes.mat.
@@ -11,8 +11,35 @@ function Get_spikes(input, parallel, par_input)
 %                   (ipunt=2 don't implies 20 or viceversa)
 %               'all', in this case the functions will process all the
 %                   supported files in the folder (except .mat files).
-%par_input must be a struct with some of the detecction parameters. All the
-%parameters included will overwrite the parameters load from set_parameters()
+% optional argument 'par' and the next input must be a struct with some of
+%       the detecction parameters. All the parameters included will 
+%       overwrite the parameters load from set_parameters()
+% optional argument 'parallel' : true for use parallel computing
+
+
+
+%default config
+par_input = struct;
+parallel = false;
+
+%optinal inputs
+nvar = length(varargin);
+for v = 1:2:nvar
+    if strcmp(varargin{v},'par')
+        if (nvar>=v+1) && isstruct(varargin{v+1})
+            par_input = varargin{v+1};
+        else
+            error('Error in ''par'' optional input.')
+        end
+    elseif strcmp(varargin{v},'parallel')
+        if (nvar>=v+1) && islogical(varargin{v+1})
+            parallel = varargin{v+1};
+        else
+            error('Error in ''parallel'' optional input.')
+        end
+    end
+end
+
 
 
 
@@ -56,7 +83,7 @@ else
     throw(ME)
 end
 
-if exist('parallel','var') && parallel == true
+if parallel == true
     if exist('matlabpool','file')
         if matlabpool('size') > 0
             parallel = false;
@@ -73,10 +100,6 @@ if exist('parallel','var') && parallel == true
     end
 end
 
-if ~exist('par_input','var')
-	par_input = struct;
-end
-
 parfor fnum = 1:length(filenames)
     filename = filenames{fnum};
     try
@@ -89,14 +112,13 @@ parfor fnum = 1:length(filenames)
 end
 
 
-if exist('parallel','var') && parallel == true
+if parallel == true
     if exist('matlabpool','file')
         matlabpool('close')
     else
         poolobj = gcp('nocreate');
         delete(poolobj);
     end
- 
 end
 
 end

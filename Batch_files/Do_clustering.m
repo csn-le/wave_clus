@@ -1,4 +1,4 @@
-function Do_clustering(input, parallel, par_input)
+function Do_clustering(input, varargin)
 
 % PROGRAM Do_clustering.
 % Does clustering on all files in Files.txt
@@ -17,8 +17,36 @@ function Do_clustering(input, parallel, par_input)
 %                   (ipunt=2 don't implies 20 or viceversa)
 %               'all', in this case the functions will process all the
 %                '_spikes.mat' files in the folder.
-%par_input must be a struct with some of the detecction parameters. All the
-%parameters included will overwrite the parameters load from set_parameters()
+% optional argument 'par' and the next input must be a struct with some of
+%       the detecction parameters. All the parameters included will 
+%       overwrite the parameters load from set_parameters()
+% optional argument 'parallel' with the next input true (boolean) for use parallel computing
+
+
+
+%default config
+par_input = struct;
+parallel = false;
+
+%optinal inputs
+nvar = length(varargin);
+for v = 1:2:nvar
+    if strcmp(varargin{v},'par')
+        if (nvar>=v+1) && isstruct(varargin{v+1})
+            par_input = varargin{v+1};
+        else
+            error('Error in ''par'' optional input.')
+        end
+    elseif strcmp(varargin{v},'parallel')
+        if (nvar>=v+1) && islogical(varargin{v+1})
+            parallel = varargin{v+1};
+        else
+            error('Error in ''parallel'' optional input.')
+        end
+    end
+end
+
+
 
 
 if isnumeric(input) || any(strcmp(input,'all'))
@@ -60,12 +88,12 @@ else
 end
 
 
-if exist('parallel','var') && parallel == true
+if parallel == true
     if exist('matlabpool','file')
-        if matlabpool('size') > 0
-            parallel = false;
-        else
+        try
             matlabpool('open');
+        catch
+            parallel = false;
         end
     else
         poolobj = gcp('nocreate'); % If no pool, do not create new one.
@@ -80,12 +108,21 @@ end
 min_spikes4SPC = 16;
 
 par_file = set_parameters();
-
+initial_date = now;
 parfor fnum = 1:length(filenames)
     filename = filenames{fnum};
-    do_clustering_single(filename,min_spikes4SPC, par_file);
+    do_clustering_single(filename,min_spikes4SPC, par_file, par_input);
+    disp(sprintf('%d of %d ''times'' files finished.',count_new_times(initial_date, filenames),length(filenames)))
 end
 
+if parallel == true
+    if exist('matlabpool','file')
+        matlabpool('close')
+    else
+        poolobj = gcp('nocreate');
+        delete(poolobj);
+    end
+end
 
 for fnum = 1:length(filenames)
     filename = filenames{fnum};
@@ -326,20 +363,9 @@ for fnum = 1:length(filenames)
 end
 
 
-if exist('parallel','var') && parallel == true
-    if exist('matlabpool','file')
-        matlabpool('close')
-    else
-        poolobj = gcp('nocreate');
-        delete(poolobj);
-    end
- 
 end
 
-
-end
-
-function do_clustering_single(filename,min_spikes4SPC, par_file)
+function do_clustering_single(filename,min_spikes4SPC, par_file, par_input)
     
     par = struct;
     par = update_parameters(par,par_file,'clus');
@@ -362,9 +388,8 @@ function do_clustering_single(filename,min_spikes4SPC, par_file)
     par.nick_name = data_handler.nick_name;
     par.fnamespc = par.fname;                  		%filename if "save clusters" button is pressed
 
-    if exist('par_input','var')
-        par = update_parameters(par,par_input,'clus');
-    end
+    par = update_parameters(par,par_input,'clus');
+    
     
     if data_handler.with_spikes            			%data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
@@ -437,7 +462,7 @@ function do_clustering_single(filename,min_spikes4SPC, par_file)
     end
     
     class0 = setdiff(1:size(spikes,1), sort([class1 class2 class3 class4 class5]));
-    whos class*
+    %whos class*
     
     
     % IF TEMPLATE MATCHING WAS DONE, THEN FORCE
@@ -486,10 +511,20 @@ function do_clustering_single(filename,min_spikes4SPC, par_file)
        end
     end
     
-    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'index', 'par','inspk','forced','Temp')
+    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'index', 'par','inspk','forced','Temp');
     if exist('ipermut','var')
-        save(['times_' data_handler.nick_name],'ipermut','-append')
+        save(['times_' data_handler.nick_name],'ipermut','-append');
     end
 end
     
-	
+function counter = count_new_times(initial_date, filenames)
+counter = 0;
+for i = 1:length(filenames)
+    fname = filenames{i};
+    FileInfo = dir(['times_' fname(1:end-11) '.mat']);
+    if length(FileInfo)==1 && (FileInfo.datenum > initial_date)
+        counter = counter + 1;
+    end
+end
+end
+

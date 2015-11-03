@@ -9,7 +9,13 @@ classes = USER_DATA{6};
 par = USER_DATA{1};
 
 for i = c2plot 
-    times = diff(spk_times(classes==i));
+    if classes == 0
+        rejected = USER_DATA{15};
+        times = diff(spk_times(classes==i & ~rejected));
+        clear rejected 
+    else
+        times = diff(spk_times(classes==i));
+    end
     % Calculates # ISIs < 3ms  
     multi_isi = nnz(times < 3); 
     % Builds and plots the histogram
