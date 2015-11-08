@@ -188,12 +188,13 @@ for fnum = 1:length(filenames)
     temperature = par.mintemp+temp*par.tempstep;
     color = get(gca,'ColorOrder');
     hold on 
+    num_temp = floor((par.maxtemp -par.mintemp)/par.tempstep);     % total number of temperatures
     switch par.temp_plot
             case 'lin'
                 plot([par.mintemp par.maxtemp-par.tempstep], ...
                 [par.min_clus par.min_clus],'k:',...
-                par.mintemp+(1:par.num_temp)*par.tempstep, ...
-                tree(1:par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
+                par.mintemp+(1:num_temp)*par.tempstep, ...
+                tree(1:num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
             
                 for i=1:5
                     if eval(['length(class' num2str(i) ')']) > par.min_clus
@@ -203,10 +204,11 @@ for fnum = 1:length(filenames)
                     end
                 end
             case 'log'
+                set(gca,'yscale','log');
                 semilogy([par.mintemp par.maxtemp-par.tempstep], ...
                 [par.min_clus par.min_clus],'k:',...
-                par.mintemp+(1:par.num_temp)*par.tempstep, ...
-                tree(1:par.num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
+                par.mintemp+(1:num_temp)*par.tempstep, ...
+                tree(1:num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
                 
                 for i=1:5
                     if eval(['length(class' num2str(i) ')']) > par.min_clus
@@ -216,6 +218,7 @@ for fnum = 1:length(filenames)
                     end
                 end
     end
+    
     subplot(3,5,6)
     hold on
     
@@ -230,14 +233,14 @@ for fnum = 1:length(filenames)
             plot(spikes(class0(1:max_spikes),:)','k');  
             plot(mean(spikes(class0,:),1),'c','linewidth',2)
             xlim([1 size(spikes,2)]); 
-            title('Cluster 0','Fontweight','bold')
+            title(['Cluster 0: # ' num2str(length(class0))],'Fontweight','bold')
         subplot(3,5,15)
             xa=diff(index(class0));
             [n,c]=hist(xa,0:1:100);
             bar(c(1:end-1),n(1:end-1))
             xlim([0 100])
-            xlabel([num2str(sum(n(1:3))) ' in < 3ms'])
-            title([num2str(length(class0)) ' spikes']);
+            xlabel('ISI (ms)');
+            title([num2str(nnz(xa<3)) ' in < 3ms']);
     end
     if length(class1) > par.min_clus; 
         clus_pop = [clus_pop length(class1)];
@@ -250,16 +253,15 @@ for fnum = 1:length(filenames)
             plot(spikes(class1(1:max_spikes),:)','b'); 
             plot(mean(spikes(class1,:),1),'k','linewidth',2)
             xlim([1 size(spikes,2)]); 
-            title('Cluster 1','Fontweight','bold')
+            title(['Cluster 1: # ' num2str(length(class1))],'Fontweight','bold')
             ylimit = [ylimit;ylim];
         subplot(3,5,12)
         xa=diff(index(class1));
         [n,c]=hist(xa,0:1:100);
         bar(c(1:end-1),n(1:end-1))
         xlim([0 100])
-        set(get(gca,'children'),'facecolor','b','linewidth',0.01)    
-        xlabel([num2str(sum(n(1:3))) ' in < 3ms'])
-        title([num2str(length(class1)) ' spikes']);
+        xlabel('ISI (ms)');
+        title([num2str(nnz(xa<3)) ' in < 3ms']);
         
     end
     if length(class2) > par.min_clus;
@@ -273,16 +275,15 @@ for fnum = 1:length(filenames)
             plot(spikes(class2(1:max_spikes),:)','r');  
             plot(mean(spikes(class2,:),1),'k','linewidth',2)
             xlim([1 size(spikes,2)]); 
-            title('Cluster 2','Fontweight','bold')
+            title(['Cluster 2: # ' num2str(length(class2))],'Fontweight','bold')
             ylimit = [ylimit;ylim];
         subplot(3,5,13)
             xa=diff(index(class2));
             [n,c]=hist(xa,0:1:100);
             bar(c(1:end-1),n(1:end-1))
             xlim([0 100])
-            set(get(gca,'children'),'facecolor','r','linewidth',0.01)    
-            xlabel([num2str(sum(n(1:3))) ' in < 3ms'])
-            title([num2str(length(class2)) ' spikes']);
+            xlabel('ISI (ms)');
+            title([num2str(nnz(xa<3)) ' in < 3ms']);
     end
     if length(class3) > par.min_clus;
         clus_pop = [clus_pop length(class3)];
@@ -295,16 +296,15 @@ for fnum = 1:length(filenames)
             plot(spikes(class3(1:max_spikes),:)','g');  
             plot(mean(spikes(class3,:),1),'k','linewidth',2)
             xlim([1 size(spikes,2)]); 
-            title('Cluster 3','Fontweight','bold')
+            title(['Cluster 3: # ' num2str(length(class3))],'Fontweight','bold')
             ylimit = [ylimit;ylim];
         subplot(3,5,14)
             xa=diff(index(class3));
             [n,c]=hist(xa,0:1:100);
             bar(c(1:end-1),n(1:end-1))
             xlim([0 100])
-            set(get(gca,'children'),'facecolor','g','linewidth',0.01)    
-            xlabel([num2str(sum(n(1:3))) ' in < 3ms'])
-            title([num2str(length(class3)) ' spikes']);
+            xlabel('ISI (ms)');
+            title([num2str(nnz(xa<3)) ' in < 3ms']);
     end
     if length(class4) > par.min_clus;
         clus_pop = [clus_pop length(class4)];

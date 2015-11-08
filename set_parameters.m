@@ -19,8 +19,6 @@ par.maxtemp = 0.201;                 % maximum temperature for SPC
 par.tempstep = 0.01;                 % temperature steps 
 par.SWCycles = 100;                  % SPC iterations for each temperature (default 100) 
 par.KNearNeighb = 11;                % number of nearest neighbors for SPC 
-par.num_temp = floor((par.maxtemp ... 
--par.mintemp)/par.tempstep);     % total number of temperatures 
 par.min_clus = 60;                   % minimum size of a cluster (default 60) 
 par.min_clus_rel = 0.005;            % minimum cluster size, relative to the total nr. of spikes (only for batch scripts). 
 par.max_clus = 33;                   % maximum number of clusters allowed (default 13) 

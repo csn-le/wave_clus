@@ -132,8 +132,7 @@ function get_spikes_single(filename, par_input)
     par.cont_segment = true;  %false doesn't save the segment of the continuous data in the spikes file
     data_handler = readInData(par);
     par = data_handler.par;
-    par = update_parameters(par,par_input,'detect')
-    return
+    par = update_parameters(par,par_input,'detect');
     if data_handler.with_spikes            %data have some type of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes

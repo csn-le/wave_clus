@@ -43,7 +43,7 @@ classdef tdtch_wc_reader < handle
         end
         
         function index_ts = index2ts(obj,index,i)
-            index_ts = (index-1)/obj.sr*1000 + obj.t0_segments(i);
+            index_ts = (index)/obj.sr*1000 + obj.t0_segments(i);
         end
       
         function x = get_segment(obj,i)

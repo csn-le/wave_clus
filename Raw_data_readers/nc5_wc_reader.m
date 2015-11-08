@@ -36,7 +36,7 @@ classdef nc5_wc_reader < handle
                 initial_index = 0;
                 obj.max_segments = ceil(lts/(par.segments_length  * sr * 60)); %number of segments in which data is cut
             else
-                initial_index = floor(par.tmin * obj.sr);                   %min time to read (in micro-sec)
+                initial_index = floor(par.tmin  * obj.sr);                   %min time to read (in sec)
                 tsmax = min(par.tsmax,lts/sr);
                 obj.max_segments = ceil((tsmax - par.tsmin)/ ...
                     (par.segments_length *60));         %number of segments in which data is cutted
@@ -48,7 +48,7 @@ classdef nc5_wc_reader < handle
             obj.segmentLength = floor (lts/obj.max_segments);
              
             obj.t0_segments = zeros(1,obj.max_segments);
-            obj.t0_segments(1) = initial_index*obj.sr;
+            obj.t0_segments(1) = initial_index / obj.sr *1e3;
             for i = 2:obj.max_segments
             	obj.t0_segments(i) = obj.t0_segments(i-1) + obj.segmentLength/obj.sr*1000;
             end
@@ -63,7 +63,7 @@ classdef nc5_wc_reader < handle
         end
         
         function index_ts = index2ts(obj,index,i)
-            index_ts = (index-1)/obj.sr*1000 + obj.t0_segments(i);
+            index_ts = (index)/obj.sr*1000 + obj.t0_segments(i);
         end
       
         function x = get_segment(obj,i)

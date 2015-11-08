@@ -346,9 +346,14 @@ function change_temperature_button_Callback(hObject, eventdata, handles)
 if button == 3
 	return
 end
-temp = round((temp-handles.par.mintemp)/handles.par.tempstep);
-if temp < 1; temp=1;end                                         %temp should be within the limits
-if temp > handles.par.num_temp; temp=handles.par.num_temp; end
+if temp < handles.par.mintemp
+    temp = 1;
+elseif temp>handles.par.maxtemp
+    temp = floor((handles.par.maxtemp-handles.par.mintemp)/handles.par.tempstep);
+else
+    temp = round((temp-handles.par.mintemp)/handles.par.tempstep); %temp from value to index
+end
+
 min_clus = round(aux);
 set(handles.min_clus_edit,'string',num2str(min_clus));
 
@@ -660,8 +665,8 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
         valids = ~USER_DATA{15}(:) & (classes(:)==cl); %First, I don't select the rejected
 
     end
-    xind = ceil(rect(1));
-    xend = floor(rect(1) + rect(3));
+    xind = max(1, ceil(rect(1)));
+    xend = min(size(spikes,2),floor(rect(1) + rect(3)));
     xD = xend-xind;
     ymin = rect(2);
     ymax = rect(2) + rect(4);
