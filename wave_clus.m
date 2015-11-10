@@ -498,31 +498,31 @@ h_fig6 = findobj(h_figs,'tag','wave_clus_aux5');
 
 if ~isempty(h_fig)
     figure(h_fig); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig,''-djpeg'',''fig2print_' outfile(7:end)  ''',''-r300'')' ]);
+    eval(['print(h_fig,''-dpng'',''fig2print_' outfile(7:end)  ''',''-r300'')' ]);
 end
 if ~isempty(h_fig1)
     figure(h_fig1); set(gcf,'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig1,''-djpeg'',''fig2print_' outfile(7:end) 'a' ''',''-r300'')' ]);
+    eval(['print(h_fig1,''-dpng'',''fig2print_' outfile(7:end) 'a' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig2)
     figure(h_fig2); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig2,''-djpeg'',''fig2print_' outfile(7:end) 'b' ''',''-r300'')' ]);
+    eval(['print(h_fig2,''-dpng'',''fig2print_' outfile(7:end) 'b' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig3)
     figure(h_fig3); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig3,''-djpeg'',''fig2print_' outfile(7:end) 'c' ''',''-r300'')' ]);
+    eval(['print(h_fig3,''-dpng'',''fig2print_' outfile(7:end) 'c' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig4)
     figure(h_fig4); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig4,''-djpeg'',''fig2print_' outfile(7:end) 'd' ''',''-r300'')' ]);
+    eval(['print(h_fig4,''-dpng'',''fig2print_' outfile(7:end) 'd' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig5)
     figure(h_fig5); set(gcf,'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig5,''-djpeg'',''fig2print_' outfile(7:end) 'e' ''',''-r300'')' ]);
+    eval(['print(h_fig5,''-dpng'',''fig2print_' outfile(7:end) 'e' ''',''-r300'')' ]);
 end
 if ~isempty(h_fig6)
     figure(h_fig6); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig6,''-djpeg'',''fig2print_' outfile(7:end) 'f' ''',''-r300'')' ]);
+    eval(['print(h_fig6,''-dpng'',''fig2print_' outfile(7:end) 'f' ''',''-r300'')' ]);
 end
 set(hObject,'value',0);
 
@@ -590,7 +590,7 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
 
         class_in = classes(classes>0);
         class_out = force_membership_wc(f_in, class_in, f_out, par);
-        forced = forced | to_force;
+        forced = forced(:) | to_force(:);
         classes(to_force) = class_out;
         USER_DATA{13} = forced;
         
@@ -605,26 +605,26 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
         
         new_forced = zeros(size(forced));
         % Fixed clusters are not considered for forcing
-        if get(handles.fix1_button,'value') ==1     
-            fix_class = USER_DATA{20}';
-            new_forced(fix_class) =forced(fix_class);
-        end
-        if get(handles.fix2_button,'value') ==1     
-            fix_class = USER_DATA{21}';
-            new_forced(fix_class) =forced(fix_class);
-        end
-        if get(handles.fix3_button,'value') ==1     
-            fix_class = USER_DATA{22}';
-            new_forced(fix_class) =forced(fix_class);
-        end
-        % Get fixed clusters from aux figures
-        for i=4:par.max_clus
-            eval(['fixx = par.fix' num2str(i) ';']);
-            if fixx == 1
-                fix_class = USER_DATA{22+i-3}';
-                new_forced(fix_class) =forced(fix_class);
-            end
-        end
+%         if get(handles.fix1_button,'value') ==1     
+%             fix_class = USER_DATA{20}';
+%             new_forced(fix_class) =forced(fix_class);
+%         end
+%         if get(handles.fix2_button,'value') ==1     
+%             fix_class = USER_DATA{21}';
+%             new_forced(fix_class) =forced(fix_class);
+%         end
+%         if get(handles.fix3_button,'value') ==1     
+%             fix_class = USER_DATA{22}';
+%             new_forced(fix_class) =forced(fix_class);
+%         end
+%         % Get fixed clusters from aux figures
+%         for i=4:par.max_clus
+%             eval(['fixx = par.fix' num2str(i) ';']);
+%             if fixx == 1
+%                 fix_class = USER_DATA{22+i-3}';
+%                 new_forced(fix_class) =forced(fix_class);
+%             end
+%         end
         classes(forced(:) & (~new_forced(:)) & (~rejected(:))) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
         USER_DATA{13} = new_forced;
         handles.force = 0;
@@ -990,7 +990,7 @@ end
 class_in = classes(classes>0);
 class_out = force_membership_wc(f_in, class_in, f_out, par);
 USER_DATA{14} = forced;                     % Save force in force_bk.
-forced = forced | to_force;
+forced = forced(:) | to_force(:);
 
 classes(to_force) = class_out;
 USER_DATA{13} = forced;

@@ -2,7 +2,7 @@ function par = set_parameters()
  
 % LOAD PARAMS 
 par.segments_length = 5;             % length (in minutes) of segments in which the data is cutted (default 5min). 
-par.sr = 30000;                      % sampling rate (in Hz). This parameter will be only used if the data file don't have a sr. 
+par.sr = 24000;                      % sampling rate (in Hz). This parameter will be only used if the data file don't have a sr. 
  
  
 % PLOTTING PARAMETERS 
@@ -15,7 +15,7 @@ par.to_plot_std = 1;                 % # of std from mean to plot
  
 % SPC PARAMETERS 
 par.mintemp = 0.00;                  % minimum temperature for SPC 
-par.maxtemp = 0.201;                 % maximum temperature for SPC 
+par.maxtemp = 0.251;                 % maximum temperature for SPC 
 par.tempstep = 0.01;                 % temperature steps 
 par.SWCycles = 100;                  % SPC iterations for each temperature (default 100) 
 par.KNearNeighb = 11;                % number of nearest neighbors for SPC 
@@ -41,8 +41,8 @@ par.detect_fmax = 3000;              % low pass filter for detection (default 10
 par.sort_fmin = 300;                 % high pass filter for sorting 
 par.sort_fmax = 3000;                % low pass filter for sorting (default 3000) 
 par.ref_ms = 1.5;                      % detector dead time, minimum refractory period (in ms) 
-par.detection = 'pos';               % type of threshold 
-%par.detection = 'neg'; 
+% par.detection = 'pos';               % type of threshold 
+par.detection = 'neg'; 
 %par.detection = 'both'; 
  
 % INTERPOLATION PARAMETERS 
@@ -71,7 +71,7 @@ par.force_auto = true;              %automatically force membership (only for ba
 % TEMPLATE MATCHING 
 par.match = 'y';                    % for template matching 
 %par.match = 'n';                   % for no template matching 
-par.max_spk = 20000;                % max. # of spikes before starting templ. match. 
+par.max_spk = 50000;                % max. # of spikes before starting templ. match. 
 par.permut = 'y';                   % for selection of random 'par.max_spk' spikes before starting templ. match. 
 % par.permut = 'n';                 % for selection of the first 'par.max_spk' spikes before starting templ. match. 
  

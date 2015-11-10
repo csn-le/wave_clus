@@ -1,7 +1,7 @@
 function [temp] = find_temp(tree, par)
 % Selects the temperature.
 
-num_temp = par.num_temp;
+num_temp = floor((par.maxtemp-par.mintemp)/par.tempstep);     % total number of temperatures 
 min_clus = par.min_clus;
 
 aux = diff(tree(:,5));   % Changes in the first cluster size

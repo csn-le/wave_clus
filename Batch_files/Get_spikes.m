@@ -85,10 +85,10 @@ end
 
 if parallel == true
     if exist('matlabpool','file')
-        if matlabpool('size') > 0
-            parallel = false;
-        else
+        try
             matlabpool('open');
+        catch
+            parallel = false;
         end
     else
         poolobj = gcp('nocreate'); % If no pool, do not create new one.
@@ -100,14 +100,13 @@ if parallel == true
     end
 end
 
+
+init_date = now;
 parfor fnum = 1:length(filenames)
     filename = filenames{fnum};
-    try
-        get_spikes_single(filename, par_input);
-    catch MExc
-        warning(MExc.message);
-        continue
-    end
+    get_spikes_single(filename, par_input);
+    disp(sprintf('%d of %d ''spikes'' files finished.',count_new_sp_files(init_date, filenames),length(filenames)))
+
     
 end
 
@@ -130,7 +129,13 @@ function get_spikes_single(filename, par_input)
     par.filename = filename;
     par.reset_results = true;  %if true,  don't load times_ or _spikes files
     par.cont_segment = true;  %false doesn't save the segment of the continuous data in the spikes file
-    data_handler = readInData(par);
+    try 
+        data_handler = readInData(par);
+    catch MExc
+        warning(MExc.message);
+        return
+    end
+    
     par = data_handler.par;
     par = update_parameters(par,par_input,'detect');
     if data_handler.with_spikes            %data have some type of _spikes files
@@ -159,7 +164,7 @@ function get_spikes_single(filename, par_input)
     
     %<----  Add here auxiliar parameters
 
-    if current_par.cont_segment
+    if current_par.cont_segment && data_handler.with_raw
         [psegment, sr_psegment] = data_handler.get_signal_sample();
         
         save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par','psegment','sr_psegment')
@@ -171,3 +176,16 @@ function get_spikes_single(filename, par_input)
         save([data_handler.nick_name '_spikes'],'threshold','-append')
     end
 end
+
+function counter = count_new_sp_files(initial_date, filenames)
+counter = 0;
+for i = 1:length(filenames)
+    fname = filenames{i};
+    [unu, fname] = fileparts(fname);
+    FileInfo = dir([fname '_spikes.mat']);
+    if length(FileInfo)==1 && (FileInfo.datenum > initial_date)
+        counter = counter + 1;
+    end
+end
+end
+

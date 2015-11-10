@@ -37,14 +37,11 @@ classdef readInData < handle
                 obj.with_results = true;
                 results_selected = true;
                 obj.nick_name = fnam(7:end);
-                disp ('Using wave_clus ''times'' file.')
-
             end
             if length(fnam)>8 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat') %if a 'spikes' file was selected.
                 obj.with_wc_spikes = true;
                 results_selected =true;
                 obj.nick_name = fnam(1:end-7);
-                disp ('Using wave_clus ''spikes'' file.')
             end
             
             

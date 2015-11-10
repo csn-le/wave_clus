@@ -1,4 +1,4 @@
-function Get_spikes_pol(polytrodes, par_input)
+function Get_spikes_pol(polytrodes, varargin)
 % function Get_spikes_pol(polytrodes, par_input)
 % Make polytrode spikes detecting and concatenating the spikes of all the
 % channels in the polytrodesN.txt used. 
