@@ -10,17 +10,53 @@ function Get_spikes_pol(polytrodes, varargin)
 % parameters included will overwrite the parameters load from set_parameters()
 
 
+%default config
+par_input = struct;
+parallel = false;
+
+%optinal inputs
+nvar = length(varargin);
+for v = 1:2:nvar
+    if strcmp(varargin{v},'par')
+        if (nvar>=v+1) && isstruct(varargin{v+1})
+            par_input = varargin{v+1};
+        else
+            error('Error in ''par'' optional input.')
+        end
+    elseif strcmp(varargin{v},'parallel')
+        if (nvar>=v+1) && islogical(varargin{v+1})
+            parallel = varargin{v+1};
+        else
+            error('Error in ''parallel'' optional input.')
+        end
+    end
+end
 
 for k = 1:length(polytrodes)
-    par = set_parameters();
-    if exist('par_input','var')
-        par = update_parameters(par,par_input,'relevant');
+   get_spikes_pol_single(polytrodes(k), par_input);
+   disp(sprintf('%d of %d ''spikes'' files finished.',count_new_sp_files(init_date, polytrodes),length(polytrodes)))
+end
+
+if parallel == true
+    if exist('matlabpool','file')
+        matlabpool('close')
+    else
+        poolobj = gcp('nocreate');
+        delete(poolobj);
     end
+end
+
+
+
+
+function get_spikes_pol_single(polytrode, par_input)
+    par = set_parameters();
+    par = update_parameters(par,par_input,'detect');
+
 
     sr = par.sr;
     ls = par.w_pre + par.w_post; % length of the spike
     par.reset_results = true;
-    polytrode = polytrodes(k);
     index_all = [];
     spikes_all = [];
     
@@ -47,8 +83,6 @@ for k = 1:length(polytrodes)
         min_num_seg =  min(data_handler_ch{i}.max_segments, min_num_seg);
     end
     
-    
-
     
     index = [];
     spikes_all = [];
@@ -83,24 +117,23 @@ for k = 1:length(polytrodes)
         
     end
 
-    
-    clear spikes;
-    clear poly_spikes;
-
-
     spikes = spikes_all;
-    clear spikes_all;
 
     current_par = par;
     par = struct;
     par.channels = n_channels;
     par = update_parameters(par, current_par, 'detect');
     save([out_filename '_spikes'], 'spikes', 'index','par')
-    clear spikes;
-
 end
 
-
-
-
-
+function counter = count_new_sp_files(initial_date, polytrodes)
+counter = 0;
+for i = 1:length(polytrodes)
+    polytrode = polytrodes(k);
+    sp_file = strcat('polytrode',num2str(polytrode),'_spikes.mat');
+    FileInfo = dir(sp_file);
+    if length(FileInfo)==1 && (FileInfo.datenum > initial_date)
+        counter = counter + 1;
+    end
+end
+end

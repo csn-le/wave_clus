@@ -4,7 +4,7 @@ function parse_data_NSx(filename,max_memo_GB)
 % the data should be split for processing
 
 aux = version;
-if ~exist('max_memo_GB','builtin')
+if ~exist('memory','builtin')
 	[uaux,aux] = memory;
 	max_memo = aux.PhysicalMemory.Available;
 else

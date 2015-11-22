@@ -105,7 +105,7 @@ init_date = now;
 parfor fnum = 1:length(filenames)
     filename = filenames{fnum};
     get_spikes_single(filename, par_input);
-    disp(sprintf('%d of %d ''spikes'' files finished.',count_new_sp_files(init_date, filenames),length(filenames)))
+    disp(sprintf('%d of %d ''spikes'' files done.',count_new_sp_files(init_date, filenames),length(filenames)))
 
     
 end

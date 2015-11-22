@@ -16,7 +16,7 @@ ylimit = par.ylimit;
 class_to_plot = par.class_to_plot;
 max_spikes = min(par.max_spikes_plot, length(class_to_plot));
 sup_spikes = length(class_to_plot);
-
+forced = USER_DATA{13};
 % Plot clusters
 colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
 
@@ -36,8 +36,9 @@ else
     plot(sp_axes, 1:ls,avup,1:ls,avdw,'color',[.65 .65 .65],'linewidth',.5)
 end
 xlim(sp_axes, [1 ls]);
-aux = num2str(length(class_to_plot));
-eval(['title(sp_axes, [''Cluster ' num2str(axes_nr-1) ':  # ' aux '''],''Fontweight'',''bold'')']);
+aux = length(class_to_plot);
+nforced = nnz(forced(class_to_plot));
+title(sp_axes, ['Cluster ' num2str(axes_nr-1) ':  # ' num2str(aux) ' (' num2str(aux-nforced) ')' ],'Fontweight','bold');
 
 %Resize axis
 ymin = min(ylimit(:,1));

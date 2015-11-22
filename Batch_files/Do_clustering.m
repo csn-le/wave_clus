@@ -152,7 +152,8 @@ for fnum = 1:numfigs
         noise_std_detect = median(abs(xd_sub))/0.6745;
         xlim([0 lx/sr_sub])
         thr = par.stdmin * noise_std_detect; 
-        thrmax = thr*par.stdmax/par.stdmin;
+        thrmax = 15 * noise_std_detect; %thr*par.stdmax/par.stdmin;
+
         if strcmp(par.detection,'pos')
             line([0 length(xd_sub)/sr_sub],[thr thr],'color','r')
             ylim([-thrmax/2 thrmax])
@@ -168,12 +169,17 @@ for fnum = 1:numfigs
     title([pwd '/' filename],'Interpreter','none','Fontsize',14)
 
     if ~data_handler.with_spc  
-        if par.print2file;
+        print2file = par_file.print2file;
+        if isfield(par_input,'print2file')
+            print2file = par_input.print2file;
+        end    
+        if print2file;
             print(gcf,'-dpng',['fig2print_' filename '.png'],'-r200');
         else
             print
         end
-        fprintf('%d/%d figs Done. ',fnum,numfigs);
+        clear print2file
+        fprintf('%d figs Done. ',fnum);
         continue
     end
         
@@ -302,7 +308,7 @@ for fnum = 1:numfigs
     else
         print
     end 
-    fprintf('%d/%d figs Done. ',fnum,numfigs);
+    fprintf('%d figs Done. ',fnum);
 end
 disp(' ')
 

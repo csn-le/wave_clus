@@ -332,6 +332,8 @@ set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 if isfield(handles,'force_unforce_button') && (nnz(forced)>0)
 	set(handles.force_unforce_button,'Value',1)
+    set(handles.force_unforce_button,'String','FORCED')
+    %set(handles.change_temperature_button,'enable','off');
 end
 if isfield(handles,'edit_max_force_dist')
     set(handles.edit_max_force_dist,'string',num2str(handles.par.template_sdnum));
@@ -598,6 +600,8 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
         handles.minclus = clustering_results(1,5);
         handles.force = 1;
         handles.setclus = 1;
+        set(hObject,'String','FORCED')
+        %set(handles.change_temperature_button,'enable','off');
     else
 %         clu = USER_DATA{4};
 %         temp = USER_DATA{8};
@@ -629,6 +633,8 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
         USER_DATA{13} = new_forced;
         handles.force = 0;
         handles.setclus = 0;
+        set(hObject,'String','Force')
+        %set(handles.change_temperature_button,'enable','on');
     end
     USER_DATA{6} = classes(:)';
     
@@ -914,7 +920,14 @@ USER_DATA{8} = clustering_results_bk(1,1); % old gui temperatures
 set(handles.wave_clus_figure,'userdata',USER_DATA)
 plot_spikes(handles) % plot_spikes updates USER_DATA{11}
 set(handles.min_clus_edit,'string',num2str(handles.minclus));
-
+if isfield(handles,'force_unforce_button') && (nnz(forced_bk)>0)
+	set(handles.force_unforce_button,'Value',1)
+    set(handles.force_unforce_button,'String','FORCED')
+    %set(handles.change_temperature_button,'enable','off');
+else
+    set(handles.force_unforce_button,'Value',0)
+    set(handles.force_unforce_button,'String','Force')
+end
 
 
 % --- Executes on button press in merge_button.
