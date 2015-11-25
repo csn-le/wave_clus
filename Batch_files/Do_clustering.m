@@ -27,10 +27,10 @@ min_spikes4SPC = 16;
 %default config
 par_input = struct;
 parallel = false;
-
+make_times = true;
 %optinal inputs
 nvar = length(varargin);
-for v = 1:2:nvar
+for v = 1:nvar
     if strcmp(varargin{v},'par')
         if (nvar>=v+1) && isstruct(varargin{v+1})
             par_input = varargin{v+1};
@@ -43,6 +43,8 @@ for v = 1:2:nvar
         else
             error('Error in ''parallel'' optional input.')
         end
+    elseif strcmp(varargin{v},'only_plot')
+        make_times = false;
     end
 end
 
@@ -87,43 +89,44 @@ else
     throw(ME)
 end
 
-
-if parallel == true
-    if exist('matlabpool','file')
-        try
-            matlabpool('open');
-        catch
-            parallel = false;
-        end
-    else
-        poolobj = gcp('nocreate'); % If no pool, do not create new one.
-        if isempty(poolobj)
-            parallel = false;
+if ~only_plot
+    if parallel == true
+        if exist('matlabpool','file')
+            try
+                matlabpool('open');
+            catch
+                parallel = false;
+            end
         else
-            parpool
+            poolobj = gcp('nocreate'); % If no pool, do not create new one.
+            if isempty(poolobj)
+                parallel = false;
+            else
+                parpool
+            end
         end
     end
-end
 
 
-par_file = set_parameters();
-initial_date = now;
-parfor fnum = 1:length(filenames)
-    filename = filenames{fnum};
-    do_clustering_single(filename,min_spikes4SPC, par_file, par_input);
-    disp(sprintf('%d of %d ''times'' files finished.',count_new_times(initial_date, filenames),length(filenames)))
-end
-
-if parallel == true
-    if exist('matlabpool','file')
-        matlabpool('close')
-    else
-        poolobj = gcp('nocreate');
-        delete(poolobj);
+    par_file = set_parameters();
+    initial_date = now;
+    parfor fnum = 1:length(filenames)
+        filename = filenames{fnum};
+        do_clustering_single(filename,min_spikes4SPC, par_file, par_input);
+        disp(sprintf('%d of %d ''times'' files finished.',count_new_times(initial_date, filenames),length(filenames)))
     end
-end
 
-disp('Computations Done. Creating figures...')
+    if parallel == true
+        if exist('matlabpool','file')
+            matlabpool('close')
+        else
+            poolobj = gcp('nocreate');
+            delete(poolobj);
+        end
+    end
+
+    disp('Computations Done. Creating figures...')
+end
 
 numfigs = length(filenames);
 for fnum = 1:numfigs
@@ -297,7 +300,7 @@ for fnum = 1:numfigs
     end
     fprintf(fout,'%s\t %s\t %g\t %d\t %g\t', char(filename), features_name, temperature, numclus, stdmin);
     for ii=0:numclus
-        fprintf(fout,'%d\t',nnz(classes==i));
+        fprintf(fout,'%d\t',nnz(classes==ii));
     end
     fclose(fout);
 
@@ -308,7 +311,7 @@ for fnum = 1:numfigs
     else
         print
     end 
-    fprintf('%d figs Done. ',fnum);
+    fprintf('%d ',fnum);
 end
 disp(' ')
 
