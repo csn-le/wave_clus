@@ -1110,6 +1110,14 @@ if par.channels > 1
 end
 
 
+function  logo_axes_CreateFcn(hObject, eventdata, handles)
+% --- Executes during object creation, after setting all properties.
+
+matlabImage = imread('logo.png');
+image(matlabImage,'Parent',hObject);
+axis(hObject, 'off');
+axis(hObject, 'image');
+
 % --- Executes during object creation, after setting all properties.
 function isi_line_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to isi0_bin_step (see GCBO)
