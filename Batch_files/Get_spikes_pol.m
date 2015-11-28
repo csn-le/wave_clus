@@ -32,9 +32,27 @@ for v = 1:2:nvar
     end
 end
 
-for k = 1:length(polytrodes)
-   get_spikes_pol_single(polytrodes(k), par_input);
-   disp(sprintf('%d of %d ''spikes'' files finished.',count_new_sp_files(init_date, polytrodes),length(polytrodes)))
+if parallel == true
+    if exist('matlabpool','file')
+        try
+            matlabpool('open');
+        catch
+            parallel = false;
+        end
+    else
+        poolobj = gcp('nocreate'); % If no pool, do not create new one.
+        if isempty(poolobj)
+            parallel = false;
+        else
+            parpool
+        end
+    end
+end
+
+init_date = now;
+parfor j = 1:length(polytrodes)
+   get_spikes_pol_single(polytrodes(j), par_input);
+   disp(sprintf('%d of %d ''spikes'' files done.',count_new_sp_files(init_date, polytrodes),length(polytrodes)))
 end
 
 if parallel == true
@@ -47,7 +65,7 @@ if parallel == true
 end
 
 
-
+end
 
 function get_spikes_pol_single(polytrode, par_input)
     par = set_parameters();
@@ -129,7 +147,7 @@ end
 function counter = count_new_sp_files(initial_date, polytrodes)
 counter = 0;
 for i = 1:length(polytrodes)
-    polytrode = polytrodes(k);
+    polytrode = polytrodes(i);
     sp_file = strcat('polytrode',num2str(polytrode),'_spikes.mat');
     FileInfo = dir(sp_file);
     if length(FileInfo)==1 && (FileInfo.datenum > initial_date)

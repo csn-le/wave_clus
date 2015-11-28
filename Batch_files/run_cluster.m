@@ -85,4 +85,8 @@ delete *.mag
 delete *.edges
 delete *.param
 
+if exist([fname '.knn'],'file')
+    delete([fname '.knn']);
+end
+
 delete(fname_in); 

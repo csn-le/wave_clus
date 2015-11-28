@@ -856,10 +856,12 @@ if cn == 3
 end
 
 if developer_mode
-    rejected = USER_DATA{15};
-    USER_DATA{16} = rejected; %update bk of rejected spikes
-    rejected(classes==cn) = true;
-    USER_DATA{15} = rejected;
+    if get(handles.pumenu_reject,'Value')==1
+        rejected = USER_DATA{15};
+        USER_DATA{16} = rejected; %update bk of rejected spikes
+        rejected(classes==cn) = true;
+        USER_DATA{15} = rejected;
+    end
 end
 forced = USER_DATA{13};
 USER_DATA{14} = forced;

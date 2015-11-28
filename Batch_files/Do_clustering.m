@@ -227,7 +227,7 @@ for fnum = 1:numfigs
                     semilogy(tree_temp,tree_clus,'.','color',color(i),'MarkerSize',20);
                 end
     end
-    
+    xlim([par.mintemp, par.maxtemp])
     subplot(3,5,6)
     hold on
     
