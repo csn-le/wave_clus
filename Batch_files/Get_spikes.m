@@ -83,7 +83,7 @@ else
     throw(ME)
 end
 
-if parallel == true
+if parallel
     if exist('matlabpool','file')
         try
             matlabpool('open');

@@ -23,9 +23,19 @@ zi = sp \ ( b(2:nfilt).' - a(2:nfilt).'*b(1) );
 
 y = [2*x(1)-x((nfact+1):-1:2);x;2*x(len)-x((len-1):-1:len-nfact)];
 
-y = filter(b,a,y,[zi*y(1)]);
+if exist('FilterM','file')
+    y = FilterM(b,a,y,[zi*y(1)]);
+else
+    y = filter(b,a,y,[zi*y(1)]);
+end
 y = y(length(y):-1:1);
-y = filter(b,a,y,[zi*y(1)]);
+
+%second filter, in the other way
+if exist('FilterM','file')
+    y = FilterM(b,a,y,[zi*y(1)]);
+else
+    y = filter(b,a,y,[zi*y(1)]);
+end
 y = y(length(y):-1:1);
 
 y([1:nfact len+nfact+(1:nfact)]) = [];

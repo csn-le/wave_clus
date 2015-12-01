@@ -18,10 +18,16 @@ awin =  par.alignment_window;
 % HIGH-PASS FILTER OF THE DATA
 xf=zeros(length(x),1);
 if exist('ellip')                         %Checks for the signal processing toolbox
-    [b,a]=ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
-    xf_detect=filtfilt(b,a,x);
-    [b,a]=ellip(2,0.1,40,[fmin_sort fmax_sort]*2/sr);
-    xf=filtfilt(b,a,x);
+    [b_detect,a_detect] = ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
+    [b,a] = ellip(2,0.1,40,[fmin_sort fmax_sort]*2/sr);
+    if exist('FiltFiltM','file')
+        xf_detect = FiltFiltM(b_detect,a_detect,x);
+        xf = FiltFiltM(b,a,x);
+    else
+        xf_detect=filtfilt(b_detect,a_detect,x);
+        xf=filtfilt(b,a,x);
+    end
+    
 else
     xf=fix_filter(x);                   %Does a bandpass filtering between [300 3000] without the toolbox.
     xf_detect = xf;

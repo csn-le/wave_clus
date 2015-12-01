@@ -20,15 +20,21 @@ fmax_sort = par.sort_fmax;
 
 % HIGH-PASS FILTER OF THE DATA
 if exist('ellip','file')                         %Checks for the signal processing toolbox
-    [b,a] = ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
-    xf_detect = filtfilt(b, a, x);
+    [b_detect,a_detect] = ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
+    
     [b,a] = ellip(2,0.1,40,[fmin_sort fmax_sort]*2/sr);
-    xf = filtfilt(b, a, x);
+    if exist('FiltFiltM','file')
+    	xf_detect = FiltFiltM(b_detect, a_detect, x);
+        xf = FiltFiltM(b, a, x); 
+    else
+        xf_detect = filtfilt(b_detect, a_detect, x);
+        xf = filtfilt(b, a, x);
+    end
+    
 else
     xf = fix_filter(x);                   %Does a bandpass filtering between [300 3000] without the toolbox.
     xf_detect = xf;
 end
-lx = length(xf);
 
 noise_std_detect = median(abs(xf_detect))/0.6745;
 noise_std_sorted = median(abs(xf))/0.6745;
