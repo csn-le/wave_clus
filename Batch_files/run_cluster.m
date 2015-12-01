@@ -77,7 +77,17 @@ switch system_type
     	ME = MException('MyComponent:NotSupportedArq', '%s type of computer not supported.',com_type);
     	throw(ME)
 end
-        
+
+if status ~= 0
+    disp(result)
+end
+
+log_name='wc_log.txt';
+
+f = fopen(log_name,'w');
+fprintf(f,result);
+fclose(f);
+
 clu = load([fname '.dg_01.lab']);
 tree = load([fname '.dg_01']); 
 delete(sprintf('%s.run',fname));
