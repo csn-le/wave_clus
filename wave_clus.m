@@ -861,7 +861,9 @@ if developer_mode
         USER_DATA{16} = rejected; %update bk of rejected spikes
         rejected(classes==cn) = true;
         USER_DATA{15} = rejected;
-    end
+   else
+        USER_DATA{16} = USER_DATA{15};
+   end
 end
 forced = USER_DATA{13};
 USER_DATA{14} = forced;
@@ -922,13 +924,16 @@ USER_DATA{8} = clustering_results_bk(1,1); % old gui temperatures
 set(handles.wave_clus_figure,'userdata',USER_DATA)
 plot_spikes(handles) % plot_spikes updates USER_DATA{11}
 set(handles.min_clus_edit,'string',num2str(handles.minclus));
-if isfield(handles,'force_unforce_button') && (nnz(forced_bk)>0)
-	set(handles.force_unforce_button,'Value',1)
-    set(handles.force_unforce_button,'String','FORCED')
+
+if isfield(handles,'force_unforce_button')
+    if (nnz(forced_bk)>0)
+        set(handles.force_unforce_button,'Value',1)
+        set(handles.force_unforce_button,'String','FORCED')
     %set(handles.change_temperature_button,'enable','off');
-else
-    set(handles.force_unforce_button,'Value',0)
-    set(handles.force_unforce_button,'String','Force')
+    else
+        set(handles.force_unforce_button,'Value',0)
+        set(handles.force_unforce_button,'String','Force')
+    end
 end
 
 
@@ -940,9 +945,10 @@ handles.undo = 0;
 handles.setclus = 1;
 handles.reject = 0;
 USER_DATA = get(handles.wave_clus_figure,'userdata');
-par = USER_DATA{1};
 clustering_results = USER_DATA{10};
 handles.minclus = clustering_results(1,5);
+USER_DATA{16} = USER_DATA{15}; %use bk of rejected spikes
+set(handles.wave_clus_figure,'userdata',USER_DATA);
 plot_spikes(handles)
 
 

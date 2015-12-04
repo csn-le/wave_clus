@@ -137,12 +137,18 @@ cn = str2double(regexp(b_name, '\d+', 'match'));
 eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',0);'])
 USER_DATA = get(handles.wave_clus_aux1,'userdata');
 classes = USER_DATA{6};
+h_figs = get(0,'children');
 
 if developer_mode
-    rejected = USER_DATA{15};
-    USER_DATA{16} = rejected; %update bk of rejected spikes
-    rejected(classes==cn) = true;
-    USER_DATA{15} = rejected;
+    pumenu_reject = findobj(h_figs,'tag','pumenu_reject');
+    if get(pumenu_reject,'Value')==1
+        rejected = USER_DATA{15};
+        USER_DATA{16} = rejected; %update bk of rejected spikes
+        rejected(classes==cn) = true;
+        USER_DATA{15} = rejected;
+   else
+        USER_DATA{16} = USER_DATA{15};
+   end
 end
 
 forced = USER_DATA{13};
@@ -158,7 +164,7 @@ USER_DATA{11} = clustering_results; % Save backup
 clustering_results(:,2) = classes;
 USER_DATA{10} = clustering_results; 
 
-h_figs = get(0,'children');
+
 h_fig{1} = findobj(h_figs,'tag','wave_clus_figure');
 h_fig{2} = findobj(h_figs,'tag','wave_clus_aux');
 h_fig{3} = findobj(h_figs,'tag','wave_clus_aux2');
