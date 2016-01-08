@@ -123,7 +123,8 @@ classdef readInData < handle
             
         end
         
-        function par = update_par(obj,par)
+        % method for change the given par replacing with the parameters read from the data
+        function par = update_par(obj,par) 
             load_par_names = fieldnames(obj.par);
             for i= 1:length(load_par_names)
                 par.(load_par_names{i}) = obj.par.(load_par_names{i});
@@ -180,6 +181,7 @@ classdef readInData < handle
             end
         end
         
+        % method for load boolean vector for rejected spikes. Vector only used in develop mode.
         function [rejected] = load_rejected(obj)
         	
             if ~ obj.with_results

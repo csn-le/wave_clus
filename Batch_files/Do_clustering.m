@@ -6,8 +6,8 @@ function Do_clustering(input, varargin)
 
 % function Do_clustering(input, par_input)
 % Saves spikes, spike times (in ms), coefficients used (inspk), used 
-%parameters, random spikes selected for clustering (ipermut), spikes forced
-%in a class (forced) results (cluster_class)
+% parameters, random spikes selected for clustering (ipermut) and 
+% results (cluster_class).
 
 %input must be: 
 %               A .txt file with the names of the spikes files to use.
@@ -21,14 +21,16 @@ function Do_clustering(input, varargin)
 %       the detecction parameters. All the parameters included will 
 %       overwrite the parameters load from set_parameters()
 % optional argument 'parallel' with the next input true (boolean) for use parallel computing
+% optional flag 'make_times' for enable recalculations from 'spikes' files or only plot results.
 
-min_spikes4SPC = 16;
+min_spikes4SPC = 16; % if are less that this number of spikes, clustering won't be made.
 
 %default config
 par_input = struct;
 parallel = false;
 make_times = true;
-%optinal inputs
+
+%search for optional inputs
 nvar = length(varargin);
 for v = 1:nvar
     if strcmp(varargin{v},'par')
@@ -50,8 +52,8 @@ end
 
 
 
-
-if isnumeric(input) || any(strcmp(input,'all'))
+% get a cell of filenames from the input
+if isnumeric(input) || any(strcmp(input,'all'))  %cases for numeric or 'all' input
     filenames = {};
     dirnames = dir();
     dirnames = {dirnames.name};
@@ -75,11 +77,11 @@ if isnumeric(input) || any(strcmp(input,'all'))
         end
     end
     
-elseif ischar(input) && length(input) > 4
-    if  strcmp (input(end-3:end),'.txt')
+elseif ischar(input) && length(input) > 4 
+    if  strcmp (input(end-3:end),'.txt')   %case for .txt input
         filenames =  textread(input,'%s');
     else
-        filenames = {input};
+        filenames = {input};               %case for cell input
     end
 
 elseif iscellstr(input)
@@ -89,7 +91,8 @@ else
     throw(ME)
 end
 
-if ~only_plot
+if make_times
+% open parallel pool, if parallel input is true
     if parallel == true
         if exist('matlabpool','file')
             try
@@ -279,13 +282,9 @@ for fnum = 1:numfigs
     if ~isempty(ylimit)
         ymin = min(ylimit(:,1));
         ymax = max(ylimit(:,2));
-    else
-        ymin = -200;
-        ymax = 200;
-    end
-    subplot(3,5,7); ylim([ymin ymax]);
-    for i = 1:min(3,max(classes))
-        subplot(3,5,6+i); ylim([ymin ymax]);
+        for i = 1:min(3,max(classes))
+           subplot(3,5,6+i); ylim([ymin ymax]);
+        end
     end
 
     features_name = par.features;

@@ -1,4 +1,8 @@
 function Get_spikes(input, varargin)
+
+% PROGRAM Get_spikes.
+% Detect spikes and save them in a file.
+
 % function Get_spikes(input, par_input)
 % Saves spikes, spike times (in ms), used parameters and a sample segment 
 % of the continuous data (optional) in filename_spikes.mat.
@@ -22,7 +26,7 @@ function Get_spikes(input, varargin)
 par_input = struct;
 parallel = false;
 
-%optinal inputs
+%search for optional inputs
 nvar = length(varargin);
 for v = 1:2:nvar
     if strcmp(varargin{v},'par')
@@ -42,8 +46,8 @@ end
 
 
 
-
-if isnumeric(input) || any(strcmp(input,'all'))  %cases for numeric or 'all' input
+% get a cell of filenames from the input
+if isnumeric(input) || any(strcmp(input,'all'))  % cases for numeric or 'all' input
     filenames = {};
     se = supported_wc_extensions();
     dirnames = dir();
@@ -69,11 +73,11 @@ if isnumeric(input) || any(strcmp(input,'all'))  %cases for numeric or 'all' inp
         end
     end
     
-elseif ischar(input) && length(input) > 4  %case for .txt input
-    if  strcmp (input(end-3:end),'.txt')
+elseif ischar(input) && length(input) > 4  
+    if  strcmp (input(end-3:end),'.txt')   % case for .txt input
         filenames =  textread(input,'%s');
     else
-        filenames = {input};
+        filenames = {input};               % case for cell input
     end
     
 elseif iscellstr(input)   %case for cell input
@@ -83,16 +87,17 @@ else
     throw(ME)
 end
 
+% open parallel pool, if parallel input is true
 if parallel
-    if exist('matlabpool','file')
-        try
-            matlabpool('open');
-        catch
+    if exist('matlabpool','file')   % old versions of Matlab have the matlabpool function
+        try 
+            matlabpool('open');     % If a matlabpool is already open 
+        catch                       % will throw a error and catch here.
             parallel = false;
         end
     else
-        poolobj = gcp('nocreate'); % If no pool, do not create new one.
-        if isempty(poolobj)
+        poolobj = gcp('nocreate');
+        if isempty(poolobj) % If already a pool, do not create new one.
             parallel = false;
         else
             parpool
@@ -110,7 +115,7 @@ parfor fnum = 1:length(filenames)
     
 end
 
-
+% if a pool was open, close it
 if parallel == true
     if exist('matlabpool','file')
         matlabpool('close')

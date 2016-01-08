@@ -1,8 +1,9 @@
-%Class for handle 'nc5' files.
+%Class for handle 'nc5' files. Wave_clus uses the firsts letters of the m file to now what files it can open.
+%
 
 %The classes used by readInData need the methods:
 %   - A constructor, with inputs par (parameters) and 
-%     raw_filename (name with the extension used in the name of the class).
+%     raw_filename (name of the file to read).
 %   - A get_info() method that return: [sr, max_segments, with_raw, with_spikes]
 %       sr : sampling rate in Hz. A empty vector if the sr in the parameters
 %            should be use.
@@ -14,13 +15,11 @@
 %       number i. It will be call in order from i=1 to i=max_segment (if it's necessary).
 %   - A index2ts(index,i) method that return a vector of times in ms,
 %       with the times of the 'index' elements of the segment i.
-     
 
 classdef nc5_wc_reader < handle
-	properties    
+	properties      % Wave_clus will not access any internal property of the class
         sr
         max_segments
-        %channel        
         opened_file
         segmentLength
         open_file

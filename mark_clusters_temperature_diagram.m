@@ -11,7 +11,10 @@ class_plot = [];
 for i=1:nclasses
     ind = find(clustering_results(:,2)==i);
     classgui_plot(i) = clustering_results(ind(1),2);
-    class_plot(i) = clustering_results(ind(1),4);  
+    class_plot(i) = clustering_results(ind(1),4);
+    if class_plot(i) == 0 %null original cluster
+		class_plot(i) =1; %plot like they were from cluster 1
+    end
     temp_plot(i) = clustering_results(ind(1),3);  
 end
 

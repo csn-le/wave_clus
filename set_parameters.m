@@ -41,8 +41,8 @@ par.detect_fmax = 3000;              % low pass filter for detection (default 10
 par.sort_fmin = 300;                 % high pass filter for sorting 
 par.sort_fmax = 3000;                % low pass filter for sorting (default 3000) 
 par.ref_ms = 1.5;                      % detector dead time, minimum refractory period (in ms) 
-% par.detection = 'pos';               % type of threshold 
-par.detection = 'neg'; 
+par.detection = 'pos';               % type of threshold 
+% par.detection = 'neg'; 
 %par.detection = 'both'; 
  
 % INTERPOLATION PARAMETERS 

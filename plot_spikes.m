@@ -68,8 +68,10 @@ end
 
 if handles.setclus == 0 && handles.undo==0 && handles.merge==0 && handles.force==0  
     sizemin_clus = par.min_clus;
+elseif handles.setclus == 1
+	sizemin_clus = 1;
 else
-    sizemin_clus = 1;
+    sizemin_clus = par.min_clus;
 end
 
 clusn = find(cluster_sizes >= sizemin_clus);
@@ -78,57 +80,59 @@ nclusters = length(clusn);
 % Get fixed clusters
 fix_class2 = [];
 nfix_class = [];
-if get(handles.fix1_button,'value') ==1     
-    nclusters = nclusters +1;
-    fix_class = USER_DATA{20}';
-    classes(classes==nclusters)=0;
-    classes(fix_class)=nclusters;
-    ifixflag(nclusters)=1;
-    
-    fix_class2 = [fix_class2 fix_class]; 
-    nfix_class = [nfix_class 1];
-    clusn = [clusn nclusters];
-end
-if get(handles.fix2_button,'value') ==1     
-    nclusters = nclusters +1;
-    fix_class = USER_DATA{21}';
-    classes(classes==nclusters)=0;
-    classes(fix_class)=nclusters;
-    ifixflag(nclusters)=1;
-    
-    fix_class2 = [fix_class2 fix_class]; 
-    nfix_class = [nfix_class 2];
-    clusn = [clusn nclusters];
-end
-if get(handles.fix3_button,'value') ==1     
-    nclusters = nclusters +1;
-    fix_class = USER_DATA{22}';
-    classes(classes==nclusters)=0;
-    classes(fix_class)=nclusters;
-    ifixflag(nclusters)=1;
-    
-    fix_class2 = [fix_class2 fix_class]; 
-    nfix_class = [nfix_class 3];
-    clusn = [clusn nclusters];
-end
-% Get fixed clusters from aux figures
-for i=4:par.max_clus
-    eval(['fixx = par.fix' num2str(i) ';']);
-    if fixx == 1 && ~isempty(USER_DATA{22+i-3})
-        nclusters = nclusters +1;
-        fix_class = USER_DATA{22+i-3}';
-        classes(classes==nclusters) = 0;
-        classes(fix_class) = nclusters;
-        ifixflag(nclusters) = 1;
-        
-        fix_class2 = [fix_class2 fix_class];
-        nfix_class = [nfix_class i];
-        clusn = [clusn nclusters];
-    end
+
+if ~isfield(handles,'new_manual')
+	if get(handles.fix1_button,'value') ==1     
+		nclusters = nclusters +1;
+		fix_class = USER_DATA{20}';
+		classes(classes==nclusters)=0;
+		classes(fix_class)=nclusters;
+		ifixflag(nclusters)=1;
+		
+		fix_class2 = [fix_class2 fix_class]; 
+		nfix_class = [nfix_class 1];
+		clusn = [clusn nclusters];
+	end
+	if get(handles.fix2_button,'value') ==1     
+		nclusters = nclusters +1;
+		fix_class = USER_DATA{21}';
+		classes(classes==nclusters)=0;
+		classes(fix_class)=nclusters;
+		ifixflag(nclusters)=1;
+		
+		fix_class2 = [fix_class2 fix_class]; 
+		nfix_class = [nfix_class 2];
+		clusn = [clusn nclusters];
+	end
+	if get(handles.fix3_button,'value') ==1     
+		nclusters = nclusters +1;
+		fix_class = USER_DATA{22}';
+		classes(classes==nclusters)=0;
+		classes(fix_class)=nclusters;
+		ifixflag(nclusters)=1;
+		
+		fix_class2 = [fix_class2 fix_class]; 
+		nfix_class = [nfix_class 3];
+		clusn = [clusn nclusters];
+	end
+	% Get fixed clusters from aux figures
+	for i=4:par.max_clus
+		eval(['fixx = par.fix' num2str(i) ';']);
+		if fixx == 1 && ~isempty(USER_DATA{22+i-3})
+			nclusters = nclusters +1;
+			fix_class = USER_DATA{22+i-3}';
+			classes(classes==nclusters) = 0;
+			classes(fix_class) = nclusters;
+			ifixflag(nclusters) = 1;
+			
+			fix_class2 = [fix_class2 fix_class];
+			nfix_class = [nfix_class i];
+			clusn = [clusn nclusters];
+		end
+	end
 end
 
 % Merge operations
-
 if handles.merge == 1 && ~isempty(nfix_class)
     imerge = 1;% index for the original temperature that will represent all the fixed classes
     bigger_fix = 0;
@@ -144,7 +148,7 @@ if handles.merge == 1 && ~isempty(nfix_class)
 end
 
 
-if handles.force==0  &&  ~handles.setclus
+if handles.force==0  &&  handles.setclus==0
     forced = USER_DATA{13};
     USER_DATA{14} = forced;
     new_forced = false(size(forced));
@@ -199,7 +203,7 @@ clustering_results(:,5) = minclus; % GUI minimum cluster
 % The temperature of the non-fixed spikes will be 
 % the GUI temperature (temp) and cluster number will be 
 % the GUI cluster number (classes)
-if (~isempty(fix_class2)) && handles.merge==0 && handles.undo==0 && handles.reject==0 && handles.force==0
+if (~isempty(fix_class2)) && handles.merge==0 && handles.undo==0 && handles.force==0
     % selects the index of the non-fixed spikes
     % since those are the ones which are going to be updated
     ind_non_fix = 1:length(classes); 
@@ -210,14 +214,22 @@ end
 
 % update new classes
 clustering_results(:,2) = classes;
-clear classes
+
 % If there are no fix and rejected clusters and undo operations, 
 % original classes are the same as current classes
-if isempty(fix_class2) && handles.reject==0 && handles.undo==0 && handles.merge==0 && handles.force==0
-    clustering_results(:,4) = clustering_results(:,2); % clusters
-    clustering_results(:,3) = temp; % temperatures
+% or 0 if they are rejected or manual selected
+if isempty(fix_class2) && handles.undo==0 && handles.merge==0 && handles.force==0
+    if isfield(handles,'new_manual')
+		clustering_results(:,4) = clustering_results(:,4); % same as before
+		clustering_results(:,3) = clustering_results(:,3);
+		clustering_results(handles.new_manual|classes==0,4) = 0;
+		clustering_results(handles.new_manual,3) = temp;
+	else
+		clustering_results(:,4) = clustering_results(:,2); % clusters
+		clustering_results(:,3) = temp; % temperatures
+    end
 end
-
+clear classes
 % Updates clustering_results and clustering_results_bk in USER_DATA
 USER_DATA{10} = clustering_results; 
 USER_DATA{11} = clustering_results_bk; 
@@ -347,4 +359,5 @@ if temp > 0
     mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
 end
 set(handles.file_name,'string', par.file_name_to_show);
+axes(handles.projections)
 drawnow

@@ -1,6 +1,6 @@
 function xf_detect = spike_detection_filter(x, par)
-%this function filter the data, using the detection filter. Is used in the
-%readInData class. The filtered data will be downsampled and saved in the object.
+%this function filter the signal, using the detection filter. Is used in the
+%readInData class. The filtered data will be downsampled and returned.
 
 sr = par.sr;
 fmin_detect = par.detect_fmin;

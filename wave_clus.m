@@ -40,8 +40,8 @@ function varargout = wave_clus(varargin)
 % USER_DATA{12} = ipermut, indexes of the previously permuted spikes for clustering taking random number of points 
 % USER_DATA{13} = forced, boolean vector for forced spikes,  
 % USER_DATA{14} = forced_bk, backup boolean vector for forced spikes,  
-% USER_DATA{15} = rejected, boolean vector for rejected spikes 
-% USER_DATA{16} = rejected_bk,  backup boolean vector for rejected spikes
+% USER_DATA{15} = rejected, boolean vector for rejected spikes. Vector only used in develop mode.
+% USER_DATA{16} = rejected_bk,  backup boolean vector for rejected spikes. Vector only used in develop mode.
 % USER_DATA{17} - USER_DATA{19}, for future changes
 % USER_DATA{20} - USER_DATA{42}, fix clusters
 
@@ -110,10 +110,10 @@ set(0,'DefaultAxesColorOrder',clus_colors)
 
 % --- Executes on button press in load_data_button.
 function load_data_button_Callback(hObject, eventdata, handles)
-%I will check this for case-sensitive related problems (FC)
-%[filename, pathname] = uigetfile('*.mat; *.Ncs; *.ncs; nev*.mat; NSX*.NC5; *.Nse','Select file');
-[filename, pathname] = uigetfile('*.*','Select file');
+% select file
+[filename, pathname] = uigetfile('*.*','Select file'); % Use only the supported extensions can bring case-sensitive related problems.
 
+% if any file was selected, cancel the loading
 if ~ischar(pathname)
     return
 end
@@ -121,14 +121,12 @@ end
 set(handles.file_name,'string',['Loading:    ' pathname filename]); drawnow
 
 cla(handles.cont_data);
-cd(pathname);
-
-clear functions
+clear functions % reset functions, force to reload set_parameters next
 handles.par = set_parameters();
 
-handles.par.filename = filename; % maybe this should be data_handler.nickname (FC)
+cd(pathname);
 
-
+handles.par.filename = filename;
 
 for i = 1:3
     si = num2str(i);
@@ -314,9 +312,11 @@ USER_DATA{10} = clustering_results;
 USER_DATA{11} = clustering_results;
 handles.force = 0;
 handles.merge = 0;
-handles.reject = 0;
+
 handles.minclus = handles.par.min_clus;
-handles.setclus = 0;
+handles.setclus = 2; %uses min cluster size but doesn't reset force
+USER_DATA{13} = forced;
+USER_DATA{14} = forced;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 clear clustering_results classes rejected spikes
@@ -325,8 +325,6 @@ guidata(hObject, handles); %this is need for plot the isi histograms
 
 plot_spikes(handles); %This function edit userdata
 USER_DATA = get(handles.wave_clus_figure,'userdata');
-USER_DATA{13} = forced;
-USER_DATA{14} = forced;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 
 
@@ -376,11 +374,12 @@ set(handles.wave_clus_figure,'userdata',USER_DATA);
 handles.setclus = 0;
 handles.force = 0;
 handles.merge = 0;
-handles.reject = 0;
+
 handles.undo = 0;
 plot_spikes(handles);
 if isfield(handles,'force_unforce_button')
 	set(handles.force_unforce_button,'Value',0)
+    set(handles.force_unforce_button,'String','Force')
 end
 
 % --- Change min_clus_edit     
@@ -401,7 +400,7 @@ handles.setclus = 0;
 handles.force = 0;
 handles.merge = 0;
 handles.undo = 0;
-handles.reject = 0;
+
 handles.minclus = par.min_clus;
 plot_spikes(handles);
 
@@ -419,7 +418,7 @@ set(handles.wave_clus_figure,'userdata',USER_DATA);
 handles.setclus = 1;
 handles.force = 0;
 handles.merge = 0;
-handles.reject = 0;
+
 handles.undo = 0;
 plot_spikes(handles)
 
@@ -639,7 +638,7 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
     USER_DATA{6} = classes(:)';
     
     handles.merge = 0;
-    handles.reject = 0;
+    
     handles.undo = 0;
     set(handles.wave_clus_figure,'userdata',USER_DATA)
     plot_spikes(handles);
@@ -669,7 +668,6 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
     else
         eval(['rect = getrect(handles_local.spikes' num2str(cl) ');']);
         valids = ~USER_DATA{15}(:) & (classes(:)==cl); %First, I don't select the rejected
-
     end
     xind = max(1, ceil(rect(1)));
     xend = min(size(spikes,2),floor(rect(1) + rect(3)));
@@ -680,9 +678,18 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
     if xD==0 || yD == 0; return; end
     [Mh, Mpos] = max(spikes(valids,xind:xend)');
     [mh ,mpos] = min(spikes(valids,xind:xend)');
-    sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos > 1 & Mpos < xD);
-    sp_selected = sp_selected |((mh >= ymin & mh <= ymax) & (mpos > 1 & mpos < xD));
-    
+    if ceil(rect(1)) < 1 %if rect is out the axis, extreme in border count like inside the rectangle
+        xiborder=0;
+    else
+        xiborder=1;
+    end
+    if floor(rect(1) + rect(3)) > size(spikes,2) %if rect is out the axis, extreme in border count like inside the rectangle
+        xeborder = xD+2; 
+    else
+        xeborder = xD;   
+    end    
+    sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos > xiborder & Mpos < xeborder);
+    sp_selected = sp_selected |((mh >= ymin & mh <= ymax) & (mpos > xiborder & mpos < xeborder));
     valids(valids==1) = sp_selected;
     
     clus_n = max(classes) + 1;
@@ -690,11 +697,11 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
     
     forced(valids) = 0;
     classes(valids)= clus_n;
-    
+    handles.new_manual = valids;
     handles.setclus = 1;
     handles.force = 0;
     handles.merge = 0;
-    handles.reject = 0;
+    
     handles.undo = 0;
     USER_DATA{6} = classes(:)';
     USER_DATA{13} = forced;
@@ -757,7 +764,7 @@ cluster_results = USER_DATA{10};
 handles.setclus = 1;
 handles.force = 0;
 handles.merge = 0;
-handles.reject = 0;
+
 handles.undo = 0;
 handles.minclus = cluster_results(1,5);
 plot_spikes(handles);
@@ -770,7 +777,7 @@ cluster_results = USER_DATA{10};
 handles.setclus = 1;
 handles.force = 0;
 handles.merge = 0;
-handles.reject = 0;
+
 handles.undo = 0;
 handles.minclus = cluster_results(1,5);
 plot_spikes(handles);
@@ -786,7 +793,7 @@ cluster_results = USER_DATA{10};
 handles.setclus = 1;
 handles.force = 0;
 handles.merge = 0;
-handles.reject = 0;
+
 handles.undo = 0;
 handles.minclus = cluster_results(1,5);
 plot_spikes(handles);
@@ -799,7 +806,7 @@ cluster_results = USER_DATA{10};
 handles.setclus = 1;
 handles.force = 0;
 handles.merge = 0;
-handles.reject = 0;
+
 handles.undo = 0;
 handles.minclus = cluster_results(1,5);
 plot_spikes(handles);
@@ -904,15 +911,12 @@ handles.force = 0;
 handles.merge = 0;
 handles.undo = 1;
 handles.setclus = 1;
-handles.reject = 0;
+
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 clustering_results_bk = USER_DATA{11};
 forced_bk =  USER_DATA{14};
 
-if isfield(handles,'force_unforce_button')
-	set(handles.force_unforce_button,'Value',any(forced_bk))
-end
 USER_DATA{13} = forced_bk;
 
 USER_DATA{15} = USER_DATA{16}; %use bk of rejected spikes
@@ -926,7 +930,7 @@ plot_spikes(handles) % plot_spikes updates USER_DATA{11}
 set(handles.min_clus_edit,'string',num2str(handles.minclus));
 
 if isfield(handles,'force_unforce_button')
-    if (nnz(forced_bk)>0)
+    if any(forced_bk)
         set(handles.force_unforce_button,'Value',1)
         set(handles.force_unforce_button,'String','FORCED')
     %set(handles.change_temperature_button,'enable','off');
@@ -943,7 +947,7 @@ handles.force = 0;
 handles.merge = 1;
 handles.undo = 0;
 handles.setclus = 1;
-handles.reject = 0;
+
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 clustering_results = USER_DATA{10};
 handles.minclus = clustering_results(1,5);
@@ -1023,7 +1027,7 @@ handles.minclus = clustering_results(1,5);
 handles.setclus = 1;
 handles.force = 1;
 handles.merge = 0;
-handles.reject = 0;
+
 handles.undo = 0;
 plot_spikes(handles);
 
@@ -1061,7 +1065,7 @@ function unforce_button_Callback(hObject, eventdata, handles)
     handles.setclus = 1;
     handles.force = 0;
     handles.merge = 0;
-    handles.reject = 0;
+    
     handles.undo = 0;
     USER_DATA{6} = classes(:)';
     USER_DATA{13} = new_forced;
@@ -1084,7 +1088,7 @@ function reject2clus_Callback(hObject, eventdata, handles)
     handles.setclus = 1;
     handles.force = 0;
     handles.merge = 0;
-    handles.reject = 0;
+    
     handles.undo = 0;
     USER_DATA{6} = classes(:)';
     USER_DATA{14} = USER_DATA{13};
