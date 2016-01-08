@@ -1,4 +1,4 @@
-function [clu, tree] = run_cluster(par)
+function [clu, tree] = run_cluster(par, multi_files)
 dim = par.inputs;
 fname = par.fnamespc;
 fname_in = par.fname_in;
@@ -82,11 +82,20 @@ if status ~= 0
     disp(result)
 end
 
-log_name='wc_log.txt';
 
-f = fopen(log_name,'w');
-fprintf(f,result);
-fclose(f);
+
+if exist('multi_files','var') && multi_files==true
+	log_name = [par.filename 'spc_log.txt'];
+	f = fopen(log_name,'w');
+	fprintf(f,['----------\nSPC result of file: ' par.filename '\n']);
+	fprintf(f,result);
+	fclose(f);
+else
+	log_name = 'spc_log.txt';
+	f = fopen(log_name,'w');
+	fprintf(f,result);
+	fclose(f);
+end
 
 clu = load([fname '.dg_01.lab']);
 tree = load([fname '.dg_01']); 

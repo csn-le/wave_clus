@@ -127,7 +127,23 @@ if make_times
             delete(poolobj);
         end
     end
+    
+	log_name = 'spc_log.txt';
+	f = fopen(log_name, 'w');
+	for fnum = 1:length(filenames)
+        filename = filenames{fnum};
+        log_name = [filename 'spc_log.txt'];
+        if exist(log_name, 'file')
+			fi = fopen(log_name,'r');
+			result = fread(fi);
+			fwrite(f,result);
+			fclose(fi);
+			delete(log_name);
+		end
+    end
+	fclose(f);
 
+	
     disp('Computations Done. Creating figures...')
 end
 
@@ -387,7 +403,7 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input)
     %INTERACTION WITH SPC
     save(par.fname_in,'inspk_aux','-ascii');
     try
-        [clu, tree] = run_cluster(par);
+        [clu, tree] = run_cluster(par,true);
     catch
         warning('MyComponent:ERROR_SPC', 'Error in SPC');
         return
