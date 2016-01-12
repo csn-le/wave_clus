@@ -28,7 +28,7 @@ avup = av + par.to_plot_std * std(spikes(class_to_plot,:));
 avdw = av - par.to_plot_std * std(spikes(class_to_plot,:));
 if par.plot_all_button ==1
     permut = randperm(sup_spikes);
-    line(1:ls,spikes(class_to_plot(permut(1:max_spikes)),:),'color',colors(axes_nr),'Parent',sp_axes)
+    line(1:ls,spikes(class_to_plot(permut(1:max_spikes)),:)','color',colors(axes_nr),'Parent',sp_axes)
     plot(sp_axes, 1:ls,av,'k','linewidth',2);
     plot(sp_axes, 1:ls,avup,1:ls,avdw,'color',[.4 .4 .4],'linewidth',.5)
 else

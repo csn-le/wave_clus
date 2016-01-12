@@ -33,7 +33,7 @@ end
 
 % Classes should be consecutive numbers
 classes_names = sort(unique(classes));
-
+classes_names = classes_names(classes_names>0);
 
 % updates 'clustering_results_bk'
 clustering_results_bk = clustering_results;
@@ -51,7 +51,7 @@ if handles.force==1
 end
 
 
-classes_names = classes_names(classes_names>0);
+
 for i = 1:min(length(classes_names),par.max_clus)
    c = classes_names(i);
    if c~= i
@@ -355,7 +355,7 @@ for i =1:figs_num
     end
 end
 
-if temp > 0
+if ~isempty(USER_DATA{5})
     mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
 end
 set(handles.file_name,'string', par.file_name_to_show);

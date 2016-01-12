@@ -628,10 +628,16 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
 %                 new_forced(fix_class) =forced(fix_class);
 %             end
 %         end
+        set(handles.fix1_button,'value',0);
+        set(handles.fix2_button,'value',0);
+        set(handles.fix3_button,'value',0);
+        for i=4:par.max_clus
+            eval(['par.fix' num2str(i) '=0;']);
+        end
         classes(forced(:) & (~new_forced(:)) & (~rejected(:))) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
-        USER_DATA{13} = new_forced;
+        USER_DATA{13} = new_forced; 
         handles.force = 0;
-        handles.setclus = 0;
+        handles.setclus = 1;
         set(hObject,'String','Force')
         %set(handles.change_temperature_button,'enable','on');
     end
@@ -664,7 +670,7 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
     
     if cl == -1
         rect = getrect(handles_local.projections);
-        valids = ~USER_DATA{15}; %First, I don't select the rejected
+        valids = ~USER_DATA{15}(:); %First, I don't select the rejected
     else
         eval(['rect = getrect(handles_local.spikes' num2str(cl) ');']);
         valids = ~USER_DATA{15}(:) & (classes(:)==cl); %First, I don't select the rejected
