@@ -168,6 +168,7 @@ handles.par.file_name_to_show = [pathname filename];
 if data_handler.with_results %data have _times files
     [clu, tree, spikes, index, inspk, ipermut, classes, forced,temp] = data_handler.load_results();
     rejected = data_handler.load_rejected();
+    handles.setclus = 1;
 else
     if data_handler.with_spikes  %data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
@@ -222,6 +223,7 @@ else
     [clu,tree] = run_cluster(handles.par);
     forced = false(size(spikes,1) ,1);
     rejected = false(1, size(spikes,1));
+    handles.setclus = 2; %uses min cluster size but doesn't reset force
 end
 
 if (data_handler.with_raw || data_handler.with_psegment) && handles.par.cont_segment         %raw exists
@@ -314,7 +316,7 @@ handles.force = 0;
 handles.merge = 0;
 
 handles.minclus = handles.par.min_clus;
-handles.setclus = 2; %uses min cluster size but doesn't reset force
+
 USER_DATA{13} = forced;
 USER_DATA{14} = forced;
 set(handles.wave_clus_figure,'userdata',USER_DATA);

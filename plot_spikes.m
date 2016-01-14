@@ -350,8 +350,9 @@ end
 
 
 for i =1:figs_num
-    if ~isempty(opened_figs{i})
-        set(opened_figs{i},'Visible', 'on'); 
+    if ~isempty(opened_figs{i})  
+    	set(opened_figs{i},'units','pixel','position',get(0,'screensize'))
+	set(opened_figs{i},'Visible', 'on'); 
     end
 end
 
