@@ -2,24 +2,27 @@ function Get_spikes(input, varargin)
 
 % PROGRAM Get_spikes.
 % Detect spikes and save them in a file.
-
-% function Get_spikes(input, par_input)
+%
 % Saves spikes, spike times (in ms), used parameters and a sample segment 
 % of the continuous data (optional) in filename_spikes.mat.
-%input must be: 
+% input must be: 
 %               A .txt file with the names of the files to use.
 %               A matlab cell with the names of the files to use.
-%               A vector, in this case the function will proccess all the
-%                   supported files with that numbers in the folder
-%                   (except .mat files). 
-%                   (ipunt=2 don't implies 20 or viceversa)
+%               A vector with channel numbers. In this case the function will proccess all the
+%                   supported files (except .mat files) located in the folder with those
+%                   channel numbers (e.g., CSC1.Ncs or NSX4.NC5)                    
 %               'all', in this case the functions will process all the
 %                   supported files in the folder (except .mat files).
 % optional argument 'par' and the next input must be a struct with some of
-%       the detecction parameters. All the parameters included will 
-%       overwrite the parameters load from set_parameters()
+%       the detecction parameters. All the parameters included in the structure 
+%       par will overwrite the parameters loaded from set_parameters()
 % optional argument 'parallel' : true for use parallel computing
 
+% Example
+% param.stdmin = 4;
+% param.sr = 24000;
+% param.detection = 'pos';
+% Get_spikes([1:8 33:56],'parallel',true,'par',param);
 
 
 %default config

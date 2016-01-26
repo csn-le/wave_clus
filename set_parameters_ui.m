@@ -66,6 +66,9 @@ guidata(hObject, handles);
 % end
 %edit([pwd filesep 'set_parameters.m'])
 text = fileread([fileparts(mfilename('fullpath')) filesep 'set_parameters.m']);
+
+new_lines = strfind(text, sprintf('\n'));
+text = text(new_lines(1)+1:end);
 set(handles.text_editor,'string',text);
 
 
@@ -87,6 +90,8 @@ function default_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 text = fileread([fileparts(mfilename('fullpath')) filesep 'set_parameters_DEFAULT.m']);
+new_lines = strfind(text, sprintf('\n'));
+text = text(new_lines(1)+1:end);
 set(handles.text_editor,'string',text);
 
 
@@ -122,6 +127,7 @@ function save_Callback(hObject, eventdata, handles)
 text = get(handles.text_editor, 'String');
 fout = fopen([fileparts(mfilename('fullpath')) filesep 'set_parameters.m'],'w');
 
+fprintf(fout, 'function par = set_parameters() \n');
 for row = 1:size(text,1)
     fprintf(fout, '%s \n', strtrim(text(row,1:end)));
 end

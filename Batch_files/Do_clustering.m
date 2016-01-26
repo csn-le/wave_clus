@@ -3,26 +3,37 @@ function Do_clustering(input, varargin)
 % PROGRAM Do_clustering.
 % Does clustering on all files in Files.txt
 % Runs after Get_spikes.
-
+%
 % function Do_clustering(input, par_input)
 % Saves spikes, spike times (in ms), coefficients used (inspk), used 
 % parameters, random spikes selected for clustering (ipermut) and 
 % results (cluster_class).
-
+%
 %input must be: 
-%               A .txt file with the names of the spikes files to use.
-%               A matlab cell with the names of the spikes files to use.
-%               A vector, in this case the function will proccessall the
-%                   '_spikes.mat' files with that numbers in the folder.
-%                   (ipunt=2 don't implies 20 or viceversa)
+%               A .txt file with the names of the _spikes files to use.
+%               A matlab cell with the names of the _spikesfiles to use.
+%               A vector with channel numbers. In this case the function will proccess all the
+%                   '_spikes.mat' files located in the folder with those
+%                   channel numbers (e.g., CSC1_spikes.mat or NSX4_spikes.mat)                    
 %               'all', in this case the functions will process all the
-%                '_spikes.mat' files in the folder.
+%                   '_spikes.mat' files in the folder.
 % optional argument 'par' and the next input must be a struct with some of
-%       the detecction parameters. All the parameters included will 
-%       overwrite the parameters load from set_parameters()
-% optional argument 'parallel' with the next input true (boolean) for use parallel computing
-% optional flag 'make_times' for enable recalculations from 'spikes' files or only plot results.
+%       the SPC parameters (the detection parameters are taken from the 
+%       XXX_spikes file or the set_parameters file. All the parameters included
+%       in the structure par will overwrite the parameters loaded from set_parameters()
+% optional argument 'parallel' : true for use parallel computing
+% optional flag 'make_times' for computing the sorting from the XXX_spikes
+%       files or plotting only the results based on the save XXX_times files.
 
+% Example
+% param.min_clus = 60;
+% param.max_spk = 50000;
+% par.maxtemp = 0.251;                                                                                     
+% Do_clustering(1:16,'parallel',true,'par',param)
+%
+% the times were created but something went wrong with the plots. Then, the
+% code can be called again just to create the plots
+% Do_clustering(1:16,'make_times',false,'par',param)
 min_spikes4SPC = 16; % if are less that this number of spikes, clustering won't be made.
 
 %default config
@@ -115,7 +126,7 @@ if make_times
     initial_date = now;
     parfor fnum = 1:length(filenames)
         filename = filenames{fnum};
-        do_clustering_single(filename,min_spikes4SPC, par_file, par_input);
+        do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum);
         disp(sprintf('%d of %d ''times'' files finished.',count_new_times(initial_date, filenames),length(filenames)))
     end
 
@@ -332,7 +343,7 @@ disp(' ')
 
 end
 
-function do_clustering_single(filename,min_spikes4SPC, par_file, par_input)
+function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     
     par = struct;
     par = update_parameters(par,par_file,'clus');
@@ -350,10 +361,10 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input)
         par.inputs = par.inputs * par.channels;
     end
     
-    par.fname_in = ['tmp_data_wc' data_handler.nick_name];                       % temporary filename used as input for SPC
+    par.fname_in = ['tmp_data_wc' num2str(fnum)];                       % temporary filename used as input for SPC
     par.fname = ['data_' data_handler.nick_name];
     par.nick_name = data_handler.nick_name;
-    par.fnamespc = par.fname;                  		%filename if "save clusters" button is pressed
+    par.fnamespc = ['data_wc' num2str(fnum)]; 
 
     par = update_parameters(par,par_input,'clus');
     
@@ -404,6 +415,10 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input)
     save(par.fname_in,'inspk_aux','-ascii');
     try
         [clu, tree] = run_cluster(par,true);
+	if exist([par.fnamespc '.dg_01.lab'],'file')
+		movefile([par.fnamespc '.dg_01.lab'], [par.fname '.dg_01.lab']);
+		movefile([par.fnamespc '.dg_01'], [par.fname '.dg_01']);
+	end
     catch
         warning('MyComponent:ERROR_SPC', 'Error in SPC');
         return

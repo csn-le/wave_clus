@@ -53,17 +53,20 @@ classdef readInData < handle
                         ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_times'' file');
                         throw(ME)
                     end
-                    if ismember('par',{finfo.name})
-                        load(['times_' obj.nick_name '.mat'],'par');
-                        obj.par = update_parameters(obj.par, par, 'relevant');
-                        with_par = true;
-                    end
-                    if ismember('gui_status',{finfo.name})  
-                        obj.with_gui_status = true;
-                    end
+                   
                     if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file')
                         obj.with_spc = true;
                         obj.with_results = true;
+                    end
+                    if  obj.with_results
+                        if ismember('par',{finfo.name})
+                            load(['times_' obj.nick_name '.mat'],'par');
+                            obj.par = update_parameters(obj.par, par, 'relevant');
+                            with_par = true;
+                        end
+                        if ismember('gui_status',{finfo.name})  
+                            obj.with_gui_status = true;
+                        end
                     end
                 end
             end

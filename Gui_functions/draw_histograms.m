@@ -11,7 +11,7 @@ par = USER_DATA{1};
 for i = c2plot 
     if classes == 0
         rejected = USER_DATA{15};
-        times = diff(spk_times(classes==i & ~rejected));
+        times = diff(spk_times(classes(:)==i & ~rejected(:)));
         clear rejected 
     else
         times = diff(spk_times(classes==i));

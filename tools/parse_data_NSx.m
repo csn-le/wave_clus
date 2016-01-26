@@ -1,4 +1,5 @@
 function parse_data_NSx(filename,max_memo_GB)
+% This code requires https://portal.g-node.org/neo/blackrock/matlab/openNSx.m in the path.
 % max_memo_GB is an idea of the number of GB allocated for the data to be
 % stored in RAM, so it is used to compute the number of segments in which
 % the data should be split for processing

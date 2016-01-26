@@ -235,6 +235,9 @@ end
 %Fixing lost elements of clu . Skiped elements will be  class -1 because in
 %all the uses of clu are like: clu(temp,3:end)+1
 if handles.par.permut == 'y' && ~isempty(clu)
+    if isempty(ipermut) %load from old result without ipermut or par, but par.permut=='y'
+       ipermut = 1:length(inspk);
+    end
     clu_aux = zeros(size(clu,1),size(spikes,1)) -1;% + 1000; %when update classes from clu, not selected go to cluster 1001
     clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
     clu_aux(:,1:2) = clu(:,1:2);

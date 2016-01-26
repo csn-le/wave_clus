@@ -1,5 +1,5 @@
 function parse_data_tdt(Block, max_memo_GB)
-%This code required OpenDeveloper
+%This code required OpenDeveloper (Tucker-Davis Technologies)
 
 folder = fileparts(Block);
 
@@ -66,7 +66,7 @@ for ch = channels
         fwrite(fout,data,'single');
         rec_readed = rec_readed + Nreading;
         rec_to_read = rec_to_read - Nreading;
-		clear data
+        clear data
     end
 	fprintf('Channel %d out. \n', ch)
     fclose(fout);
