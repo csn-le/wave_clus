@@ -427,7 +427,7 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     
 
     if par.permut == 'y'
-        clu_aux = zeros(size(clu,1),size(spikes,1)) -1;% + 1000; %when update classes from clu, not selected go to cluster 1001
+        clu_aux = zeros(size(clu,1),2 + size(spikes,1)) -1;%when update classes from clu, not selected go to cluster 1001
         clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
         clu_aux(:,1:2) = clu(:,1:2);
         clu = clu_aux;

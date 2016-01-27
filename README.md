@@ -53,16 +53,14 @@ R. Quian Quiroga, Z. Nadasdy and Y. Ben-Shaul
 Neural Computation 16, 1661-1687; 2004.
 
 
-For a non technical reference about spike sorting see:
+######For a non technical reference about spike sorting see:
 
-Quick guide: [Spike Sorting](http://www2.le.ac.uk/departments/engineering/research/bioengineering/neuroengineering-lab/Publications/spike%20sorting%20quick%20guide.pdf "quick guide")
-Quian Quiroga, R.
+Quick guide: [Spike Sorting](http://www2.le.ac.uk/departments/engineering/research/bioengineering/neuroengineering-lab/Publications/spike%20sorting%20quick%20guide.pdf "quick guide")<br/>
+Quian Quiroga, R.<br/>
 Current Biology, Vol 22. R45–R46, 2012.
 
-[Spike Sorting](https://www.scholarpedia.org/article/Spike_sorting "spike sorting in Scholarpedia")
-R. Quian Quiroga
+[Spike Sorting](https://www.scholarpedia.org/article/Spike_sorting "spike sorting in Scholarpedia")<br/>
+R. Quian Quiroga<br/>
 Scholarpedia 2 (12): 3583. 2007
-
-
 
 

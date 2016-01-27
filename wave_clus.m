@@ -238,7 +238,7 @@ if handles.par.permut == 'y' && ~isempty(clu)
     if isempty(ipermut) %load from old result without ipermut or par, but par.permut=='y'
        ipermut = 1:length(inspk);
     end
-    clu_aux = zeros(size(clu,1),size(spikes,1)) -1;% + 1000; %when update classes from clu, not selected go to cluster 1001
+    clu_aux = zeros(size(clu,1),2 + size(spikes,1)) -1;%when update classes from clu, not selected go to cluster 1001
     clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
     clu_aux(:,1:2) = clu(:,1:2);
     clu = clu_aux;
@@ -328,7 +328,7 @@ clear clustering_results classes rejected spikes
 % mark clusters when new data is loaded
 guidata(hObject, handles); %this is need for plot the isi histograms
 
-plot_spikes(handles); %This function edit userdata
+plot_spikes(handles); %This function edits userdata
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 
