@@ -15,9 +15,25 @@ if strcmp(ext,'.int')
     error('Incorrect extension.');
 end
 
-if exist('memory','builtin')
+with_memory=true;
+try
+	memory;
+catch
+	with_memory=false;
+end
+if with_memory
 	[uaux,aux] = memory;
-	max_memo = aux.PhysicalMemory.Available;
+	memo_avaible = floor(aux.PhysicalMemory.Available*0.9);
+	if exist('max_memo_GB','var')
+		if max_memo_GB > memo_avaible
+			error('max_memo_GB > 90% of Physical Memory Available')
+		else
+			max_memo = max_memo_GB*(1024)^3;
+		end
+	else
+		max_memo = memo_avaible*(1024)^3;
+	end
+	
 else
 	max_memo = max_memo_GB*(1024)^3;
 end

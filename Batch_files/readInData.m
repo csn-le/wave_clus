@@ -33,12 +33,12 @@ classdef readInData < handle
             with_par = false;
             results_selected = false;
             
-            if length(fnam)>7 && strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat') %if a 'times' file was selected.
+            if length(fnam)>6 && strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat') %if a 'times' file was selected.
                 obj.with_results = true;
                 results_selected = true;
                 obj.nick_name = fnam(7:end);
             end
-            if length(fnam)>8 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat') %if a 'spikes' file was selected.
+            if length(fnam)>7 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat') %if a 'spikes' file was selected.
                 obj.with_wc_spikes = true;
                 results_selected =true;
                 obj.nick_name = fnam(1:end-7);
@@ -120,7 +120,7 @@ classdef readInData < handle
                  obj.par.channels = 1;
             end
 
-            if isfield(obj.par,'sr')
+            if isfield(obj.par,'sr') && isfield(obj.par,'ref_ms')
                 obj.par.ref = floor(obj.par.ref_ms *obj.par.sr/1000);
             end
             
@@ -169,8 +169,8 @@ classdef readInData < handle
            
             
             % cluster_class(:,1);
-            index = cluster_class(:,2);
-            classes = cluster_class(:,1);
+            index = cluster_class(1:end,2);
+            classes = cluster_class(1:end,1);
             
             if ~exist('Temp','var')
             	Temp = ones(max(classes));
@@ -199,8 +199,11 @@ classdef readInData < handle
         
 
         function [original_classes, current_temp] = get_gui_status(obj)
-            load(['times_' obj.nick_name '.mat'],'gui_status','cluster_class'); 
+            load(['times_' obj.nick_name '.mat'],'gui_status','cluster_class');
             current_temp = gui_status.current_temp;
+            if current_temp == -1 && obj.with_spc
+                current_temp=1;
+            end
             original_classes = gui_status.original_classes;
         end
             

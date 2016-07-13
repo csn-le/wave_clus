@@ -19,7 +19,10 @@ h_fig4= findobj(h_figs,'name','polytrode_aux2');
 close(h_fig1); close(h_fig2); close(h_fig3); close(h_fig4);
 
 % PLOT POLYTRODE CLASSES
-colors = ['b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
+colors = [[0.0 0.0 1.0];[1.0 0.0 0.0];[0.0 0.5 0.0];[0.620690 0.0 0.0];[0.413793 0.0 0.758621];[0.965517 0.517241 0.034483];
+    [0.448276 0.379310 0.241379];[1.0 0.103448 0.724138];[0.545 0.545 0.545];[0.586207 0.827586 0.310345];
+    [0.965517 0.620690 0.862069];[0.620690 0.758621 1.]]; 
+maxc = size(colors,1);
 
 for i = 1:nclusters
     eval(['class' num2str(i) '= find( classes==' num2str(i) ');']);
@@ -51,7 +54,7 @@ for j=1:nchannels
                 end
                 hold on
                 if i==nclusters+1,colors(i)='k'; end;
-                eval(['plot(spikes(class' num2str(i) '(permut(1:max_spikes)),' num2str(j-1) '*lch + 1 : j*lch)'',''color'',''' colors(i) ''')']);
+                eval(['plot(spikes(class' num2str(i) '(permut(1:max_spikes)),' num2str(j-1) '*lch + 1 : j*lch)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)) '])']);
                 plot(1:lch,av,'k','linewidth',2)
                 plot(1:lch,avup,1:lch,avdw,'color' , [.4 .4 .4], 'linewidth' ,0.5)
     %             xlim([1 lch])
@@ -78,7 +81,7 @@ for j=1:nchannels
                 end
                 hold on
                 if i==nclusters+1,colors(i)='k'; end
-                eval(['plot(spikes(class' num2str(i) '(permut(1:max_spikes)),' num2str(j-1) '*lch + 1 : j*lch)'',''color'',''' colors(i) ''')']);
+                eval(['plot(spikes(class' num2str(i) '(permut(1:max_spikes)),' num2str(j-1) '*lch + 1 : j*lch)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)) '])']);
                 plot(1:lch,av,'k','linewidth',2)
                 plot(1:lch,avup,1:lch,avdw,'color' , [.4 .4 .4], 'linewidth' ,0.5)
                 axis tight
@@ -104,7 +107,7 @@ for j=1:nchannels
                 end
                 hold on
                 if i==nclusters+1,colors(i)='k'; end
-                eval(['plot(spikes(class' num2str(i) '(permut(1:max_spikes)),' num2str(j-1) '*lch + 1 : j*lch)'',''color'',''' colors(i) ''')']);
+                eval(['plot(spikes(class' num2str(i) '(permut(1:max_spikes)),' num2str(j-1) '*lch + 1 : j*lch)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)) '])']);
                 plot(1:lch,av,'k','linewidth',2)
                 plot(1:lch,avup,1:lch,avdw,'color' , [.4 .4 .4], 'linewidth' ,0.5)
                 axis tight
@@ -130,7 +133,7 @@ for j=1:nchannels
                 end
                 hold on
                 if i==nclusters+1,colors(i)='k'; end
-                eval(['plot(spikes(class' num2str(i) '(permut(1:max_spikes)),' num2str(j-1) '*lch + 1 : j*lch)'',''color'',''' colors(i) ''')']);
+                eval(['plot(spikes(class' num2str(i) '(permut(1:max_spikes)),' num2str(j-1) '*lch + 1 : j*lch)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)) '])']);
                 plot(1:lch,av,'k','linewidth',2)
                 plot(1:lch,avup,1:lch,avdw,'color' , [.4 .4 .4], 'linewidth' ,0.5)
                 axis tight

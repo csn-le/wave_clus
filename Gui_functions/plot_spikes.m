@@ -143,20 +143,23 @@ if handles.merge == 1 && ~isempty(nfix_class)
             bigger_fix = aux;
         end
     end
+    imerge = find(clustering_results(:,2) ==nfix_class(imerge),1);
     mtemp = clustering_results(imerge,3); % temperature that represents all the fixed classes
     classes(fix_class2) = nfix_class(1); % labels all the fixed classes with the new number
 end
 
-
-if handles.force==0  &&  handles.setclus==0
-    forced = USER_DATA{13};
-    USER_DATA{14} = forced;
-    new_forced = false(size(forced));
-    new_forced(fix_class2) = forced(fix_class2);
-    clear forced
-    USER_DATA{13} = new_forced;
+if ~isfield(handles,'unforce')
+    if handles.force==0  &&  handles.setclus==0
+        forced = USER_DATA{13};
+        USER_DATA{14} = forced;
+        new_forced = false(size(forced));
+        new_forced(fix_class2) = forced(fix_class2);
+        clear forced
+        USER_DATA{13} = new_forced;
+    elseif handles.force==0
+        USER_DATA{14} = USER_DATA{13};
+    end
 end
-
 % Defines classes
 non_clustered = ones(1,size(spikes,1));
 cont = 0;
@@ -208,8 +211,14 @@ if (~isempty(fix_class2)) && handles.merge==0 && handles.undo==0 && handles.forc
     % since those are the ones which are going to be updated
     ind_non_fix = 1:length(classes); 
     ind_non_fix(fix_class2) = []; 
-    clustering_results(ind_non_fix,4) = classes(ind_non_fix); % classes of the non-fixed spikes in the original clusters column
-    clustering_results(ind_non_fix,3) = temp; % temperature of the non-fixed spikes in the original temperature column
+    if isfield(handles,'new_spc_classes')
+            clustering_results(ind_non_fix,4) = handles.new_spc_classes(ind_non_fix);
+%     else
+%             clustering_results(ind_non_fix,4) = classes(ind_non_fix); % classes of the non-fixed spikes in the original clusters column
+    end
+    if handles.setclus == 0
+        clustering_results(ind_non_fix,3) = temp; % temperature of the non-fixed spikes in the original temperature column
+    end
 end
 
 % update new classes
@@ -224,11 +233,19 @@ if isempty(fix_class2) && handles.undo==0 && handles.merge==0 && handles.force==
 		clustering_results(:,3) = clustering_results(:,3);
 		clustering_results(handles.new_manual|classes==0,4) = 0;
 		clustering_results(handles.new_manual,3) = temp;
-	else
-		clustering_results(:,4) = clustering_results(:,2); % clusters
+	elseif handles.setclus == 0
+        if isfield(handles,'new_spc_classes')
+            clustering_results(:,4) = handles.new_spc_classes;
+        else
+            clustering_results(:,4) = clustering_results(:,2); % clusters
+        end
 		clustering_results(:,3) = temp; % temperatures
     end
 end
+
+
+
+
 clear classes
 % Updates clustering_results and clustering_results_bk in USER_DATA
 USER_DATA{10} = clustering_results; 
@@ -256,9 +273,10 @@ cla(handles.projections);
 hold(handles.projections,'on')
 % Plot clusters
 ylimit = [];
-colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
-
-
+colors = [[0.0 0.0 1.0];[1.0 0.0 0.0];[0.0 0.5 0.0];[0.620690 0.0 0.0];[0.413793 0.0 0.758621];[0.965517 0.517241 0.034483];
+    [0.448276 0.379310 0.241379];[1.0 0.103448 0.724138];[0.545 0.545 0.545];[0.586207 0.827586 0.310345];
+    [0.965517 0.620690 0.862069];[0.620690 0.758621 1.]]; 
+maxc = size(colors,1);
 forced = USER_DATA{13};
 figs_num = 6;
 opened_figs = cell(1,figs_num);
@@ -270,14 +288,14 @@ for i = 0:nclusters
         permut = randperm(sup_spikes);
         permut = permut(1:max_spikes);
         if get(handles.spike_shapes_button,'value') ==1 && get(handles.plot_all_button,'value') ==1
-            eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',''' colors(i+1) ''',''Parent'',handles.projections)']);
+            eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''Parent'',handles.projections)']);
             xlim(handles.projections, [1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
             eval(['av   = mean(spikes(class' num2str(i) ',:));']);
-            plot(handles.projections,1:ls,av,'color',colors(i+1),'linewidth',2);
+            plot(handles.projections,1:ls,av,'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'linewidth',2);
             xlim(handles.projections,[1 ls])
         else
-            eval(['plot(handles.projections,inspk(class' num2str(i) ',1),inspk(class' num2str(i) ',2),''.' colors(i+1) ''',''markersize'',.5);']);
+            eval(['plot(handles.projections,inspk(class' num2str(i) ',1),inspk(class' num2str(i) ',2),''.'',''Color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''markersize'',.5);']);
             axis(handles.projections,'auto');
         end
     
@@ -289,7 +307,7 @@ for i = 0:nclusters
             eval(['avdw = av - par.to_plot_std * std(spikes(class' num2str(i) '(:,permut),:));']); % JMG
             
             if get(handles.plot_all_button,'value') ==1
-                eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',''' colors(i+1) ''',''Parent'',clus_ax)']);
+                eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''Parent'',clus_ax)']);
                 if i==0
                     plot(clus_ax,1:ls,av,'c','linewidth',2)
                     plot(clus_ax,1:ls,avup,'c','linewidth',.5)
@@ -299,7 +317,7 @@ for i = 0:nclusters
                     plot(clus_ax,1:ls,avup,1:ls,avdw,'color',[.4 .4 .4],'linewidth',.5)
                 end
             else
-                plot(clus_ax,1:ls,av,'color',colors(i+1),'linewidth',2)
+                plot(clus_ax,1:ls,av,'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'linewidth',2)
                 plot(clus_ax,1:ls,avup,1:ls,avdw,'color',[.65 .65 .65],'linewidth',.5)
             end
             xlim(clus_ax, [1 ls])
@@ -329,7 +347,7 @@ for i = 0:nclusters
                 opened_figs{4} = wave_clus_aux3('Visible', 'off');
             elseif i < 29
                 opened_figs{5} = wave_clus_aux4('Visible', 'off');
-            else
+            elseif i < 34
                 opened_figs{6} = wave_clus_aux5('Visible', 'off');
             %-------------------------------------------------------------------------
             end
@@ -352,7 +370,8 @@ end
 
 for i =1:figs_num
     if ~isempty(opened_figs{i})  
-    	set(opened_figs{i},'units','pixel','position',get(0,'screensize'))
+    	%set(opened_figs{i},'units','pixel','position',get(0,'screensize'))
+   	set(opened_figs{i},'units','normalized','outerposition',[0 0 1 1])
 	set(opened_figs{i},'Visible', 'on'); 
     end
 end

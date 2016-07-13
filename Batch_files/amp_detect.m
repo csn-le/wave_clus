@@ -18,17 +18,24 @@ fmin_sort = par.sort_fmin;
 fmax_sort = par.sort_fmax;
 
 
-% HIGH-PASS FILTER OF THE DATA
+%HIGH-PASS FILTER OF THE DATA
 if exist('ellip','file')                         %Checks for the signal processing toolbox
-    [b_detect,a_detect] = ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
-    
-    [b,a] = ellip(2,0.1,40,[fmin_sort fmax_sort]*2/sr);
+    [b_detect,a_detect] = ellip(par.detect_order,0.1,40,[fmin_detect fmax_detect]*2/sr);
+    [b,a] = ellip(par.sort_order,0.1,40,[fmin_sort fmax_sort]*2/sr);
+%     [z_det,p_det,k_det] = ellip(par.detect_order,0.1,40,[fmin_detect fmax_detect]*2/sr);
+%     [z,p,k] = ellip(par.sort_order,0.1,40,[fmin_sort fmax_sort]*2/sr);
+%     
+%     [SOS,G] = zp2sos(z,p,k);
+%     [SOS_det,G_det] = zp2sos(z_det,p_det,k_det);
     if exist('FiltFiltM','file')
     	xf_detect = FiltFiltM(b_detect, a_detect, x);
         xf = FiltFiltM(b, a, x); 
     else
         xf_detect = filtfilt(b_detect, a_detect, x);
         xf = filtfilt(b, a, x);
+%         xf_detect = filtfilt(SOS_det, G_det, x);
+%         xf = filtfilt(SOS,G, x);
+        
     end
     
 else
@@ -52,6 +59,9 @@ switch detect
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
                 [aux_unused, iaux]=max((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                if iaux == 1
+                    continue
+                end
                 nspk = nspk + 1;
                 index(nspk) = iaux + xaux(i) -1;
                 xaux0 = index(nspk);
@@ -64,6 +74,9 @@ switch detect
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
                 [aux_unused, iaux]=min((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                if iaux == 1
+                    continue
+                end
                 nspk = nspk + 1;
                 index(nspk) = iaux + xaux(i) -1;
                 xaux0 = index(nspk);
@@ -76,6 +89,9 @@ switch detect
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
                 [aux_unused, iaux]=max(abs(xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                if iaux == 1
+                    continue
+                end
                 nspk = nspk + 1;
                 index(nspk) = iaux + xaux(i) -1;
                 xaux0 = index(nspk);

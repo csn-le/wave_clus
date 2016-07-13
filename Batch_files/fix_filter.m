@@ -41,4 +41,3 @@ y = y(length(y):-1:1);
 y([1:nfact len+nfact+(1:nfact)]) = [];
 
 y = y.';   
-

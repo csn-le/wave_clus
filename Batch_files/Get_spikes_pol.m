@@ -32,6 +32,8 @@ for v = 1:2:nvar
     end
 end
 
+run_parfor = parallel;
+
 if parallel == true
     if exist('matlabpool','file')
         try
@@ -42,17 +44,25 @@ if parallel == true
     else
         poolobj = gcp('nocreate'); % If no pool, do not create new one.
         if isempty(poolobj)
-            parallel = false;
-        else
             parpool
+        else
+            parallel = false;
         end
     end
 end
 
 init_date = now;
-parfor j = 1:length(polytrodes)
-   get_spikes_pol_single(polytrodes(j), par_input);
-   disp(sprintf('%d of %d ''spikes'' files done.',count_new_sp_files(init_date, polytrodes),length(polytrodes)))
+if run_parfor == true
+    parfor j = 1:length(polytrodes)
+        get_spikes_pol_single(polytrodes(j), par_input);
+        disp(sprintf('%d of %d ''spikes'' files done.',count_new_sp_files(init_date, polytrodes),length(polytrodes)))
+    end
+else
+    for j = 1:length(polytrodes)
+        get_spikes_pol_single(polytrodes(j), par_input);
+        disp(sprintf('%d of %d ''spikes'' files done.',count_new_sp_files(init_date, polytrodes),length(polytrodes)))
+    end
+    
 end
 
 if parallel == true
@@ -80,7 +90,7 @@ function get_spikes_pol_single(polytrode, par_input)
     
     % LOAD POLYTRODE CHANNELS
     pol = strcat('polytrode',num2str(polytrode),'.txt');
-    out_filename = strcat(pol(1:end-4));
+    out_filename = pol(1:end-4);
     electrodes = textread(pol,'%s');
     n_channels = length(electrodes);
     

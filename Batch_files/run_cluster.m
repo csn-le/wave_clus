@@ -34,22 +34,25 @@ fclose(fid);
 system_type = computer;
 switch system_type
     case {'PCWIN'}    
-        if exist([pwd '\cluster.exe'])==0
-            directory = which('cluster.exe');
-            copyfile(directory,pwd);
-        end
-        [status,result] = dos(sprintf('cluster.exe %s.run',fname));
+%         if exist([pwd '\cluster.exe'])==0
+%             directory = which('cluster.exe');
+%             copyfile(directory,pwd);
+%         end
+        [status,result] = dos(sprintf('"%s" %s.run',which('cluster.exe'),fname));
+        %[status,result] = dos(sprintf('cluster.exe %s.run',fname));
     case {'PCWIN64'}    
-        if exist([pwd '\cluster_64.exe'])==0
-            directory = which('cluster_64.exe');
-            copyfile(directory,pwd);
-        end
-        [status,result] = dos(sprintf('cluster_64.exe %s.run',fname));
+%         if exist([pwd '\cluster_64.exe'])==0
+%             directory = which('cluster_64.exe');
+%             copyfile(directory,pwd);
+%         end
+        [status,result] = dos(sprintf('"%s" %s.run',which('cluster_64.exe'),fname));
+        %[status,result] = dos(sprintf('cluster_64.exe %s.run',fname));
     case {'MAC'}
         if exist([pwd '/cluster_mac.exe'])==0
             directory = which('cluster_mac.exe');
             copyfile(directory,pwd);
         end
+        fileattrib([pwd '/cluster_mac.exe'],'+x')
         run_mac = sprintf('./cluster_mac.exe %s.run',fname);
 	    [status,result] = unix(run_mac);
    case {'MACI','MACI64'}
@@ -57,22 +60,26 @@ switch system_type
             directory = which('cluster_maci.exe');
             copyfile(directory,pwd);
         end
+        fileattrib([pwd '/cluster_maci.exe'],'+x')
         run_maci = sprintf('./cluster_maci.exe %s.run',fname);
 	    [status,result] = unix(run_maci);
     case {'GLNX86'}      
-        if exist([pwd '/cluster_linux.exe'],'file') == 0
-            directory = which('cluster_linux.exe');
-            copyfile(directory,pwd);
-        end
-        run_linux = sprintf('./cluster_linux.exe %s.run',fname);
-	    unix(run_linux);
+        %if exist([pwd '/cluster_linux.exe'],'file') == 0
+        %    directory = which('cluster_linux.exe');
+        %    copyfile(directory,pwd);
+        %end
+        %run_linux = sprintf('./cluster_linux.exe %s.run',fname);
+        run_linux = sprintf('''%s'' %s.run',which('cluster_linux.exe'),fname);
+        fileattrib(which('cluster_linux.exe'),'+x')
+	    [status,result] = unix(run_linux);
     case {'GLNXA64', 'GLNXI64'}
-        if exist([pwd '/cluster_linux64.exe'],'file') == 0
-            directory = which('cluster_linux64.exe');
-            copyfile(directory,pwd);
-        end
-        run_linux = sprintf('./cluster_linux64.exe %s.run',fname);
-	    [status,result] = unix(run_linux);        
+        %if exist([pwd '/cluster_linux64.exe'],'file') == 0
+         %   directory = which('cluster_linux64.exe');
+          %  copyfile(directory,pwd);
+        %end
+        run_linux = sprintf('''%s'' %s.run',which('cluster_linux64.exe'),fname);
+        fileattrib(which('cluster_linux64.exe'),'+x')
+	    [status,result] = unix(run_linux);
     otherwise 
     	ME = MException('MyComponent:NotSupportedArq', '%s type of computer not supported.',com_type);
     	throw(ME)
@@ -99,10 +106,13 @@ end
 
 clu = load([fname '.dg_01.lab']);
 tree = load([fname '.dg_01']); 
-delete(sprintf('%s.run',fname));
-delete *.mag
-delete *.edges
-delete *.param
+
+try
+delete(sprintf('%s.run',fname));    
+delete([fname '*.mag']);
+delete([fname '*.edges']);
+delete([fname '*.param']);
+end
 
 if exist([fname '.knn'],'file')
     delete([fname '.knn']);

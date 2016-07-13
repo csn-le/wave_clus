@@ -1,10 +1,4 @@
-function plot_spikes_aux(handles, plot_number)
-if ~exist('plot_number','var') || (plot_number== 0)
-	USER_DATA = get(handles.wave_clus_aux,'userdata');
-	plot_number= 0;
-else
-	eval(['USER_DATA = get(handles.wave_clus_aux' num2str(plot_number) ',''userdata'');']);
-end
+function plot_spikes_aux(handles, USER_DATA,plot_number)
 
 par = USER_DATA{1};
 spikes = USER_DATA{2};
@@ -18,7 +12,11 @@ max_spikes = min(par.max_spikes_plot, length(class_to_plot));
 sup_spikes = length(class_to_plot);
 forced = USER_DATA{13};
 % Plot clusters
-colors = ['k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
+colors = [[0.0 0.0 1.0];[1.0 0.0 0.0];[0.0 0.5 0.0];[0.620690 0.0 0.0];[0.413793 0.0 0.758621];[0.965517 0.517241 0.034483];
+    [0.448276 0.379310 0.241379];[1.0 0.103448 0.724138];[0.545 0.545 0.545];[0.586207 0.827586 0.310345];
+    [0.965517 0.620690 0.862069];[0.620690 0.758621 1.]]; 
+maxc = size(colors,1);
+
 
 sp_axes = eval(['handles.spikes' num2str(axes_nr-1)]); 
 cla(sp_axes, 'reset');
@@ -28,11 +26,11 @@ avup = av + par.to_plot_std * std(spikes(class_to_plot,:));
 avdw = av - par.to_plot_std * std(spikes(class_to_plot,:));
 if par.plot_all_button ==1
     permut = randperm(sup_spikes);
-    line(1:ls,spikes(class_to_plot(permut(1:max_spikes)),:)','color',colors(axes_nr),'Parent',sp_axes)
+    line(1:ls,spikes(class_to_plot(permut(1:max_spikes)),:)','color',colors(mod(axes_nr-2,maxc)+1,:),'Parent',sp_axes)
     plot(sp_axes, 1:ls,av,'k','linewidth',2);
     plot(sp_axes, 1:ls,avup,1:ls,avdw,'color',[.4 .4 .4],'linewidth',.5)
 else
-    plot(sp_axes, 1:ls,av,'color',colors(axes_nr),'linewidth',2)
+    plot(sp_axes, 1:ls,av,'color',colors(mod(axes_nr-2,maxc)+1,:),'linewidth',2)
     plot(sp_axes, 1:ls,avup,1:ls,avdw,'color',[.65 .65 .65],'linewidth',.5)
 end
 xlim(sp_axes, [1 ls]);

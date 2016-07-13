@@ -104,7 +104,11 @@ function varargout = wave_clus_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-clus_colors = [0 0 1; 1 0 0; 0 0.5 0; 0 0.75 0.75; 0.75 0 0.75; 0.75 0.75 0; 0.25 0.25 0.25];
+clus_colors = [[0.0 0.0 1.0];[1.0 0.0 0.0];[0.0 0.5 0.0];[0.620690 0.0 0.0];[0.413793 0.0 0.758621];[0.965517 0.517241 0.034483];
+    [0.448276 0.379310 0.241379];[1.0 0.103448 0.724138];[0.545 0.545 0.545];[0.586207 0.827586 0.310345];
+    [0.965517 0.620690 0.862069];[0.620690 0.758621 1.]]; 
+
+
 set(0,'DefaultAxesColorOrder',clus_colors)
 
 
@@ -163,13 +167,18 @@ handles.par.fnamesave = handles.par.fname;                  %filename if "save c
 handles.par.fnamespc = 'data_wc';
 
 handles.par = data_handler.update_par(handles.par);
-handles.par.file_name_to_show = [pathname filename];
+
 
 if data_handler.with_results %data have _times files
     [clu, tree, spikes, index, inspk, ipermut, classes, forced,temp] = data_handler.load_results();
     rejected = data_handler.load_rejected();
     handles.setclus = 1;
+    if isempty(ipermut) 
+        handles.par.permut = 'n';
+    end
+    
 else
+    
     if data_handler.with_spikes  %data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
@@ -226,6 +235,8 @@ else
     handles.setclus = 2; %uses min cluster size but doesn't reset force
 end
 
+handles.par.file_name_to_show = [pathname filename];
+
 if (data_handler.with_raw || data_handler.with_psegment) && handles.par.cont_segment         %raw exists
     [xd_sub, sr_sub] = data_handler.get_signal_sample();
     Plot_continuous_data(xd_sub, sr_sub, handles); drawnow
@@ -236,16 +247,22 @@ end
 %all the uses of clu are like: clu(temp,3:end)+1
 if handles.par.permut == 'y' && ~isempty(clu)
     if isempty(ipermut) %load from old result without ipermut or par, but par.permut=='y'
-       ipermut = 1:length(inspk);
+       naux =  size(clu,2)-2;
+	   ipermut = 1:naux;
     end
-    clu_aux = zeros(size(clu,1),2 + size(spikes,1)) -1;%when update classes from clu, not selected go to cluster 1001
+    clu_aux = zeros(size(clu,1),2 + size(spikes,1)) -1; %when update classes from clu, not selected elements go to cluster 0
     clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
     clu_aux(:,1:2) = clu(:,1:2);
     clu = clu_aux;
     clear clu_aux
+elseif ~isempty(clu)
+    naux = size(clu,2)-2;
+    clu_aux = zeros(size(clu,1),2 + size(spikes,1)) -1; %when update classes from clu, not selected elements go to cluster 0
+    clu_aux(:,(1:naux)+2) = clu(:,(1:naux)+2);
+    clu_aux(:,1:2) = clu(:,1:2);
+    clu = clu_aux;
+    clear clu_aux
 end
-
-
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 USER_DATA{1} = handles.par;
 USER_DATA{2} = spikes;
@@ -276,10 +293,11 @@ if  data_handler.with_gui_status
     handles.undo = 1;
     
 elseif data_handler.with_results
-    clustering_results(:,1) = repmat(temp(1),length(classes),1); % GUI temperatures
+    current_temp = 1;
+    clustering_results(:,1) = repmat(current_temp,length(classes),1); % GUI temperatures
     clustering_results(:,2) = classes'; % GUI classes 
     for i=1:max(classes)
-    	clustering_results(classes==i,3)  = temp(i);
+    	clustering_results(classes==i,3)  = current_temp;
     end 
     clustering_results(:,4) = classes'; % original classes 
     handles.undo = 1;
@@ -289,7 +307,7 @@ else
     temp = find_temp(tree, handles.par); 
     classes = clu(temp,3:end)+1;
     if handles.par.permut == 'n'
-        classes = [classes zeros(1,max(size(spikes,1)-handles.par.max_spk,0))];
+        classes = [classes zeros(1,max(size(spikes,1)-size(clu,2)-2,0))];
     end
 
     % definition of clustering_results
@@ -337,6 +355,9 @@ if isfield(handles,'force_unforce_button') && (nnz(forced)>0)
 	set(handles.force_unforce_button,'Value',1)
     set(handles.force_unforce_button,'String','FORCED')
     %set(handles.change_temperature_button,'enable','off');
+elseif isfield(handles,'force_unforce_button')
+    set(handles.force_unforce_button,'Value',0)
+    set(handles.force_unforce_button,'String','Force')
 end
 if isfield(handles,'edit_max_force_dist')
     set(handles.edit_max_force_dist,'string',num2str(handles.par.template_sdnum));
@@ -351,7 +372,7 @@ function change_temperature_button_Callback(hObject, eventdata, handles)
 if button == 3
 	return
 end
-if temp < handles.par.mintemp
+if temp <= handles.par.mintemp+0.5*handles.par.tempstep
     temp = 1;
 elseif temp>handles.par.maxtemp
     temp = floor((handles.par.maxtemp-handles.par.mintemp)/handles.par.tempstep);
@@ -381,6 +402,7 @@ handles.force = 0;
 handles.merge = 0;
 
 handles.undo = 0;
+handles.new_spc_classes = classes(:)';
 plot_spikes(handles);
 if isfield(handles,'force_unforce_button')
 	set(handles.force_unforce_button,'Value',0)
@@ -463,30 +485,28 @@ for i = 1:length(classes_names)
 end
 forced = USER_DATA{13};
 
-var_list = ' cluster_class par spikes gui_status forced index Temp';
+var_list = 'cluster_class'',''par'',''spikes'',''gui_status'', ''forced'',''index'', ''Temp''';
 
 if ~isempty(USER_DATA{7})
     inspk = USER_DATA{7};
-    var_list = strcat(var_list , ' inspk');
+    var_list = strcat(var_list , ' ,''inspk''');
 end
 
 if ~isempty(USER_DATA{12})
     ipermut = USER_DATA{12};
-    var_list = strcat(var_list , ' ipermut');
+    var_list = strcat(var_list , ' ,''ipermut''');
 end
        
 if developer_mode
-	var_list = strcat(var_list , ' rejected');
+	var_list = strcat(var_list , ' ,''rejected''');
 end
 
+ver = '';
 currentver = version;
 if currentver(1) >= 7
-    var_list = strcat(var_list , ' -v6;');
-else
-    var_list = strcat(var_list , ';');
+    ver = ',''-v6''';
 end
-
-eval(['save ' outfile var_list]);
+eval(['save( ''' outfile ''',''' var_list '' ver ');']);
 if exist([handles.par.fnamespc '.dg_01.lab'],'file')
     copyfile([handles.par.fnamespc '.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab']);
     copyfile([handles.par.fnamespc '.dg_01'], [handles.par.fnamesave '.dg_01']);
@@ -643,6 +663,7 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
         USER_DATA{13} = new_forced; 
         handles.force = 0;
         handles.setclus = 1;
+        handles.unforce = true;
         set(hObject,'String','Force')
         %set(handles.change_temperature_button,'enable','on');
     end
@@ -658,75 +679,87 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
 
     
 function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
-    
-    if isfield(handles_local,'wave_clus_figure')
-        USER_DATA = get(handles_local.wave_clus_figure,'userdata');
-        handles = handles_local;
-    else
-        h_figs = get(0,'children');
-        h_fig = findobj(h_figs,'tag','wave_clus_figure');
-        USER_DATA = get(h_fig,'UserData');
-        handles = guidata(h_fig);
-    end
+    set(hObject,'Enable','off')
+    try
+        if isfield(handles_local,'wave_clus_figure')
+            USER_DATA = get(handles_local.wave_clus_figure,'userdata');
+            handles = handles_local;
+        else
+            h_figs = get(0,'children');
+            h_fig = findobj(h_figs,'tag','wave_clus_figure');
+            USER_DATA = get(h_fig,'UserData');
+            handles = guidata(h_fig);
+        end
 
-    spikes = USER_DATA{2};
-    classes = USER_DATA{6};
-    forced = USER_DATA{13};   
-    
-    if cl == -1
-        rect = getrect(handles_local.projections);
-        valids = ~USER_DATA{15}(:); %First, I don't select the rejected
-    else
-        eval(['rect = getrect(handles_local.spikes' num2str(cl) ');']);
-        valids = ~USER_DATA{15}(:) & (classes(:)==cl); %First, I don't select the rejected
-    end
-    xind = max(1, ceil(rect(1)));
-    xend = min(size(spikes,2),floor(rect(1) + rect(3)));
-    xD = xend-xind;
-    ymin = rect(2);
-    ymax = rect(2) + rect(4);
-    yD = ymin - ymax;
-    if xD==0 || yD == 0; return; end
-    [Mh, Mpos] = max(spikes(valids,xind:xend)');
-    [mh ,mpos] = min(spikes(valids,xind:xend)');
-    if ceil(rect(1)) < 1 %if rect is out the axis, extreme in border count like inside the rectangle
-        xiborder=0;
-    else
-        xiborder=1;
-    end
-    if floor(rect(1) + rect(3)) > size(spikes,2) %if rect is out the axis, extreme in border count like inside the rectangle
-        xeborder = xD+2; 
-    else
-        xeborder = xD;   
-    end    
-    sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos > xiborder & Mpos < xeborder);
-    sp_selected = sp_selected |((mh >= ymin & mh <= ymax) & (mpos > xiborder & mpos < xeborder));
-    valids(valids==1) = sp_selected;
-    
-    clus_n = max(classes) + 1;
-    USER_DATA{14} = forced;
-    
-    forced(valids) = 0;
-    classes(valids)= clus_n;
-    handles.new_manual = valids;
-    handles.setclus = 1;
-    handles.force = 0;
-    handles.merge = 0;
-    
-    handles.undo = 0;
-    USER_DATA{6} = classes(:)';
-    USER_DATA{13} = forced;
-    USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
-    
-    if isfield(handles,'wave_clus_figure')
-        set(handles.wave_clus_figure,'userdata',USER_DATA)
-    else
-        set(h_fig,'userdata',USER_DATA)
-    end
+        spikes = USER_DATA{2};
+        classes = USER_DATA{6};
+        forced = USER_DATA{13};   
 
-    plot_spikes(handles);
+        if cl == -1
+            rect = getrect(handles_local.projections);
+            valids = ~USER_DATA{15}(:); %First, I don't select the rejected
+        else
+            eval(['rect = getrect(handles_local.spikes' num2str(cl) ');']);
+            valids = ~USER_DATA{15}(:) & (classes(:)==cl); %First, I don't select the rejected
+        end
+        xind = max(1, ceil(rect(1)));
+        xend = min(size(spikes,2),floor(rect(1) + rect(3)));
+        xD = xend-xind;
+        ymin = rect(2);
+        ymax = rect(2) + rect(4);
+        yD = ymin - ymax;
+        if xD==0 || yD == 0; 
+            set(hObject,'Enable','on');
+            return;
+        end
+        [Mh, Mpos] = max(spikes(valids,xind:xend)');
+        [mh ,mpos] = min(spikes(valids,xind:xend)');
+        if ceil(rect(1)) < 1 %if rect is out the axis, extreme in border count like inside the rectangle
+            xiborder=0;
+        else
+            xiborder=1;
+        end
+        if floor(rect(1) + rect(3)) > size(spikes,2) %if rect is out the axis, extreme in border count like inside the rectangle
+            xeborder = xD+2; 
+        else
+            xeborder = xD;   
+        end    
+        sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos > xiborder & Mpos < xeborder);
+        sp_selected = sp_selected |((mh >= ymin & mh <= ymax) & (mpos > xiborder & mpos < xeborder));
+        valids(valids==1) = sp_selected;
 
-    
+        if nnz(valids)==0
+            set(hObject,'Enable','on');
+            return;
+        end
+
+
+        clus_n = max(classes) + 1;
+        USER_DATA{14} = forced;
+
+        forced(valids) = 0;
+        classes(valids)= clus_n;
+        handles.new_manual = valids;
+        handles.setclus = 1;
+        handles.force = 0;
+        handles.merge = 0;
+
+        handles.undo = 0;
+        USER_DATA{6} = classes(:)';
+        USER_DATA{13} = forced;
+        USER_DATA{16} = USER_DATA{15}; %update bk of rejected spikes
+
+        if isfield(handles,'wave_clus_figure')
+            set(handles.wave_clus_figure,'userdata',USER_DATA)
+            set(hObject,'Enable','on');
+        else
+            set(h_fig,'userdata',USER_DATA)
+        end
+        plot_spikes(handles);
+        
+    catch
+        set(hObject,'Enable','on');
+    end
     
 % PLOT ALL PROJECTIONS BUTTON
 % --------------------------------------------------------------------
@@ -741,29 +774,20 @@ end
 % --------------------------------------------------------------------
 
 % fix buttons --------------------------------------------------------------------
-function fix_button_Callback(hObject, eventdata, handles)
-b_name = get(gcbo,'Tag');
-cn = regexp(b_name, '\d+', 'match');
+function fix_button_Callback(hObject, eventdata, handles,cn)
 
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 classes = USER_DATA{6};
-fix_class = find(classes== str2double(cn{1}));
-
-if get(eval(['handles.fix' cn{1} '_button']),'value') ==1
-    USER_DATA{19+str2double(cn{1})} = fix_class;  %20 for class 1, etc
+fix_class = find(classes== cn);
+if isempty(fix_class)
+    return
+end
+if get(eval(['handles.fix' num2str(cn) '_button']),'value') ==1
+    USER_DATA{19+cn} = fix_class;  %20 for class 1, etc
 else
-    USER_DATA{19+str2double(cn{1})} = [];
+    USER_DATA{19+cn} = [];
 end
 set(handles.wave_clus_figure,'userdata',USER_DATA)
-h_figs=get(0,'children');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux3');
-set(h_fig4,'userdata',USER_DATA)
-set(h_fig3,'userdata',USER_DATA)
-set(h_fig2,'userdata',USER_DATA)
-set(h_fig1,'userdata',USER_DATA)
 
 %SETTING OF SPIKE FEATURES OR PROJECTIONS
 % --------------------------------------------------------------------
@@ -804,11 +828,11 @@ cluster_results = USER_DATA{10};
 handles.setclus = 1;
 handles.force = 0;
 handles.merge = 0;
-
 handles.undo = 0;
 handles.minclus = cluster_results(1,5);
 plot_spikes(handles);
 % --------------------------------------------------------------------
+
 function plot_average_button_Callback(hObject, eventdata, handles)
 set(hObject,'value',1);
 set(handles.plot_all_button,'value',0);
@@ -817,7 +841,6 @@ cluster_results = USER_DATA{10};
 handles.setclus = 1;
 handles.force = 0;
 handles.merge = 0;
-
 handles.undo = 0;
 handles.minclus = cluster_results(1,5);
 plot_spikes(handles);
@@ -827,26 +850,24 @@ plot_spikes(handles);
 function isi_nbins_Callback(hObject, eventdata, handles)
 b_name = get(hObject,'Tag');
 cn = regexp(b_name, '\d+', 'match');
-USER_DATA = get(handles.wave_clus_figure,'userdata');
+main_fig = findobj( 0, 'type', 'figure', 'tag', 'wave_clus_figure');
+USER_DATA = get(main_fig,'userdata');
 par = USER_DATA{1};
-%cluster_results = USER_DATA{10};
 eval(['par.nbins' cn{1}  '= str2num(get(hObject, ''String''));']);
-
 USER_DATA{1} = par;
-set(handles.wave_clus_figure,'userdata',USER_DATA);
+set(main_fig,'userdata',USER_DATA);
 draw_histograms(handles,  str2double(cn{1}),USER_DATA);
 
 % --------------------------------------------------------------------
 function isi_bin_step_Callback(hObject, eventdata, handles)
 b_name = get(hObject,'Tag');
 cn = regexp(b_name, '\d+', 'match');
-USER_DATA = get(handles.wave_clus_figure,'userdata');
+main_fig = findobj( 0, 'type', 'figure', 'tag', 'wave_clus_figure');
+USER_DATA = get(main_fig,'userdata');
 par = USER_DATA{1};
-%cluster_results = USER_DATA{10};
 eval(['par.bin_step' cn{1}  '= str2num(get(hObject, ''String''));']);
-
 USER_DATA{1} = par;
-set(handles.wave_clus_figure,'userdata',USER_DATA);
+set(main_fig,'userdata',USER_DATA);
 draw_histograms(handles, str2double(cn{1}),USER_DATA);
             
 
@@ -864,7 +885,8 @@ b_name = get(gcbo,'Tag');
 cn = str2double(regexp(b_name, '\d+', 'match'));
 
 eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',0);'])
-USER_DATA = get(handles.wave_clus_figure,'userdata');
+main_fig = findobj( 0, 'type', 'figure', 'tag', 'wave_clus_figure');
+USER_DATA = get(main_fig,'userdata');
 classes = USER_DATA{6};
 if cn == 3
     if nnz(classes==3)==0
@@ -874,7 +896,8 @@ if cn == 3
 end
 
 if developer_mode
-    if get(handles.pumenu_reject,'Value')==1
+    pumenu_reject = findobj(main_fig,'tag','pumenu_reject');
+    if get(pumenu_reject,'Value')==1
         rejected = USER_DATA{15};
         USER_DATA{16} = rejected; %update bk of rejected spikes
         rejected(classes==cn) = true;
@@ -893,22 +916,10 @@ USER_DATA{6} = classes;
 
 clustering_results = USER_DATA{10};
 USER_DATA{11} = clustering_results; % Save backup
-clustering_results(:,2) = classes;
-USER_DATA{10} = clustering_results; 
+%clustering_results(:,2) = classes;
+%USER_DATA{10} = clustering_results; 
 
-
-h_figs = get(0,'children');
-h_fig{1} = findobj(h_figs,'tag','wave_clus_aux');
-h_fig{2} = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig{3} = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig{4} = findobj(h_figs,'tag','wave_clus_aux3');
-h_fig{5} = findobj(h_figs,'tag','wave_clus_aux4');
-h_fig{6} = findobj(h_figs,'tag','wave_clus_aux5');
-set(handles.wave_clus_figure,'userdata',USER_DATA);
-
-for h = h_fig
-    set(h{1},'userdata',USER_DATA)
-end
+set(main_fig,'userdata',USER_DATA);
 
 set(hObject,'value',0);
 eval(['cla(handles.spikes' int2str(cn) ',''reset'');']);
@@ -1168,3 +1179,36 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function fix_all_button_Callback(hobject,event,handles)
+    USER_DATA = get(handles.wave_clus_figure,'userdata');
+    par = USER_DATA{1};
+    classes = USER_DATA{6};
+    cls = unique(classes);
+    cls = cls(cls>0);
+    
+    fmax = ceil((max(cls)-3)/5)+1;
+    opened_figs = cell(1,fmax);
+    if fmax>1
+        opened_figs{2} =  guidata(findobj(0, 'type', 'figure','tag','wave_clus_aux'));
+    end
+    for i=3:fmax
+        opened_figs{i} =  guidata(findobj(0, 'type', 'figure','tag',['wave_clus_aux' num2str(i-2)]));
+    end
+    for ci = 1:length(cls)
+        c = cls(ci);
+        fix_class = find(classes==c);
+        USER_DATA{19+c} = fix_class;
+        
+        if c<4
+            set(eval(['handles.fix' num2str(c) '_button']),'value',1)
+        else
+            handles_aux = opened_figs{ceil((c-3)/5)+1};
+            set(eval(['handles_aux.fix' num2str(c) '_button']),'value',1)
+            eval(['par.fix' num2str(c) '= 1;'])
+        end
+ 
+    end
+    USER_DATA{1} = par;
+    set(handles.wave_clus_figure,'userdata',USER_DATA);
+    
+    

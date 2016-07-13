@@ -21,9 +21,11 @@ function Do_clustering(input, varargin)
 %       the SPC parameters (the detection parameters are taken from the 
 %       XXX_spikes file or the set_parameters file. All the parameters included
 %       in the structure par will overwrite the parameters loaded from set_parameters()
-% optional argument 'parallel' : true for use parallel computing
-% optional flag 'make_times' for computing the sorting from the XXX_spikes
-%       files or plotting only the results based on the save XXX_times files.
+% optional argument 'parallel' : true for use parallel computing.
+% optional argument 'make_times': true for computing the sorting from the XXX_spikes files.
+% optional argument 'make_plots': true for plotting the results based on the save XXX_times files.
+% optional argument 'resolution': resolution string used by the plots (default: '-r150').
+
 
 % Example
 % param.min_clus = 60;
@@ -31,15 +33,23 @@ function Do_clustering(input, varargin)
 % par.maxtemp = 0.251;                                                                                     
 % Do_clustering(1:16,'parallel',true,'par',param)
 %
-% the times were created but something went wrong with the plots. Then, the
-% code can be called again just to create the plots
+% If the times were created but something went wrong with the plots. Then, the
+% code can be called again just to create the plots:
 % Do_clustering(1:16,'make_times',false,'par',param)
+% 
+%
+% Similarly, for don't create the plots:
+% Do_clustering(1:16,'make_plots',false,'par',param)
+%
+
 min_spikes4SPC = 16; % if are less that this number of spikes, clustering won't be made.
 
 %default config
 par_input = struct;
 parallel = false;
 make_times = true;
+make_plots = true;
+resolution = '-r150';
 
 %search for optional inputs
 nvar = length(varargin);
@@ -56,12 +66,30 @@ for v = 1:nvar
         else
             error('Error in ''parallel'' optional input.')
         end
-    elseif strcmp(varargin{v},'only_plot')
-        make_times = false;
+    elseif strcmp(varargin{v},'make_times')
+        if (nvar>=v+1) && islogical(varargin{v+1})
+            make_times = varargin{v+1};
+        else
+            error('Error in ''make_times'' optional input.')
+        end
+    elseif strcmp(varargin{v},'make_plots')
+        if (nvar>=v+1) && islogical(varargin{v+1})
+            make_plots = varargin{v+1};
+        else
+            error('Error in ''make_plots'' optional input.')
+        end 
+    elseif strcmp(varargin{v},'resolution')
+        if (nvar>=v+1) && ischar(varargin{v+1})
+            resolution = varargin{v+1};
+        else
+            error('Error in ''make_plots'' optional input.')
+        end    
+        
+        
     end
 end
 
-
+run_par_for = parallel;
 
 % get a cell of filenames from the input
 if isnumeric(input) || any(strcmp(input,'all'))  %cases for numeric or 'all' input
@@ -102,6 +130,8 @@ else
     throw(ME)
 end
 
+tic
+
 if make_times
 % open parallel pool, if parallel input is true
     if parallel == true
@@ -114,9 +144,9 @@ if make_times
         else
             poolobj = gcp('nocreate'); % If no pool, do not create new one.
             if isempty(poolobj)
-                parallel = false;
-            else
                 parpool
+            else
+                parallel = false;
             end
         end
     end
@@ -124,12 +154,20 @@ if make_times
 
     par_file = set_parameters();
     initial_date = now;
-    parfor fnum = 1:length(filenames)
-        filename = filenames{fnum};
-        do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum);
-        disp(sprintf('%d of %d ''times'' files finished.',count_new_times(initial_date, filenames),length(filenames)))
+    
+    if run_par_for == true
+        parfor fnum = 1:length(filenames)
+            filename = filenames{fnum};
+            do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum);
+            disp(sprintf('%d of %d ''times'' files finished.',count_new_times(initial_date, filenames),length(filenames)))
+        end
+    else
+        for fnum = 1:length(filenames)
+            filename = filenames{fnum};
+            do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum);
+            disp(sprintf('%d of %d ''times'' files finished.',count_new_times(initial_date, filenames),length(filenames)))
+        end     
     end
-
     if parallel == true
         if exist('matlabpool','file')
             matlabpool('close')
@@ -154,192 +192,210 @@ if make_times
     end
 	fclose(f);
 
-	
-    disp('Computations Done. Creating figures...')
+	tocaux = toc;
+    disp(['Computations Done (' num2str(tocaux,'%2.2f') 's).']) 
 end
 
-numfigs = length(filenames);
-for fnum = 1:numfigs
-    filename = filenames{fnum};
-    par = struct;
-    par.filename = filename;
 
-    par.cont_segment = true;  %maybe true and save the sample in spikes
-
-    data_handler = readInData(par);
-    par = data_handler.update_par(par);
-    if ~data_handler.with_wc_spikes       			%data should have spikes
-        continue
+if make_plots
+    disp('Creating figures...')
+    numfigs = length(filenames);
+    curr_fig = figure('Visible','Off');
+    set(curr_fig, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','units','normalized','outerposition',[0 0 1 1],'RendererMode','manual','Renderer','painters') 
+    if isfield(get(curr_fig),'GraphicsSmoothing')
+        set(curr_fig,'GraphicsSmoothing','off');
     end
-    filename = data_handler.nick_name;
+    
+    for fnum = 1:numfigs
+        clf(curr_fig)
+        filename = filenames{fnum};
+        par = struct;
+        par.filename = filename;
 
-    figure('Visible','Off')
-    set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','units','normalized','outerposition',[0 0 1 1]) 
-    subplot(3,1,1)
-    if par.cont_segment && data_handler.with_psegment
-        box off; hold on
-        %these lines are for plotting continuous data 
-        [xd_sub, sr_sub] = data_handler.get_signal_sample();
-        lx = length(xd_sub);
-        plot((1:lx)/sr_sub,xd_sub)
-        noise_std_detect = median(abs(xd_sub))/0.6745;
-        xlim([0 lx/sr_sub])
-        thr = par.stdmin * noise_std_detect; 
-        thrmax = 15 * noise_std_detect; %thr*par.stdmax/par.stdmin;
+        par.cont_segment = true;  %maybe true and save the sample in spikes
 
-        if strcmp(par.detection,'pos')
-            line([0 length(xd_sub)/sr_sub],[thr thr],'color','r')
-            ylim([-thrmax/2 thrmax])
-        elseif strcmp(par.detection,'neg')
-            line([0 length(xd_sub)/sr_sub],[-thr -thr],'color','r')
-            ylim([-thrmax thrmax/2])
-        else
-            line([0 length(xd_sub)/sr_sub],[thr thr],'color','r')
-            line([0 length(xd_sub)/sr_sub],[-thr -thr],'color','r')
-            ylim([-thrmax thrmax])
+        data_handler = readInData(par);
+        par = data_handler.update_par(par);
+        if ~data_handler.with_wc_spikes       			%data should have spikes
+            continue
         end
-    end
-    title([pwd '/' filename],'Interpreter','none','Fontsize',14)
+        filename = data_handler.nick_name;
 
-    if ~data_handler.with_spc  
-        print2file = par_file.print2file;
-        if isfield(par_input,'print2file')
-            print2file = par_input.print2file;
-        end    
-        if print2file;
-            print(gcf,'-dpng',['fig2print_' filename '.png'],'-r200');
+        
+        
+        
+        subplot(3,1,1)
+        if par.cont_segment && data_handler.with_psegment
+            box off; hold on
+            %these lines are for plotting continuous data 
+            [xd_sub, sr_sub] = data_handler.get_signal_sample();
+            lx = length(xd_sub);
+            plot((1:lx)/sr_sub,xd_sub)
+            noise_std_detect = median(abs(xd_sub))/0.6745;
+            xlim([0 lx/sr_sub])
+            thr = par.stdmin * noise_std_detect; 
+            plotmax = 15 * noise_std_detect; %thr*par.stdmax/par.stdmin;
+
+            if strcmp(par.detection,'pos')
+                line([0 length(xd_sub)/sr_sub],[thr thr],'color','r')
+                ylim([-plotmax/2 plotmax])
+            elseif strcmp(par.detection,'neg')
+                line([0 length(xd_sub)/sr_sub],[-thr -thr],'color','r')
+                ylim([-plotmax plotmax/2])
+            else
+                line([0 length(xd_sub)/sr_sub],[thr thr],'color','r')
+                line([0 length(xd_sub)/sr_sub],[-thr -thr],'color','r')
+                ylim([-plotmax plotmax])
+            end
+        end
+        title([pwd '/' filename],'Interpreter','none','Fontsize',14)
+
+        if ~data_handler.with_spc  
+            print2file = par_file.print2file;
+            if isfield(par_input,'print2file')
+                print2file = par_input.print2file;
+            end    
+            if print2file;
+                print(curr_fig,'-dpng',['fig2print_' filename '.png'],resolution);
+            else
+                print
+            end
+            clear print2file
+            fprintf('%d figs Done. ',fnum);
+            continue
+        end
+
+        % LOAD SPIKES        
+        [clu, tree, spikes, index, inspk, ipermut, classes, forced] = data_handler.load_results();
+        nspk = size(spikes,1);
+        [temp] = find_temp(tree,par);
+
+
+
+        %PLOTS
+        clus_pop = [];
+        ylimit = [];
+        subplot(3,5,11)
+        temperature = par.mintemp+temp*par.tempstep;
+        color = [[0.0 0.0 1.0];[1.0 0.0 0.0];[0.0 0.5 0.0];[0.620690 0.0 0.0];[0.413793 0.0 0.758621];[0.965517 0.517241 0.034483];
+        [0.448276 0.379310 0.241379];[1.0 0.103448 0.724138];[0.545 0.545 0.545];[0.586207 0.827586 0.310345];
+        [0.965517 0.620690 0.862069];[0.620690 0.758621 1.]]; 
+        maxc = size(color,1);
+
+        hold on 
+        num_temp = floor((par.maxtemp -par.mintemp)/par.tempstep);     % total number of temperatures
+        switch par.temp_plot
+                case 'lin'
+                    plot([par.mintemp par.maxtemp-par.tempstep], ...
+                    [par.min_clus par.min_clus],'k:',...
+                    par.mintemp+(1:num_temp)*par.tempstep, ...
+                    tree(1:num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
+
+                    for i=1:max(classes)
+                        tree_clus = tree(temp,4+i);
+                        tree_temp = tree(temp+1,2);
+                        plot(tree_temp,tree_clus,'.','color',color(mod(i-1,maxc)+1,:),'MarkerSize',20);
+                    end
+                case 'log'
+                    set(gca,'yscale','log');
+                    semilogy([par.mintemp par.maxtemp-par.tempstep], ...
+                    [par.min_clus par.min_clus],'k:',...
+                    par.mintemp+(1:num_temp)*par.tempstep, ...
+                    tree(1:num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
+
+                    for i=1:max(classes)
+                        tree_clus = tree(temp,4+i);
+                        tree_temp = tree(temp+1,2);
+                        semilogy(tree_temp,tree_clus,'.','color',color(mod(i-1,maxc)+1,:),'MarkerSize',20);
+                    end
+        end
+        xlim([par.mintemp, par.maxtemp])
+        subplot(3,5,6)
+        hold on
+
+
+        class0 = find(classes==0);
+            max_spikes=min(length(class0),par.max_spikes_plot);
+            plot(spikes(class0(1:max_spikes),:)','k'); 
+            xlim([1 size(spikes,2)]);
+        subplot(3,5,10); 
+            hold on
+            plot(spikes(class0(1:max_spikes),:)','k');  
+            plot(mean(spikes(class0,:),1),'c','linewidth',2)
+            xlim([1 size(spikes,2)]); 
+            title(['Cluster 0: # ' num2str(length(class0))],'Fontweight','bold')
+        subplot(3,5,15)
+            xa=diff(index(class0));
+            [n,c]=hist(xa,0:1:100);
+            bar(c(1:end-1),n(1:end-1))
+            xlim([0 100])
+            xlabel('ISI (ms)');
+            title([num2str(nnz(xa<3)) ' in < 3ms']);
+
+
+
+        for i = 1:min(max(classes),3)
+            class = find(classes==i);
+            subplot(3,5,6); 
+                max_spikes=min(length(class),par.max_spikes_plot);
+                plot(spikes(class(1:max_spikes),:)','color',color(mod(i-1,maxc)+1,:)); 
+                xlim([1 size(spikes,2)]);
+            subplot(3,5,6+i); 
+                hold on
+                plot(spikes(class(1:max_spikes),:)','color',color(mod(i-1,maxc)+1,:)); 
+                plot(mean(spikes(class,:),1),'k','linewidth',2)
+                xlim([1 size(spikes,2)]); 
+                title(['Cluster ' num2str(i) ': # ' num2str(length(class)) ' (' num2str(nnz(classes(:)==i & ~forced(:))) ')'],'Fontweight','bold')
+                ylimit = [ylimit;ylim];
+            subplot(3,5,11+i)
+            xa=diff(index(class));
+            [n,c]=hist(xa,0:1:100);
+            bar(c(1:end-1),n(1:end-1))
+            xlim([0 100])
+            xlabel('ISI (ms)');
+            title([num2str(nnz(xa<3)) ' in < 3ms']);
+
+        end
+
+        % Rescale spike's axis 
+        if ~isempty(ylimit)
+            ymin = min(ylimit(:,1));
+            ymax = max(ylimit(:,2));
+            for i = 1:min(3,max(classes))
+               subplot(3,5,6+i); ylim([ymin ymax]);
+            end
+        end
+
+        features_name = par.features;
+
+        numclus = max(classes);
+        outfileclus='cluster_results.txt';
+        fout=fopen(outfileclus,'at+');
+        if isfield(par,'stdmin')
+            stdmin = par.stdmin;
+        else
+            stdmin = NaN;
+        end
+        fprintf(fout,'%s\t %s\t %g\t %d\t %g\t', char(filename), features_name, temperature, numclus, stdmin);
+        for ii=0:numclus
+            fprintf(fout,'%d\t',nnz(classes==ii));
+        end
+        fclose(fout);
+
+
+
+        if par.print2file;
+            print(curr_fig,'-dpng',['fig2print_' filename '.png'],resolution);
         else
             print
-        end
-        clear print2file
-        fprintf('%d figs Done. ',fnum);
-        continue
+        end 
+        fprintf('%d ',fnum);
     end
-        
-    % LOAD SPIKES        
-    [clu, tree, spikes, index, inspk, ipermut, classes, forced] = data_handler.load_results();
-    nspk = size(spikes,1);
-    [temp] = find_temp(tree,par);
- 
-    
-
-    %PLOTS
-    clus_pop = [];
-    ylimit = [];
-    subplot(3,5,11)
-    temperature = par.mintemp+temp*par.tempstep;
-    color =['b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'k' 'b' 'r' 'g' 'c' 'm' 'y' 'b' 'r' 'g' 'c' 'm' 'y' 'b'];
-
-    hold on 
-    num_temp = floor((par.maxtemp -par.mintemp)/par.tempstep);     % total number of temperatures
-    switch par.temp_plot
-            case 'lin'
-                plot([par.mintemp par.maxtemp-par.tempstep], ...
-                [par.min_clus par.min_clus],'k:',...
-                par.mintemp+(1:num_temp)*par.tempstep, ...
-                tree(1:num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
-            
-                for i=1:max(classes)
-                    tree_clus = tree(temp,4+i);
-                    tree_temp = tree(temp+1,2);
-                    plot(tree_temp,tree_clus,'.','color',color(i),'MarkerSize',20);
-                end
-            case 'log'
-                set(gca,'yscale','log');
-                semilogy([par.mintemp par.maxtemp-par.tempstep], ...
-                [par.min_clus par.min_clus],'k:',...
-                par.mintemp+(1:num_temp)*par.tempstep, ...
-                tree(1:num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
-                
-                for i=1:max(classes)
-                    tree_clus = tree(temp,4+i);
-                    tree_temp = tree(temp+1,2);
-                    semilogy(tree_temp,tree_clus,'.','color',color(i),'MarkerSize',20);
-                end
-    end
-    xlim([par.mintemp, par.maxtemp])
-    subplot(3,5,6)
-    hold on
-    
-
-    class0 = find(classes==0);
-        max_spikes=min(length(class0),par.max_spikes_plot);
-        plot(spikes(class0(1:max_spikes),:)','k'); 
-        xlim([1 size(spikes,2)]);
-    subplot(3,5,10); 
-        hold on
-        plot(spikes(class0(1:max_spikes),:)','k');  
-        plot(mean(spikes(class0,:),1),'c','linewidth',2)
-        xlim([1 size(spikes,2)]); 
-        title(['Cluster 0: # ' num2str(length(class0))],'Fontweight','bold')
-    subplot(3,5,15)
-        xa=diff(index(class0));
-        [n,c]=hist(xa,0:1:100);
-        bar(c(1:end-1),n(1:end-1))
-        xlim([0 100])
-        xlabel('ISI (ms)');
-        title([num2str(nnz(xa<3)) ' in < 3ms']);
-
-    
-        
-    for i = 1:min(max(classes),3)
-        class = find(classes==i);
-        subplot(3,5,6); 
-            max_spikes=min(length(class),par.max_spikes_plot);
-            plot(spikes(class(1:max_spikes),:)','color',color(i)); 
-            xlim([1 size(spikes,2)]);
-        subplot(3,5,6+i); 
-            hold on
-            plot(spikes(class(1:max_spikes),:)','color',color(i)); 
-            plot(mean(spikes(class,:),1),'k','linewidth',2)
-            xlim([1 size(spikes,2)]); 
-            title(['Cluster ' num2str(i) ': # ' num2str(length(class)) ' (' num2str(nnz(classes(:)==i & ~forced(:))) ')'],'Fontweight','bold')
-            ylimit = [ylimit;ylim];
-        subplot(3,5,11+i)
-        xa=diff(index(class));
-        [n,c]=hist(xa,0:1:100);
-        bar(c(1:end-1),n(1:end-1))
-        xlim([0 100])
-        xlabel('ISI (ms)');
-        title([num2str(nnz(xa<3)) ' in < 3ms']);
-        
-    end
-
-    % Rescale spike's axis 
-    if ~isempty(ylimit)
-        ymin = min(ylimit(:,1));
-        ymax = max(ylimit(:,2));
-        for i = 1:min(3,max(classes))
-           subplot(3,5,6+i); ylim([ymin ymax]);
-        end
-    end
-
-    features_name = par.features;
-
-    numclus = max(classes);
-    outfileclus='cluster_results.txt';
-    fout=fopen(outfileclus,'at+');
-    if isfield(par,'stdmin')
-        stdmin = par.stdmin;
-    else
-        stdmin = NaN;
-    end
-    fprintf(fout,'%s\t %s\t %g\t %d\t %g\t', char(filename), features_name, temperature, numclus, stdmin);
-    for ii=0:numclus
-        fprintf(fout,'%d\t',nnz(classes==ii));
-    end
-    fclose(fout);
-
-    
-    
-    if par.print2file;
-        print(gcf,'-dpng',['fig2print_' filename '.png'],'-r200');
-    else
-        print
-    end 
-    fprintf('%d ',fnum);
+    close(curr_fig)
+    disp(' ')
 end
-disp(' ')
+
+toc
 
 end
 
@@ -415,10 +471,10 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     save(par.fname_in,'inspk_aux','-ascii');
     try
         [clu, tree] = run_cluster(par,true);
-	if exist([par.fnamespc '.dg_01.lab'],'file')
-		movefile([par.fnamespc '.dg_01.lab'], [par.fname '.dg_01.lab']);
-		movefile([par.fnamespc '.dg_01'], [par.fname '.dg_01']);
-	end
+		if exist([par.fnamespc '.dg_01.lab'],'file')
+			movefile([par.fnamespc '.dg_01.lab'], [par.fname '.dg_01.lab']);
+			movefile([par.fnamespc '.dg_01'], [par.fname '.dg_01']);
+		end
     catch
         warning('MyComponent:ERROR_SPC', 'Error in SPC');
         return
@@ -427,7 +483,7 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     
 
     if par.permut == 'y'
-        clu_aux = zeros(size(clu,1),2 + size(spikes,1)) -1;%when update classes from clu, not selected go to cluster 1001
+        clu_aux = zeros(size(clu,1),2 + size(spikes,1)) -1;  %when update classes from clu, not selected elements go to cluster 0
         clu_aux(:,ipermut+2) = clu(:,(1:length(ipermut))+2);
         clu_aux(:,1:2) = clu(:,1:2);
         clu = clu_aux;

@@ -1,19 +1,43 @@
 function parse_data_NSx(filename,max_memo_GB)
-% This code requires https://portal.g-node.org/neo/blackrock/matlab/openNSx.m in the path.
+% Code only valid for recordings without pauses or data loss (Nsx.Data field can't be a cell)
+% This code requires the file openNSx.m, from the NPMK, in the path. You can download the download NPMK from https://github.com/BlackrockMicrosystems/NPMK/releases
 % max_memo_GB is an idea of the number of GB allocated for the data to be
 % stored in RAM, so it is used to compute the number of segments in which
 % the data should be split for processing
 
-aux = version;
-if ~exist('memory','builtin')
+with_memory=true;
+try
+	memory;
+catch
+	with_memory=false;
+end
+if with_memory
 	[uaux,aux] = memory;
-	max_memo = aux.PhysicalMemory.Available;
+	memo_avaible = floor(aux.PhysicalMemory.Available*0.9);
+	if exist('max_memo_GB','var') && ~isempty(max_memo_GB)
+		if max_memo_GB > memo_avaible
+			error('max_memo_GB > 90% of Physical Memory Available');
+		else
+			max_memo = max_memo_GB*(1024)^3;
+		end
+	else
+		max_memo = memo_avaible*(1024)^3;
+	end
+	
 else
 	max_memo = max_memo_GB*(1024)^3;
 end
 
 tcum=0;
-NSx = openNSx(filename, 'report');
+
+if length(filename)<3 || (~strcmpi(filename(3),'\') && ...
+                 ~strcmpi(filename(1),'/') && ...
+                 ~strcmpi(filename(2),'/') && ...
+                 ~strcmpi(filename(1:2), '\\'))
+
+	filename= [pwd filesep filename];
+end
+NSx = openNSx(filename, 'report','noread');
 nchan = NSx.MetaTags.ChannelCount;   % number of channels
 sr = NSx.MetaTags.SamplingFreq;   % sampling rate
 lts = NSx.MetaTags.DataPoints;   % total data points 
@@ -36,7 +60,7 @@ clear TimeStamps;
 fprintf('TimeStamps generated. Data will be processed in %d segments of %d samples each.\n',num_segments,min(samples_per_channel,lts))
 
 for j=1:num_segments
-    ini = (j-1)*samples_per_channel;
+    ini = (j-1)*samples_per_channel+1;
     fin = min(j*samples_per_channel,lts);
     tcum = tcum + toc;  % this is because openNSx has a tic at the beginning
     NSx = openNSx('read',filename,['t:' num2str(ini) ':' num2str(fin)]);

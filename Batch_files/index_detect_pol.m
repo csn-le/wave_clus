@@ -16,16 +16,16 @@ fmax_sort =  par.sort_fmax;
 awin =  par.alignment_window;  
 
 % HIGH-PASS FILTER OF THE DATA
-xf=zeros(length(x),1);
+xf = zeros(length(x),1);
 if exist('ellip')                         %Checks for the signal processing toolbox
-    [b_detect,a_detect] = ellip(2,0.1,40,[fmin_detect fmax_detect]*2/sr);
-    [b,a] = ellip(2,0.1,40,[fmin_sort fmax_sort]*2/sr);
+    [b_detect,a_detect] = ellip(par.detect_order,0.1,40,[fmin_detect fmax_detect]*2/sr);
+    [b,a] = ellip(par.sort_order,0.1,40,[fmin_sort fmax_sort]*2/sr);
     if exist('FiltFiltM','file')
         xf_detect = FiltFiltM(b_detect,a_detect,x);
         xf = FiltFiltM(b,a,x);
     else
-        xf_detect=filtfilt(b_detect,a_detect,x);
-        xf=filtfilt(b,a,x);
+        xf_detect = filtfilt(b_detect,a_detect,x);
+        xf = filtfilt(b,a,x);
     end
     
 else

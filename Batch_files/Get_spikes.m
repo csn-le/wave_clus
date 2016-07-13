@@ -90,6 +90,8 @@ else
     throw(ME)
 end
 
+run_parfor = parallel;
+
 % open parallel pool, if parallel input is true
 if parallel
     if exist('matlabpool','file')   % old versions of Matlab have the matlabpool function
@@ -101,21 +103,29 @@ if parallel
     else
         poolobj = gcp('nocreate');
         if isempty(poolobj) % If already a pool, do not create new one.
-            parallel = false;
-        else
             parpool
+        else
+            parallel = false;
         end
     end
 end
 
 
 init_date = now;
-parfor fnum = 1:length(filenames)
-    filename = filenames{fnum};
-    get_spikes_single(filename, par_input);
-    disp(sprintf('%d of %d ''spikes'' files done.',count_new_sp_files(init_date, filenames),length(filenames)))
 
-    
+
+if run_parfor == true
+    parfor fnum = 1:length(filenames)
+        filename = filenames{fnum};
+        get_spikes_single(filename, par_input);
+        disp(sprintf('%d of %d ''spikes'' files done.',count_new_sp_files(init_date, filenames),length(filenames)))
+    end
+else
+    for fnum = 1:length(filenames)
+        filename = filenames{fnum};
+        get_spikes_single(filename, par_input);
+        disp(sprintf('%d of %d ''spikes'' files done.',count_new_sp_files(init_date, filenames),length(filenames)))
+    end
 end
 
 % if a pool was open, close it
@@ -146,10 +156,15 @@ function get_spikes_single(filename, par_input)
     
     par = data_handler.par;
     par = update_parameters(par,par_input,'detect');
+    data_handler.par = par;
+    
     if data_handler.with_spikes            %data have some type of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
-            [spikes] = spike_alignment(spikes,par);
+            spikes = spike_alignment(spikes,par);
+            % spikes = int_spikes(spikes,par);
+        else
+            disp([filename ': Using detected spikes'])
         end
     else    
         index = [];
