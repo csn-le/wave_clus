@@ -29,9 +29,9 @@ if strcmp(type,'detect') || strcmp(type,'relevant')
         if ismember(detection_params(i),load_par_names)
             field = char(detection_params(i));
             new_par.(field) = par.(field );
-        else
-            field = char(detection_params(i));
-            new_par.(field) = NaN;
+   %     else
+   %         field = char(detection_params(i));
+    %        new_par.(field) = NaN;
         end
     end
 end
@@ -50,9 +50,9 @@ if strcmp(type,'clus') || strcmp(type,'relevant')
         if ismember(clus_params(i),load_par_names)
             field = char(clus_params(i));
             new_par.(field ) = par.(field );
-        else
-            field = char(detection_params(i));
-            new_par.(field) = NaN;      
+       % else
+       %     field = char(detection_params(i));
+       %     new_par.(field) = NaN;      
         end
     end
 end
