@@ -116,7 +116,7 @@ if ~isfield(handles,'new_manual')
 		clusn = [clusn nclusters];
 	end
 	% Get fixed clusters from aux figures
-	for i=4:par.max_clus
+	for i=4:min(par.max_clus,33)
 		eval(['fixx = par.fix' num2str(i) ';']);
 		if fixx == 1 && ~isempty(USER_DATA{22+i-3})
 			nclusters = nclusters +1;

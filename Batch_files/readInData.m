@@ -61,7 +61,7 @@ classdef readInData < handle
                     if  obj.with_results
                         if ismember('par',{finfo.name})
                             load(['times_' obj.nick_name '.mat'],'par');
-                            obj.par = update_parameters(obj.par, par, 'relevant');
+                            obj.par = update_parameters(obj.par, par, 'relevant',true);
                             with_par = true;
                         end
                         if ismember('gui_status',{finfo.name})  
@@ -83,7 +83,7 @@ classdef readInData < handle
                     end
                     if ismember('par',{finfo.name}) && ~ with_par 
                         load([obj.nick_name '_spikes.mat'],'par'); 
-                        obj.par = update_parameters(obj.par,par,'detect');
+                        obj.par = update_parameters(obj.par,par,'detect',true);
                         with_par = true;
                     end
                     if ismember('psegment',{finfo.name})
@@ -201,7 +201,7 @@ classdef readInData < handle
         function [original_classes, current_temp] = get_gui_status(obj)
             load(['times_' obj.nick_name '.mat'],'gui_status','cluster_class');
             current_temp = gui_status.current_temp;
-            if current_temp == -1 && obj.with_spc
+            if isempty(current_temp) || (current_temp == -1 && obj.with_spc)
                 current_temp=1;
             end
             original_classes = gui_status.original_classes;
@@ -230,7 +230,7 @@ classdef readInData < handle
                 xf_detect = spike_detection_filter(x(1:lplot), obj.par);
                 
                 max_samples = obj.par.cont_plot_samples;
-                sub = floor(lplot/max_samples);
+                sub = max(1,floor(lplot/max_samples));
                 obj.sample_signal.xd_sub = xf_detect(1:sub:end) ;
                 obj.sample_signal.sr_sub = obj.par.sr/sub ;
             end

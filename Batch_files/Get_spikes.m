@@ -183,7 +183,7 @@ function get_spikes_single(filename, par_input)
     current_par = par;
     par = struct;
     par = update_parameters(par, current_par, 'detect');
-    
+    par.detection_date =  datestr(now);
     
     %<----  Add here auxiliar parameters
 

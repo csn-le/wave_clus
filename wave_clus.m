@@ -196,6 +196,7 @@ else
             index = [index data_handler.index2ts(new_index)]; %new_index to ms
             spikes = [spikes; new_spikes];
         end
+        handles.par.detection_date =  datestr(now);
     end
     
     if size(spikes,1) < 15
@@ -474,6 +475,7 @@ outfile=['times_' used_par.nick_name];
 
 par = struct;
 par = update_parameters(par,used_par,'relevant');
+par.sorting_date = datestr(now);
 
 gui_status = struct();
 gui_status.current_temp =  gui_classes_data(1,1);
@@ -485,7 +487,7 @@ for i = 1:length(classes_names)
 end
 forced = USER_DATA{13};
 
-var_list = 'cluster_class'',''par'',''spikes'',''gui_status'', ''forced'',''index'', ''Temp''';
+var_list = 'cluster_class'',''par'',''spikes'',''gui_status'', ''forced'', ''Temp''';
 
 if ~isempty(USER_DATA{7})
     inspk = USER_DATA{7};
@@ -1011,7 +1013,7 @@ if get(handles.fix3_button,'value') ==1
     classes(fix_class )= -1;
 end
 % Get fixed clusters from aux figures
-for i=4:par.max_clus
+for i=4:min(par.max_clus,33)
     eval(['fixx = par.fix' num2str(i) ';']);
     if fixx == 1
         fix_class = USER_DATA{22+i-3}';
@@ -1074,7 +1076,7 @@ function unforce_button_Callback(hObject, eventdata, handles)
         new_forced(fix_class) =forced(fix_class);
     end
     % Get fixed clusters from aux figures
-    for i=4:par.max_clus
+    for i=4:min(par.max_clus,33)
         eval(['fixx = par.fix' num2str(i) ';']);
         if fixx == 1
             fix_class = USER_DATA{22+i-3}';

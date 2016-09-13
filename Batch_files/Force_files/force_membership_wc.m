@@ -44,10 +44,11 @@ switch par.template_type
             class_out(i) = ML_gaussian(f_out(i,:),mu,inv_sigma);
         end
     case 'mahal'
-        max_class =  max(class_in);
-        mdistance = zeros(max_class, nspk);
-        maxdist   = zeros(1, max_class);
-        for i = 1:max_class
+        classes = unique(class_in);
+        mdistance = zeros(length(classes), nspk);
+        maxdist   = zeros(1, length(classes));
+        for ci = 1:length(classes)
+           i = classes(ci);
            mdistance(i,:) = mahal(f_out, f_in(class_in ==i, :));
            maxdist(i) = sqrt(mean(mahal(f_in(class_in ==i, :), f_in(class_in ==i, :))));
         end
@@ -55,7 +56,7 @@ switch par.template_type
         for i = 1:nspk
              [d winner] = min(mdistance(:,i));
              if sqrt(d) < sdnum*maxdist(winner)
-                 class_out(i) = winner;
+                 class_out(i) = classes(winner);
              end
         end
         

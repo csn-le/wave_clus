@@ -131,7 +131,7 @@ else
 end
 
 tic
-
+par_file = set_parameters();
 if make_times
 % open parallel pool, if parallel input is true
     if parallel == true
@@ -152,7 +152,7 @@ if make_times
     end
 
 
-    par_file = set_parameters();
+    
     initial_date = now;
     
     if run_par_for == true
@@ -528,10 +528,11 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     par = struct;
     par = update_parameters(par, current_par, 'relevant');
     par.min_clus_rel = current_par.min_clus_rel;
+    par.sorting_date = datestr(now);
     cluster_class = zeros(nspk,2);
     cluster_class(:,2)= index';
     cluster_class(:,1)= classes';
-    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'index', 'par','inspk','forced','Temp');
+    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'par','inspk','forced','Temp');
     if exist('ipermut','var')
         save(['times_' data_handler.nick_name],'ipermut','-append');
     end

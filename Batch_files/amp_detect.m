@@ -48,7 +48,7 @@ noise_std_sorted = median(abs(xf))/0.6745;
 thr = stdmin * noise_std_detect;        %thr for detection is based on detect settings.
 thrmax = stdmax * noise_std_sorted;     %thrmax for artifact removal is based on sorted settings.
 
-
+index = [];
 
 % LOCATE SPIKE TIMES
 switch detect
