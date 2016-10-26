@@ -62,7 +62,7 @@ if isnumeric(input) || any(strcmp(input,'all'))  % cases for numeric or 'all' in
         ext = lower(ext(2:end));
         if any(strcmp(ext,se)) 
             if strcmp(ext,'mat')
-                sprintf('Skipped file ''%s''. The ''.mat'' files should be added by name.\n',fname);
+                warning('Skipped file ''%s''. The ''.mat'' files should be added by name.\n',fname);
                 continue
             end
             if strcmp(input,'all')
