@@ -379,6 +379,12 @@ end
 if ~isempty(USER_DATA{5})
     mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
 end
+
+% mark detected and currently assigned spikes in the amplitude trace plot
+data_handler = readInData(handles.par);
+[xd_sub, sr_sub] = data_handler.get_signal_sample();
+Plot_continuous_data(xd_sub, sr_sub, handles, USER_DATA{3}, USER_DATA{6}, colors);
+
 set(handles.file_name,'string', par.file_name_to_show);
 axes(handles.projections)
 drawnow
