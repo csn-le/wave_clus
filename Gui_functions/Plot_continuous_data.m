@@ -44,12 +44,29 @@ ylim(handles.cont_data,yl);
 
 if nargin==6
     % mark positions of detected spikes
+
     hold on
-    % y-position where to plot spike markers
-    ylm=ylim(handles.cont_data);
-    yTop=ylm(2);
-    yBottom=yTop-diff(ylm)/5;
-    %
+
+    % update ylim to leave more space for markers and 
+    % compute y-position where to plot spike markers
+    ylo=yl;
+    switch detect
+        case 'pos'
+            yl=[yl(1) yl(2)*1.2];
+            y1=[yl(2) ylo(2)];
+            y2=[];
+        case 'neg'
+            yl=[yl(1)*1.2 yl(2)];
+            y1=[yl(1) ylo(1)];
+            y2=[];
+        case 'both'
+            yl=yl*1.2;
+            y1=[yl(2) ylo(2)];
+            y2=[yl(1) ylo(1)];
+    end
+    ylim(handles.cont_data,yl);
+
+    % plot
     for i=0:max(spikesClass)
         idx=find(spikesClass==i);
         n=length(idx);
@@ -67,8 +84,12 @@ if nargin==6
             xx=spikesIdx(idx);
             % force them to form a row vector
             if size(xx,1)>1 xx=xx'; end
-            plot(handles.cont_data, repmat(xx,2,1)/1000,repmat([yBottom yTop]',1,n),...
+            plot(handles.cont_data, repmat(xx,2,1)/1000,repmat(y1',1,n),...
                 'color',clr,'LineWidth',3);
+            if ~isempty(y2)
+                plot(handles.cont_data, repmat(xx,2,1)/1000,repmat(y2',1,n),...
+                    'color',clr,'LineWidth',3);
+            end
         end
     end
     hold off
