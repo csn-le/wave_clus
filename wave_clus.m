@@ -44,6 +44,8 @@ function varargout = wave_clus(varargin)
 % USER_DATA{16} = rejected_bk,  backup boolean vector for rejected spikes. Vector only used in develop mode.
 % USER_DATA{17} - USER_DATA{19}, for future changes
 % USER_DATA{20} - USER_DATA{42}, fix clusters
+% USER_DATA{53} = signal sample being plotted by Plot_continuous_data
+% USER_DATA{54} = sampling frequency of the signal sample being plotted by Plot_continuous_data
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -240,6 +242,10 @@ handles.par.file_name_to_show = [pathname filename];
 
 if (data_handler.with_raw || data_handler.with_psegment) && handles.par.cont_segment         %raw exists
     [xd_sub, sr_sub] = data_handler.get_signal_sample();
+    % cache the signal sample for later calls to Plot_continuous_data
+    USER_DATA{53}=xd_sub;
+    USER_DATA{54}=sr_sub;
+    set(handles.wave_clus_figure,'userdata',USER_DATA);
     Plot_continuous_data(xd_sub, sr_sub, handles); drawnow
     clear xd_sub
 end

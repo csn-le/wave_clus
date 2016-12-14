@@ -381,9 +381,9 @@ if ~isempty(USER_DATA{5})
 end
 
 % mark detected and currently assigned spikes in the amplitude trace plot
-data_handler = readInData(handles.par);
-[xd_sub, sr_sub] = data_handler.get_signal_sample();
-Plot_continuous_data(xd_sub, sr_sub, handles, USER_DATA{3}, USER_DATA{6}, colors);
+if ~isempty(USER_DATA{53}) % if signal sample has been cached
+    Plot_continuous_data(USER_DATA{53}, USER_DATA{54}, handles, USER_DATA{3}, USER_DATA{6}, colors);
+end
 
 set(handles.file_name,'string', par.file_name_to_show);
 axes(handles.projections)
