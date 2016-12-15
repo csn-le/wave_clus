@@ -46,6 +46,7 @@ function varargout = wave_clus(varargin)
 % USER_DATA{20} - USER_DATA{42}, fix clusters
 % USER_DATA{53} = signal sample being plotted by Plot_continuous_data
 % USER_DATA{54} = sampling frequency of the signal sample being plotted by Plot_continuous_data
+% USER_DATA{55} = spike markers plotted by Plot_continuous_data and colored by colorSpikeMarkers
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -245,6 +246,7 @@ if (data_handler.with_raw || data_handler.with_psegment) && handles.par.cont_seg
     % cache the signal sample for later calls to Plot_continuous_data
     USER_DATA{53}=xd_sub;
     USER_DATA{54}=sr_sub;
+    USER_DATA{55}=[]; % initially, there are no spike markers
     set(handles.wave_clus_figure,'userdata',USER_DATA);
     Plot_continuous_data(xd_sub, sr_sub, handles); drawnow
     clear xd_sub

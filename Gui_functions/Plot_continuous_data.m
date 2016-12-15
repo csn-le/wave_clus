@@ -1,10 +1,13 @@
-function Plot_continuous_data(xf_detect, sr_sub,handles, spikesIdx, spikesClass, colors)
+function spikeMarkers=Plot_continuous_data(xf_detect, sr_sub,handles, spikesIdx, spikesClass, colors)
 % Function that plot the segment of continuous data. 
 % It will try to plot a minute, maximun.
 % Optional arguments:
 %   - spikesIdx - indices of samples of detected spikes
 %   - spikesClass - classes of detected spikes
 %   - colors - cluster colors
+%
+% If supplied with 5 arguments, spikeMarkers (a 1x2 cell array of arrays of handles to
+% plotted spike marker lines) get returned.
 
 detect = handles.par.detection;
 stdmin = handles.par.stdmin;
@@ -67,6 +70,12 @@ if nargin==6
     ylim(handles.cont_data,yl);
 
     % plot
+    spikeMarkers=repmat(0,1,length(spikesClass));
+    if ~isempty(y2)
+        spikeMarkers2=repmat(0,1,length(spikesClass));
+    else
+        spikeMarkers2=[];
+    end
     for i=0:max(spikesClass)
         idx=find(spikesClass==i);
         n=length(idx);
@@ -84,14 +93,17 @@ if nargin==6
             xx=spikesIdx(idx);
             % force them to form a row vector
             if size(xx,1)>1 xx=xx'; end
-            plot(handles.cont_data, repmat(xx,2,1)/1000,repmat(y1',1,n),...
+            p=plot(handles.cont_data, repmat(xx,2,1)/1000,repmat(y1',1,n),...
                 'color',clr,'LineWidth',3);
+            spikeMarkers(idx)=p;
             if ~isempty(y2)
-                plot(handles.cont_data, repmat(xx,2,1)/1000,repmat(y2',1,n),...
+                p=plot(handles.cont_data, repmat(xx,2,1)/1000,repmat(y2',1,n),...
                     'color',clr,'LineWidth',3);
+                spikeMarkers2(idx)=p;
             end
         end
     end
+    spikeMarkers={spikeMarkers,spikeMarkers2};
     hold off
 end
 
