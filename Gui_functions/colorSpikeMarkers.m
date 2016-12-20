@@ -14,7 +14,7 @@ function colorSpikeMarkers(spikeMarkers, spikesClass, colors)
                 clr=colors(1+mod(i-1,length(colors)),:);
                 % make the color a little bit lighter to ease
                 % its visual perception on the white background
-                clr=clr+(1-clr).*.25;
+                clr=clr+(1-clr).*.35;
             else
                 % cluster 0 plotted in black
                 clr=[0 0 0];
