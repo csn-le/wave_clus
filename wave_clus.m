@@ -147,7 +147,7 @@ set(handles.isi0_nbins,'string',handles.par.nbins);
 set(handles.isi0_bin_step,'string',handles.par.bin_step);
 
 % Sets to zero fix buttons from aux figures
-for i=4:handles.par.max_clus
+for i=4:min(handles.par.max_clus,33)
     eval(['handles.par.fix' num2str(i) '=0;'])
 end
 
@@ -593,7 +593,7 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
             classes(fix_class )= -1;
         end
         % Get fixed clusters from aux figures
-        for i=4:par.max_clus
+        for i=4:min(par.max_clus,33)
             eval(['fixx = par.fix' num2str(i) ';']);
             if fixx == 1
                 fix_class = USER_DATA{22+i-3}';
@@ -658,7 +658,7 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
         set(handles.fix1_button,'value',0);
         set(handles.fix2_button,'value',0);
         set(handles.fix3_button,'value',0);
-        for i=4:par.max_clus
+        for i=4:min(par.max_clus,33)
             eval(['par.fix' num2str(i) '=0;']);
         end
         classes(forced(:) & (~new_forced(:)) & (~rejected(:))) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0

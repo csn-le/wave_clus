@@ -64,22 +64,36 @@ switch system_type
         run_maci = sprintf('./cluster_maci.exe %s.run',fname);
 	    [status,result] = unix(run_maci);
     case {'GLNX86'}      
-        %if exist([pwd '/cluster_linux.exe'],'file') == 0
-        %    directory = which('cluster_linux.exe');
-        %    copyfile(directory,pwd);
-        %end
-        %run_linux = sprintf('./cluster_linux.exe %s.run',fname);
+        
         run_linux = sprintf('''%s'' %s.run',which('cluster_linux.exe'),fname);
         fileattrib(which('cluster_linux.exe'),'+x')
+        
+        [stat,mess]=fileattrib(which('cluster_linux.exe'));
+        
+        if mess.UserExecute==0
+            if exist([pwd '/cluster_linux.exe'],'file') == 0
+                directory = which('cluster_linux.exe');
+                copyfile(directory,pwd);
+            end
+            run_linux = sprintf('./cluster_linux.exe %s.run',fname);
+        end
 	    [status,result] = unix(run_linux);
+        
     case {'GLNXA64', 'GLNXI64'}
-        %if exist([pwd '/cluster_linux64.exe'],'file') == 0
-         %   directory = which('cluster_linux64.exe');
-          %  copyfile(directory,pwd);
-        %end
+       
         run_linux = sprintf('''%s'' %s.run',which('cluster_linux64.exe'),fname);
         fileattrib(which('cluster_linux64.exe'),'+x')
-	    [status,result] = unix(run_linux);
+        
+        [stat,mess]=fileattrib(which('cluster_linux64.exe'));
+        
+        if mess.UserExecute==0
+            if exist([pwd '/cluster_linux64.exe'],'file') == 0
+                directory = which('cluster_linux64.exe');
+                copyfile(directory,pwd);
+            end
+            run_linux = sprintf('./cluster_linux64.exe %s.run',fname);
+        end
+        [status,result] = unix(run_linux);
     otherwise 
     	ME = MException('MyComponent:NotSupportedArq', '%s type of computer not supported.',com_type);
     	throw(ME)

@@ -61,15 +61,19 @@ if isnumeric(input) || any(strcmp(input,'all'))  % cases for numeric or 'all' in
         [unused, f, ext] = fileparts(fname);
         ext = lower(ext(2:end));
         if any(strcmp(ext,se)) 
-            if strcmp(ext,'mat')
-                warning('Skipped file ''%s''. The ''.mat'' files should be added by name.\n',fname);
-                continue
-            end
             if strcmp(input,'all')
+                if strcmp(ext,'mat')
+                    warning('Skipped file ''%s''. The ''.mat'' files should be added by name.\n',fname);
+                    continue
+                end
                 filenames = [filenames {fname}];
             else
                 aux = regexp(f, '\d+', 'match');
-                if ismember(str2num(aux{1}),input)
+                if ~isempty(aux) && ismember(str2num(aux{1}),input)
+                    if strcmp(ext,'mat')
+                        warning('Skipped file ''%s''. The ''.mat'' files should be added by name.\n',fname);
+                        continue
+                    end
                     filenames = [filenames {fname}];   
                 end
             end
