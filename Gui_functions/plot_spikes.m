@@ -383,7 +383,7 @@ end
 % mark detected and currently assigned spikes in the amplitude trace plot
 if length(USER_DATA)>=55 && ~isempty(USER_DATA{55})
     % if spike markers have already been plotted, just color them
-    colorSpikeMarkers(USER_DATA{55}, USER_DATA{6}, colors);
+    color_spike_markers(USER_DATA{55}, USER_DATA{6}, colors);
 elseif length(USER_DATA)>=53 && ~isempty(USER_DATA{53}) % if signal sample has been cached
     % plot spike markers and cache them
     spikeMarkers=Plot_continuous_data(USER_DATA{53}, USER_DATA{54}, handles, USER_DATA{3}, USER_DATA{6}, colors);

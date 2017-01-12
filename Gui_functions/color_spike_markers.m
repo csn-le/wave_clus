@@ -1,4 +1,4 @@
-function colorSpikeMarkers(spikeMarkers, spikesClass, colors)
+function color_spike_markers(spikeMarkers, spikesClass, colors)
 % Function that colors spike markers (tiny lines in the trace plot
 % created by Plot_continuous_data) according to the current clusters.
 % Arguments:
