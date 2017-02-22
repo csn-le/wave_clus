@@ -67,11 +67,11 @@ for i=1:par.max_clus
 end
 
 if handles.setclus == 0 && handles.undo==0 && handles.merge==0 && handles.force==0  
-    sizemin_clus = par.min_clus;
+    sizemin_clus = minclus;
 elseif handles.setclus == 1
 	sizemin_clus = 1;
 else
-    sizemin_clus = par.min_clus;
+    sizemin_clus = minclus;
 end
 
 clusn = find(cluster_sizes >= sizemin_clus);
@@ -371,8 +371,13 @@ end
 for i =1:figs_num
     if ~isempty(opened_figs{i})  
     	%set(opened_figs{i},'units','pixel','position',get(0,'screensize'))
-   	set(opened_figs{i},'units','normalized','outerposition',[0 0 1 1])
-	set(opened_figs{i},'Visible', 'on'); 
+        haux = guidata(opened_figs{i});
+        for k = 5*(i-1)+4:min(nclusters,5*(i-1)+8)
+            ylim(eval(['haux.spikes' num2str(k)]),[ymin ymax]);
+        end
+        
+        set(opened_figs{i},'units','normalized','outerposition',[0 0 1 1])
+        set(opened_figs{i},'Visible', 'on'); 
     end
 end
 

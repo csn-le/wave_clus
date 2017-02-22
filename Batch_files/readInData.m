@@ -198,13 +198,17 @@ classdef readInData < handle
         end
         
 
-        function [original_classes, current_temp] = get_gui_status(obj)
+        function [original_classes, current_temp,auto_sort_info] = get_gui_status(obj)
             load(['times_' obj.nick_name '.mat'],'gui_status','cluster_class');
             current_temp = gui_status.current_temp;
             if isempty(current_temp) || (current_temp == -1 && obj.with_spc)
                 current_temp=1;
             end
             original_classes = gui_status.original_classes;
+            auto_sort_info = [];
+            if isfield(gui_status,'auto_sort_info')
+                auto_sort_info = gui_status.auto_sort_info;
+            end
         end
             
             

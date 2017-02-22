@@ -49,12 +49,17 @@ times = diff(spk_times(class_to_plot));
 % Calculates # ISIs < 3ms  
 multi_isi = nnz(times<3); 
 % Builds and plots the histogram
-eval(['[N,X]=hist(times,0:par.bin_step' num2str(axes_nr-1) ':par.nbins' num2str(axes_nr-1) ');']);
-bar(isi_ax, X(1:end-1),N(1:end-1))
-eval(['xlim(isi_ax, [0 par.nbins' num2str(axes_nr-1) ']);']);
-%eval(['set(get(gca,''children''),''facecolor'',''' colors(axes_nr) ''',''edgecolor'',''' colors(axes_nr) ''',''linewidth'',0.01);']);  %  (FC) why is this commented?
-title(isi_ax, [num2str(multi_isi) ' in < 3ms'])
-xlabel(isi_ax, 'ISI (ms)');
+try
+    eval(['[N,X]=hist(times,0:par.bin_step' num2str(axes_nr-1) ':par.nbins' num2str(axes_nr-1) ');']);
+    bar(isi_ax, X(1:end-1),N(1:end-1))
+    eval(['xlim(isi_ax, [0 par.nbins' num2str(axes_nr-1) ']);']);
+    %eval(['set(get(gca,''children''),''facecolor'',''' colors(axes_nr) ''',''edgecolor'',''' colors(axes_nr) ''',''linewidth'',0.01);']);  %  (FC) why is this commented?
+    title(isi_ax, [num2str(multi_isi) ' in < 3ms'])
+    xlabel(isi_ax, 'ISI (ms)');
+catch
+    warning(['Error in the ISI plot of the Cluster ' num2str(axes_nr-1)] )
+end
+
 
 
 eval(['set(handles.fix' num2str(4+plot_number*5) '_button,''value'',0);']);

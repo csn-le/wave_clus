@@ -280,9 +280,11 @@ USER_DATA{15} = rejected;  %the clusters numbers are sorted
 USER_DATA{16} = rejected;  %the clusters numbers are sorted
 
 set(handles.min_clus_edit,'string',num2str(handles.par.min_clus));
+setappdata(handles.temperature_plot,'auto_sort_info',[]);
 
 if  data_handler.with_gui_status
-    [saved_gui_status, current_temp] = data_handler.get_gui_status();
+    [saved_gui_status, current_temp,auto_sort_info] = data_handler.get_gui_status();
+    setappdata(handles.temperature_plot,'auto_sort_info',auto_sort_info);
     clustering_results = zeros(length(classes),4);
     clustering_results(:,1) = repmat(current_temp,length(classes),1);
     for i=1:max(classes)
@@ -387,12 +389,9 @@ set(handles.min_clus_edit,'string',num2str(min_clus));
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 rejected = USER_DATA{15};
 USER_DATA{16} = rejected;
-par = USER_DATA{1};
-par.min_clus = min_clus;
 clu = USER_DATA{4};
 classes = clu(temp, 3:end) + 1;
 classes(rejected) = 0;
-USER_DATA{1} = par;
 USER_DATA{6} = classes(:)';
 USER_DATA{8} = temp;
 
@@ -413,23 +412,21 @@ end
 % --- Change min_clus_edit     
 function min_clus_edit_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
-par = USER_DATA{1};  
-par.min_clus = str2num(get(hObject, 'String'));
+min_clus = str2num(get(hObject, 'String'));
 clu = USER_DATA{4};
 temp = USER_DATA{8};
 classes = clu(temp,3:end)+1;
-USER_DATA{1} = par;
 USER_DATA{6} = classes(:)';
 USER_DATA{16} = USER_DATA{15};
 clustering_results = USER_DATA{10};
-clustering_results(:,5) = par.min_clus;
+clustering_results(:,5) = min_clus;
 set(handles.wave_clus_figure,'userdata',USER_DATA);
 handles.setclus = 0;
 handles.force = 0;
 handles.merge = 0;
 handles.undo = 0;
 
-handles.minclus = par.min_clus;
+handles.minclus = min_clus;
 plot_spikes(handles);
 
 
@@ -704,34 +701,56 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
             eval(['rect = getrect(handles_local.spikes' num2str(cl) ');']);
             valids = ~USER_DATA{15}(:) & (classes(:)==cl); %First, I don't select the rejected
         end
-        xind = max(1, ceil(rect(1)));
-        xend = min(size(spikes,2),floor(rect(1) + rect(3)));
-        xD = xend-xind;
-        ymin = rect(2);
-        ymax = rect(2) + rect(4);
-        yD = ymin - ymax;
-        if xD==0 || yD == 0; 
+        if rect(1) > size(spikes,2) || (rect(1) + rect(3))<1 %if the rect is totally outside the axis
             set(hObject,'Enable','on');
+            set(hObject,'value',0);
             return;
         end
-        [Mh, Mpos] = max(spikes(valids,xind:xend)');
-        [mh ,mpos] = min(spikes(valids,xind:xend)');
-        if ceil(rect(1)) < 1 %if rect is out the axis, extreme in border count like inside the rectangle
-            xiborder=0;
+        
+        if(rect(3)<2)
+            if rect(3)==0
+                set(hObject,'Enable','on');
+                set(hObject,'value',0);
+                return;
+            end
+            xind = max(1, ceil(rect(1)));
+            xend = min(size(spikes,2),floor(rect(1) + rect(3)));
+            ymin = rect(2);
+            ymax = rect(2) + rect(4);
+            
+            sp_selected = (max(spikes(valids,xind:xend),[],2)>ymin) &  (min(spikes(valids,xind:xend),[],2)<ymax);
+            valids(valids==1) = sp_selected;
         else
-            xiborder=1;
+            xind = max(1, ceil(rect(1)));
+            xend = min(size(spikes,2),floor(rect(1) + rect(3)));
+            xD = xend-xind;
+            ymin = rect(2);
+            ymax = rect(2) + rect(4);
+            yD = ymin - ymax;
+            if xD==0 || yD == 0; 
+                set(hObject,'Enable','on');
+                set(hObject,'value',0);
+                return;
+            end
+            [Mh, Mpos] = max(spikes(valids,xind:xend)');
+            [mh ,mpos] = min(spikes(valids,xind:xend)');
+            if ceil(rect(1)) < 1 %if rect is out the axis, extreme in border count like inside the rectangle
+                xiborder=0;
+            else
+                xiborder=1;
+            end
+            if floor(rect(1) + rect(3)) > size(spikes,2) %if rect is out the axis, extreme in border count like inside the rectangle
+                xeborder = xD+2; 
+            else
+                xeborder = xD;   
+            end    
+            sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos > xiborder & Mpos < xeborder);
+            sp_selected = sp_selected |((mh >= ymin & mh <= ymax) & (mpos > xiborder & mpos < xeborder));
+            valids(valids==1) = sp_selected;
         end
-        if floor(rect(1) + rect(3)) > size(spikes,2) %if rect is out the axis, extreme in border count like inside the rectangle
-            xeborder = xD+2; 
-        else
-            xeborder = xD;   
-        end    
-        sp_selected = (Mh >= ymin & Mh <= ymax) & (Mpos > xiborder & Mpos < xeborder);
-        sp_selected = sp_selected |((mh >= ymin & mh <= ymax) & (mpos > xiborder & mpos < xeborder));
-        valids(valids==1) = sp_selected;
-
         if nnz(valids)==0
             set(hObject,'Enable','on');
+            set(hObject,'value',0);
             return;
         end
 
@@ -757,11 +776,14 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
         else
             set(h_fig,'userdata',USER_DATA)
         end
+        set(hObject,'value',0);
         plot_spikes(handles);
         
     catch
         set(hObject,'Enable','on');
+        set(hObject,'value',0);
     end
+    
     
 % PLOT ALL PROJECTIONS BUTTON
 % --------------------------------------------------------------------
@@ -855,10 +877,17 @@ cn = regexp(b_name, '\d+', 'match');
 main_fig = findobj( 0, 'type', 'figure', 'tag', 'wave_clus_figure');
 USER_DATA = get(main_fig,'userdata');
 par = USER_DATA{1};
-eval(['par.nbins' cn{1}  '= str2num(get(hObject, ''String''));']);
-USER_DATA{1} = par;
-set(main_fig,'userdata',USER_DATA);
-draw_histograms(handles,  str2double(cn{1}),USER_DATA);
+value = str2num(get(hObject, 'String'));
+
+if ~isempty(value) && value > 0 && value>=eval(['par.bin_step' cn{1}])
+    eval(['par.nbins' cn{1}  '= value;']);
+    USER_DATA{1} = par;
+    set(main_fig,'userdata',USER_DATA);
+    draw_histograms(handles, str2double(cn{1}),USER_DATA);
+else
+    eval(['set(hObject,''string'',par.nbins' cn{1} ');']);
+end
+
 
 % --------------------------------------------------------------------
 function isi_bin_step_Callback(hObject, eventdata, handles)
@@ -867,10 +896,18 @@ cn = regexp(b_name, '\d+', 'match');
 main_fig = findobj( 0, 'type', 'figure', 'tag', 'wave_clus_figure');
 USER_DATA = get(main_fig,'userdata');
 par = USER_DATA{1};
-eval(['par.bin_step' cn{1}  '= str2num(get(hObject, ''String''));']);
-USER_DATA{1} = par;
-set(main_fig,'userdata',USER_DATA);
-draw_histograms(handles, str2double(cn{1}),USER_DATA);
+
+value = str2num(get(hObject, 'String'));
+if ~isempty(value) && value > 0 && value<=eval(['par.nbins' cn{1}])
+    eval(['par.bin_step' cn{1}  '= value;']);
+    USER_DATA{1} = par;
+    set(main_fig,'userdata',USER_DATA);
+    draw_histograms(handles, str2double(cn{1}),USER_DATA);
+else
+    eval(['set(hObject,''string'',par.bin_step' cn{1} ');']);
+end
+
+
             
 
 %SETTING OF ISI BUTTONS
