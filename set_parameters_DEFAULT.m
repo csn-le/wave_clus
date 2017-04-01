@@ -46,10 +46,10 @@ par.ref_ms = 1.5;                    % detector dead time, minimum refractory pe
 % par.detection = 'pos';             % type of threshold
 par.detection = 'neg';
 %par.detection = 'both';
-
+par.channels = 1;
 
 % INTERPOLATION PARAMETERS
-par.int_factor = 2;                  % interpolation factor
+par.int_factor = 5;                  % interpolation factor
 par.interpolation = 'y';             % interpolation with cubic splines (default)
 % par.interpolation = 'n';
 

@@ -53,7 +53,7 @@ gui_State = struct('gui_Name',       mfilename, ...
                    'gui_OutputFcn',  @wave_clus_OutputFcn, ...
                    'gui_LayoutFcn',  [], ...
                    'gui_Callback',   []);
-if nargin && isstr(varargin{1})
+if nargin>1 && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
 
@@ -90,6 +90,10 @@ set(handles.fix3_button,'value',0);
 % Update handles structure
 guidata(hObject, handles);
 
+if nargin>3 && ischar(varargin{1})
+      load_data_button_Callback(varargin{1},'w_arg',handles)
+end
+
 % UIWAIT makes wave_clus wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -115,8 +119,21 @@ set(0,'DefaultAxesColorOrder',clus_colors)
 % --- Executes on button press in load_data_button.
 function load_data_button_Callback(hObject, eventdata, handles)
 % select file
-[filename, pathname] = uigetfile('*.*','Select file'); % Use only the supported extensions can bring case-sensitive related problems.
 
+if ischar(hObject) && strcmp(eventdata,'w_arg')
+    if isempty(fileparts(hObject))
+        filename = hObject;
+        pathname = [pwd filesep];
+    else
+        [pathname filename ext]=fileparts(hObject);
+        pathname = [pathname filesep];
+        filename = [filename ext];
+    end
+    hObject = handles.load_data_button;
+else
+    [filename, pathname] = uigetfile('*.*','Select file'); % Use only the supported extensions can bring case-sensitive related problems.
+end
+    
 % if any file was selected, cancel the loading
 if ~ischar(pathname)
     return
