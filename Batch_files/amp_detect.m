@@ -58,7 +58,8 @@ switch detect
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
-                [aux_unused, iaux]=max((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                xf_end = min(xaux(i) + floor(ref/2) - 1,length(xf));
+                [aux_unused, iaux]=max((xf(xaux(i):xf_end)));    %introduces alignment
                 if iaux == 1
                     continue
                 end
@@ -73,7 +74,8 @@ switch detect
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
-                [aux_unused, iaux]=min((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                xf_end = min(xaux(i) + floor(ref/2) - 1,length(xf));
+                [aux_unused, iaux]=min((xf(xaux(i):xf_end)));    %introduces alignment
                 if iaux == 1
                     continue
                 end
@@ -88,7 +90,8 @@ switch detect
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
-                [aux_unused, iaux]=max(abs(xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
+                xf_end = min(xaux(i) + floor(ref/2) - 1,length(xf));
+                [aux_unused, iaux]=max(abs(xf(xaux(i):xf_end)));    %introduces alignment
                 if iaux == 1
                     continue
                 end
