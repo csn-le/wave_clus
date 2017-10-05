@@ -54,7 +54,7 @@ index = [];
 switch detect
     case 'pos'
         nspk = 0;
-        xaux = find(xf_detect(w_pre+2:end-w_post-2) > thr) +w_pre+1;
+        xaux = find(xf_detect(w_pre+2:end-w_post-2-floor(ref/2)) > thr) +w_pre+1;
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
@@ -69,7 +69,7 @@ switch detect
         end
     case 'neg'
         nspk = 0;
-        xaux = find(xf_detect(w_pre+2:end-w_post-2) < -thr) +w_pre+1;
+        xaux = find(xf_detect(w_pre+2:end-w_post-2-floor(ref/2)) < -thr) +w_pre+1;
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
@@ -84,7 +84,7 @@ switch detect
         end
     case 'both'
         nspk = 0;
-        xaux = find(abs(xf_detect(w_pre+2:end-w_post-2)) > thr) +w_pre+1;
+        xaux = find(abs(xf_detect(w_pre+2:end-w_post-2-floor(ref/2))) > thr) +w_pre+1;
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref

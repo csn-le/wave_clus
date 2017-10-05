@@ -1,10 +1,10 @@
 function Get_spikes_pol(polytrodes, varargin)
 % function Get_spikes_pol(polytrodes, par_input)
 % Make polytrode spikes detecting and concatenating the spikes of all the
-% channels in the polytrodesN.txt used. 
+% channels in the polytrodeN.txt used. 
 % Saves spikes, spike times (in ms) and used parameters in filename_spikes.mat.
 
-% input must be a vector with the numbers(N) of polytrodesN.txt to use.
+% input must be a vector with the numbers(N) of polytrodeN.txt to use.
 
 % par_input must be a struct with some of the detecction parameters. All the
 % parameters included will overwrite the parameters load from set_parameters()

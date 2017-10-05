@@ -14,7 +14,7 @@ How-to
 ------
 
 #### Installation
-In MATLAB go to the menu File/Set Path and add the directory wave\_clus with subfolders to the MATLAB path. The functions from [FilterM](http://www.mathworks.com/MATLABcentral/fileexchange/32261-filterm "FilterM") can be added to the path for using them instead of the functions of the Signal Processing Toolbox.
+In MATLAB go to the menu File/Set Path and add the directory wave\_clus with subfolders to the MATLAB path. The functions from [FilterM](https://www.mathworks.com/matlabcentral/fileexchange/32261-filterm "FilterM") can be added to the path for using them instead of the functions of the Signal Processing Toolbox.
 
 
 #### Basic Gui Instructions
@@ -42,7 +42,7 @@ The output of Wave_clus (obtained either using the *Save* clusters button in the
 
 Wave_clus can read MATLAB files (extension .mat) with continuous data or spikes for clustering spike shapes that have already been detected (e.g. detected on-line by the acquisition system). It should have either a vector named **data** (the continuous signal) or a matrix named **spikes** (nr. of spikes x length of the spike shape) plus a vector **index** with the spike times. If the variable **sr** is inside the file, it will set the sampling rate. Otherwise **par.sr** inside the file `set_parameters` will be use.
 
-All the supported formats (.mat, .int, .NSx, .pl2, .tdt, .ncs and .nse) use the codes in the folder `Raw_data_readers` to get the data from the files. Some of them require to run the codes in the folder `tools` before.
+All the supported formats (.mat, .int, .NSx, .pl2, .tdt and .ncs) use the codes in the folder `Raw_data_readers` to get the data from the files. Some of them require to run the codes in the folder `tools` before.
 
 
 Important links
