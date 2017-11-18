@@ -103,7 +103,7 @@ end
 ls = w_pre+w_post;
 spikes = zeros(nspk,ls+4);
 
-xf = [xf zeros(1,w_post)];
+xf(length(xf)+1:length(xf)+w_post)=0;
 
 for i=1:nspk                          %Eliminates artifacts
     if max(abs( xf(index(i)-w_pre:index(i)+w_post) )) < thrmax

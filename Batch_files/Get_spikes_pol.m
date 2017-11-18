@@ -149,9 +149,9 @@ function get_spikes_pol_single(polytrode, par_input)
 
     current_par = par;
     par = struct;
-    par.channels = n_channels;
     par = update_parameters(par, current_par, 'detect');
     par.detection_date =  datestr(now);
+	par.channels = n_channels;
     save([out_filename '_spikes'], 'spikes', 'index','par')
 end
 

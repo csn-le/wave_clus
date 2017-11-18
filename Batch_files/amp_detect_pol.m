@@ -35,8 +35,6 @@ end
 index = sort(index);
 index( find(abs(diff(index))<ref/2) ) = []; 
 
-
-
 % SPIKE CONCATENATION: POLY-SPIKE
 for i=1:length(index)
     for j=1:size(x,1)
@@ -54,14 +52,4 @@ switch par.interpolation
     case 'y'
         %Does interpolation
         spikes = int_spikes_pol(spikes,size(x,1),thr,par);   
-end
-
-
-
-
-
-
-
-
-
-    
+end   

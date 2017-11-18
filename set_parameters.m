@@ -54,7 +54,7 @@ par.interpolation = 'y';             % interpolation with cubic splines (default
 % par.interpolation = 'n';
 
 % FEATURES PARAMETERS
-par.inputs = 10;                       % number of inputs to the clustering
+par.inputs = 10;                       % number of inputs to the clustering (per channel)
 par.scales = 4;                        % number of scales for the wavelet decomposition
 par.features = 'wav';                % type of feature ('wav' or 'pca')
 %par.features = 'pca'
