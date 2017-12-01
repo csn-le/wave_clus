@@ -1,5 +1,12 @@
 function plot_spikes(handles)
-set(handles.file_name,'string','Plotting...'); drawnow;
+set(handles.file_name,'string','Plotting...'); 
+drawnow;
+if exist('groot','builtin')
+     set(groot,'defaultfiguregraphicssmoothing','off');
+    set(handles.wave_clus_figure,'GraphicsSmoothing','off');
+    set(groot,'DefaultAxesFontSize',8)
+end
+
 USER_DATA = get(handles.wave_clus_figure,'userdata');
 par = USER_DATA{1};
 spikes = USER_DATA{2};
@@ -12,13 +19,13 @@ minclus = handles.minclus;
 clustering_results = USER_DATA{10};
 
 % Closes aux figures
-h_figs=get(0,'children');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2= findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3= findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4= findobj(h_figs,'tag','wave_clus_aux3');
-h_fig5= findobj(h_figs,'tag','wave_clus_aux4');
-h_fig6= findobj(h_figs,'tag','wave_clus_aux5');
+h_figs = get(0,'children');
+h_fig1 = findobj(h_figs,'flat','tag','wave_clus_aux');
+h_fig2 = findobj(h_figs,'flat','tag','wave_clus_aux1');
+h_fig3 = findobj(h_figs,'flat','tag','wave_clus_aux2');
+h_fig4 = findobj(h_figs,'flat','tag','wave_clus_aux3');
+h_fig5 = findobj(h_figs,'flat','tag','wave_clus_aux4');
+h_fig6 = findobj(h_figs,'flat','tag','wave_clus_aux5');
 close(h_fig1); close(h_fig2); close(h_fig3); close(h_fig4); close(h_fig5); close(h_fig6);
 if ishandle(10)
 	close(10)
@@ -263,14 +270,18 @@ for i=4:par.max_clus
 end
 
 set(handles.wave_clus_figure,'userdata',USER_DATA)
-
+ax_v=[];
 % Clear plots
-for i=1:4
-    cla(eval(['handles.spikes' num2str(i-1)]),'reset');
-    cla(eval(['handles.isi' num2str(i-1)]),'reset');
+for i=1:3
+    cla(eval(['handles.spikes' num2str(i)]),'reset');
+	ax_v(end+1)=eval(['handles.spikes' num2str(i)]);
+    cla(eval(['handles.isi' num2str(i)]),'reset');
 end    
-cla(handles.projections); 
+% cla(handles.isi0);
+cla(handles.spikes0,'reset');
+delete(allchild(handles.projections))
 hold(handles.projections,'on')
+
 % Plot clusters
 ylimit = [];
 colors = [[0.0 0.0 1.0];[1.0 0.0 0.0];[0.0 0.5 0.0];[0.620690 0.0 0.0];[0.413793 0.0 0.758621];[0.965517 0.517241 0.034483];
@@ -283,52 +294,60 @@ opened_figs = cell(1,figs_num);
 for i = 0:nclusters
     if ~ (isempty(class0) && i==0)
         %PLOTS SPIKES OR PROJECTIONS
-        eval(['max_spikes=min(length(class' num2str(i) '), par.max_spikes_plot);']);
-        eval(['sup_spikes=length(class' num2str(i) ');']);
+        class_i = eval(['class' num2str(i)]);
+        sup_spikes = length(class_i);
+        max_spikes = min(sup_spikes, par.max_spikes_plot);
         permut = randperm(sup_spikes);
         permut = permut(1:max_spikes);
-        if get(handles.spike_shapes_button,'value') ==1 && get(handles.plot_all_button,'value') ==1
-            eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''Parent'',handles.projections)']);
+        xlim(handles.projections,'manual');
+        if get(handles.spike_shapes_button,'value') ==1 && (get(handles.plot_all_button,'value') ==1) && ~strcmp(par.all_classes_ax,'mean')
+            line(1:ls,spikes(class_i(permut),:),'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',handles.projections,'Visible','off'); %
             xlim(handles.projections, [1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
-            eval(['av   = mean(spikes(class' num2str(i) ',:));']);
+            av   = mean(spikes(class_i,:));
             plot(handles.projections,1:ls,av,'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'linewidth',2);
             xlim(handles.projections,[1 ls])
         else
-            eval(['plot(handles.projections,inspk(class' num2str(i) ',1),inspk(class' num2str(i) ',2),''.'',''Color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''markersize'',.5);']);
+            plot(handles.projections,inspk(class_i,1),inspk(class_i,2),'.','Color',colors(mod(i-1,maxc)+1,:)*(i~=0),'markersize',.5);
             axis(handles.projections,'auto');
         end
     
         if i < 4
             clus_ax = eval(['handles.spikes' num2str(i)]); 
+            xlim(clus_ax,'manual');
+            xlim(clus_ax,[1 ls]);
             hold(clus_ax,'on')
-            eval(['av   = mean(spikes(class' num2str(i) '(:,permut),:));']); % JMG
-            eval(['avup = av + par.to_plot_std * std(spikes(class' num2str(i) '(:,permut),:));']); % JMG 
-            eval(['avdw = av - par.to_plot_std * std(spikes(class' num2str(i) '(:,permut),:));']); % JMG
             
+            av   = mean(spikes(class_i,:));
+            avup = av + par.to_plot_std * std(spikes(class_i,:));
+            avdw = av - par.to_plot_std * std(spikes(class_i,:));
+                      
             if get(handles.plot_all_button,'value') ==1
-                eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''Parent'',clus_ax)']);
+                line(1:ls,spikes(class_i(permut),:),'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',clus_ax);
                 if i==0
-                    plot(clus_ax,1:ls,av,'c','linewidth',2)
-                    plot(clus_ax,1:ls,avup,'c','linewidth',.5)
-                    plot(clus_ax,1:ls,avdw,'c','linewidth',.5)
+                    line(1:ls,av,'color','c','linewidth',2,'Parent',clus_ax)
+                    line(1:ls,avup,'color','c','linewidth',0.5,'Parent',clus_ax)
+                    line(1:ls,avdw,'color','c','linewidth',0.5,'Parent',clus_ax)
                 else
-                    plot(clus_ax,1:ls,av,'k','linewidth',2);
-                    plot(clus_ax,1:ls,avup,1:ls,avdw,'color',[.4 .4 .4],'linewidth',.5)
+                    line(1:ls,av,'color','k','linewidth',2,'Parent',clus_ax)
+                    line(1:ls,avdw,'color',[.4 .4 .4],'linewidth',0.5,'Parent',clus_ax)
+                    line(1:ls,avup,'color',[.4 .4 .4],'linewidth',0.5,'Parent',clus_ax)
                 end
             else
                 plot(clus_ax,1:ls,av,'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'linewidth',2)
                 plot(clus_ax,1:ls,avup,1:ls,avdw,'color',[.65 .65 .65],'linewidth',.5)
             end
-            xlim(clus_ax, [1 ls])
+            
             eval(['aux=num2str(length(class' num2str(i) '));']);
             if i>0 
+                ylim(clus_ax,'auto');
                 ylimit = [ylimit; ylim(clus_ax)];
                 title(clus_ax,['Cluster ' num2str(i) ':  # ' aux ' (' num2str(nnz(clustering_results(:,2)==i & ~forced(:))) ')'],'Fontweight','bold');
             else            
                 title(clus_ax,['Cluster ' num2str(i) ':  # ' aux],'Fontweight','bold');
+                xlim(clus_ax, [1 ls])
             end
-
+            
         else
             par.axes_nr = i+1;
             par.ylimit = ylimit;
@@ -358,32 +377,39 @@ end
 
 draw_histograms(handles, 0:min(nclusters,3),USER_DATA);
 
+if ~isempty(USER_DATA{5})
+    mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
+end
+set(handles.file_name,'string', par.file_name_to_show);
+
+set(allchild(handles.projections),'Visible','on')
+
 %Resize axis
 if ~isempty(ylimit)
     ymin = min(ylimit(:,1));
     ymax = max(ylimit(:,2));
-    for i=1:4
-        clus_ax = eval(['handles.spikes' num2str(i-1)]); 
-        ylim(clus_ax,[ymin ymax]);
+    ylim(handles.spikes0,[ymin ymax]);
+    if get(handles.spike_shapes_button,'value') ==1
+        ylim(handles.projections,[ymin ymax]);
     end
+    linkaxes(ax_v,'xy'); %drawnow inside
+    ylim(ax_v(1),[ymin ymax]);
+else
+    drawnow
 end
 
 for i =1:figs_num
     if ~isempty(opened_figs{i})  
-    	%set(opened_figs{i},'units','pixel','position',get(0,'screensize'))
-        haux = guidata(opened_figs{i});
-        for k = 5*(i-1)+4:min(nclusters,5*(i-1)+8)
-            ylim(eval(['haux.spikes' num2str(k)]),[ymin ymax]);
-        end
-        
+%         haux = guidata(opened_figs{i});
+%         for k = 5*(i-1)+4:min(nclusters,5*(i-1)+8)
+%             ylim(eval(['haux.spikes' num2str(k)]),[ymin ymax]);
+%         end
         set(opened_figs{i},'units','normalized','outerposition',[0 0 1 1])
         set(opened_figs{i},'Visible', 'on'); 
     end
 end
 
-if ~isempty(USER_DATA{5})
-    mark_clusters_temperature_diagram(handles,USER_DATA{5},clustering_results)
+if exist('groot','builtin')
+    set(groot,'defaultfiguregraphicssmoothing','remove')
+    set(groot,'DefaultAxesFontSize','remove')
 end
-set(handles.file_name,'string', par.file_name_to_show);
-axes(handles.projections)
-drawnow

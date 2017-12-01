@@ -38,7 +38,7 @@ if strcmp(type,'detect') || strcmp(type,'relevant')
     end
 end
 
-if strcmp(type,'clus') || strcmp(type,'relevant')
+if strcmp(type,'batch_plot')
     for i= 1:length(batch_ploting_params)
         if ismember(batch_ploting_params(i),load_par_names)
             field = char(batch_ploting_params(i));

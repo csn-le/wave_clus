@@ -216,6 +216,10 @@ if make_plots
 
         data_handler = readInData(par);
         par = data_handler.update_par(par);
+        
+        par = update_parameters(par,par_file,'batch_plot');
+        par = update_parameters(par,par_input,'batch_plot');
+        
         if ~data_handler.with_wc_spikes       			%data should have spikes
             continue
         end
@@ -403,10 +407,10 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     
     par = struct;
     par = update_parameters(par,par_file,'clus');
+    par = update_parameters(par,par_file,'batch_plot');
+    par = update_parameters(par,par_input,'clus');
+    par = update_parameters(par,par_input,'batch_plot');
     
-    if isfield(par,'channels')
-        par.inputs = par.inputs * par.channels;
-    end
     par.filename = filename;
     par.reset_results = true;
     
@@ -422,8 +426,7 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     par.nick_name = data_handler.nick_name;
     par.fnamespc = ['data_wc' num2str(fnum)]; 
 
-    par = update_parameters(par,par_input,'clus');
-    
+
     
     if data_handler.with_spikes            			%data have some time of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
@@ -527,6 +530,8 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     current_par = par;
     par = struct;
     par = update_parameters(par, current_par, 'relevant');
+    par = update_parameters(par,current_par,'batch_plot');
+
     par.min_clus_rel = current_par.min_clus_rel;
     par.sorting_date = datestr(now);
     cluster_class = zeros(nspk,2);

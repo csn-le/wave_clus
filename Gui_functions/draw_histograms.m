@@ -19,8 +19,9 @@ for i = c2plot
     % Calculates # ISIs < 3ms  
     multi_isi = nnz(times < 3); 
     % Builds and plots the histogram
-    eval(['[N,X]=hist(times,0:par.bin_step' num2str(i) ':par.nbins' num2str(i) ');']);
     isi_ax = eval(['handles.isi' num2str(i)]);
+    xlim(isi_ax,'manual');
+    eval(['[N,X]=hist(times,0:par.bin_step' num2str(i) ':par.nbins' num2str(i) ');']);
     bar(isi_ax,X(1:end-1),N(1:end-1))
     eval(['xlim(isi_ax,[0 par.nbins' num2str(i) ']);']);
     title(isi_ax,[num2str(multi_isi) ' in < 3ms'])

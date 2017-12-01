@@ -7,15 +7,15 @@ par.sr = 30000;                      % sampling rate (in Hz). This parameter wil
 
 % PLOTTING PARAMETERS
 par.cont_segment = true;
-par.max_spikes_plot = 2000;          % max. number of spikes to be plotted
+par.max_spikes_plot = 1000;          % max. number of spikes to be plotted
 par.print2file = true;               % If is not true, print the figure (only for batch scripts).
 par.cont_plot_samples = 100000;      % number of samples used in the one-minute (maximum) sample of continuous data to plot.
 par.to_plot_std = 1;                 % # of std from mean to plot.
-
+par.all_classes_ax = 'mean';         % 'mean'/'all'. If it's 'mean' only the mean waveforms will be ploted in the axes with all the classes
 
 % SPC PARAMETERS
 par.mintemp = 0.00;                  % minimum temperature for SPC
-par.maxtemp = 0.201;                 % maximum temperature for SPC
+par.maxtemp = 0.251;                 % maximum temperature for SPC
 par.tempstep = 0.01;                 % temperature steps
 par.SWCycles = 100;                  % SPC iterations for each temperature (default 100)
 par.KNearNeighb = 11;                % number of nearest neighbors for SPC
@@ -72,7 +72,7 @@ par.force_auto = true;              %automatically force membership (only for ba
 % TEMPLATE MATCHING
 par.match = 'y';                    % for template matching
 %par.match = 'n';                   % for no template matching
-par.max_spk = 20000;                % max. # of spikes before starting templ. match.
+par.max_spk = 40000;                % max. # of spikes before starting templ. match.
 par.permut = 'y';                   % for selection of random 'par.max_spk' spikes before starting templ. match.
 % par.permut = 'n';                 % for selection of the first 'par.max_spk' spikes before starting templ. match.
 

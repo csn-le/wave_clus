@@ -79,6 +79,7 @@ handles.output = hObject;
 set(handles.isi1_accept_button,'value',1);
 set(handles.isi2_accept_button,'value',1);
 set(handles.isi3_accept_button,'value',1);
+
 set(handles.spike_shapes_button,'value',1);
 set(handles.plot_all_button,'value',1);
 set(handles.plot_average_button,'value',0);
@@ -200,7 +201,8 @@ else
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
             [spikes] = spike_alignment(spikes,handles.par);
-        elseif isfield(handles.par,'channels')
+        end
+        if isfield(handles.par,'channels')
         	handles.par.inputs = handles.par.inputs * handles.par.channels;
         end
     else    
@@ -314,11 +316,18 @@ if  data_handler.with_gui_status
     
 elseif data_handler.with_results
     current_temp = 1;
+
     clustering_results(:,1) = repmat(current_temp,length(classes),1); % GUI temperatures
     clustering_results(:,2) = classes'; % GUI classes 
-    for i=1:max(classes)
-    	clustering_results(classes==i,3)  = current_temp;
-    end 
+    if exist('temp','var')
+        for i=1:max(classes)
+            clustering_results(classes==i,3)  = temp(i);
+        end
+    else
+        for i=1:max(classes)
+            clustering_results(classes==i,3)  = current_temp;
+        end 
+    end
     clustering_results(:,4) = classes'; % original classes 
     handles.undo = 1;
     
@@ -388,10 +397,24 @@ set(handles.file_name,'string',handles.par.file_name_to_show);
 
 % --- Executes on button press in change_temperature_button.
 function change_temperature_button_Callback(hObject, eventdata, handles)
-[temp,aux,button] = ginput(1);                                          %gets the mouse input
-if button == 3
-	return
+%gets the mouse input
+if exist('impoint','class')
+    point = impoint(handles.temperature_plot);
+    if isempty(point)
+        return
+    end
+    pos = point.getPosition();
+	temp = pos(1);
+    aux = pos(2);
+    point.delete()
+else
+    [temp,aux,button] = ginput(1);
+    if button == 3
+        return
+    end
 end
+
+
 if temp <= handles.par.mintemp+0.5*handles.par.tempstep
     temp = 1;
 elseif temp>handles.par.maxtemp
@@ -489,13 +512,14 @@ outfile=['times_' used_par.nick_name];
 
 par = struct;
 par = update_parameters(par,used_par,'relevant');
+par = update_parameters(par,used_par,'batch_plot');
 par.sorting_date = datestr(now);
 
 gui_status = struct();
 gui_status.current_temp =  gui_classes_data(1,1);
 gui_status.original_classes = gui_classes_data(1:end,4);
 
-Temp = zeros(length(classes_names));
+Temp = zeros(length(classes_names),1);
 for i = 1:length(classes_names)
     Temp(i) = gui_classes_data(find(classes==i,1,'first'),3);
 end
@@ -712,12 +736,20 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
         forced = USER_DATA{13};   
 
         if cl == -1
-            rect = getrect(handles_local.projections);
+            current_ax = handles_local.projections;
             valids = ~USER_DATA{15}(:); %First, I don't select the rejected
         else
-            eval(['rect = getrect(handles_local.spikes' num2str(cl) ');']);
+            eval(['current_ax = handles_local.spikes' num2str(cl) ';']);
             valids = ~USER_DATA{15}(:) & (classes(:)==cl); %First, I don't select the rejected
+        end  
+        if exist('getrect','file')
+            rect = getrect(current_ax);
+        else
+            aux_rec = imrect(current_ax);
+            rect = aux_rec.getPosition;
+            aux_rec.delete()
         end
+        
         if rect(1) > size(spikes,2) || (rect(1) + rect(3))<1 %if the rect is totally outside the axis
             set(hObject,'Enable','on');
             set(hObject,'value',0);
@@ -978,7 +1010,10 @@ USER_DATA{11} = clustering_results; % Save backup
 set(main_fig,'userdata',USER_DATA);
 
 set(hObject,'value',0);
-eval(['cla(handles.spikes' int2str(cn) ',''reset'');']);
+linkaxes(eval(['handles.spikes' int2str(cn)]),'off');
+% cla(eval(['handles.spikes' int2str(cn)]),'reset');
+delete(allchild(eval(['handles.spikes' int2str(cn)])))
+
 eval(['cla(handles.isi' int2str(cn) ',''reset'');']);
 eval(['set(handles.isi' int2str(cn) '_accept_button,''value'',1);']);
 

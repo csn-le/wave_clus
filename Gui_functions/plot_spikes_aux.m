@@ -24,6 +24,8 @@ hold(sp_axes, 'on');
 av   = mean(spikes(class_to_plot,:));
 avup = av + par.to_plot_std * std(spikes(class_to_plot,:));
 avdw = av - par.to_plot_std * std(spikes(class_to_plot,:));
+ylim(sp_axes, 'manual');
+xlim(sp_axes, 'manual');
 if par.plot_all_button ==1
     permut = randperm(sup_spikes);
     line(1:ls,spikes(class_to_plot(permut(1:max_spikes)),:)','color',colors(mod(axes_nr-2,maxc)+1,:),'Parent',sp_axes)
@@ -50,6 +52,7 @@ times = diff(spk_times(class_to_plot));
 multi_isi = nnz(times<3); 
 % Builds and plots the histogram
 try
+    xlim(isi_ax,'manual');
     eval(['[N,X]=hist(times,0:par.bin_step' num2str(axes_nr-1) ':par.nbins' num2str(axes_nr-1) ');']);
     bar(isi_ax, X(1:end-1),N(1:end-1))
     eval(['xlim(isi_ax, [0 par.nbins' num2str(axes_nr-1) ']);']);
