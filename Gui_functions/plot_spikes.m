@@ -2,8 +2,10 @@ function plot_spikes(handles)
 set(handles.file_name,'string','Plotting...'); 
 drawnow;
 if exist('groot','builtin')
-     set(groot,'defaultfiguregraphicssmoothing','off');
-    set(handles.wave_clus_figure,'GraphicsSmoothing','off');
+    set(groot,'defaultfiguregraphicssmoothing','off');
+    if isprop(handles.wave_clus_figure,'GraphicsSmoothing')
+        set(handles.wave_clus_figure,'GraphicsSmoothing','off');
+    end
     set(groot,'DefaultAxesFontSize',8)
 end
 

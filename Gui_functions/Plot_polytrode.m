@@ -12,10 +12,10 @@ filename = par.nick_name;
 
 
 h_figs=get(0,'children');
-h_fig1 = findobj(h_figs,'Name','polytrode');
-h_fig2= findobj(h_figs,'Name','polytrode_aux');
-h_fig3= findobj(h_figs,'Name','polytrode_aux1');
-h_fig4= findobj(h_figs,'name','polytrode_aux2');
+h_fig1 = findobj(h_figs,'Name',[filename]);
+h_fig2= findobj(h_figs,'Name',[filename '_aux']);
+h_fig3= findobj(h_figs,'Name',[filename '_aux1']);
+h_fig4= findobj(h_figs,'name',[filename '_aux2']);
 close(h_fig1); close(h_fig2); close(h_fig3); close(h_fig4);
 
 % PLOT POLYTRODE CLASSES
@@ -160,7 +160,7 @@ for j=1:nchannels
                     eval(['title([''Cluster ' num2str(k) ':  # ' aux '''],''Fontweight'',''bold'')']);
                 end
             end
-        end;
+        end
         
   end
   ymin = min(ylimit(:,1)); ymax = max(ylimit(:,2)); 
