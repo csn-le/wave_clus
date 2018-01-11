@@ -114,7 +114,7 @@ function get_spikes_pol_single(polytrode, par_input)
     
     index = [];
     spikes_all = [];
-    
+    thr = cell(min_num_seg,1);
     for n = 1:min_num_seg   %that's for cutting the data into pieces
         x(1,:) = data_handler_ch{1}.get_segment();
         poly_spikes = [];
@@ -133,7 +133,7 @@ function get_spikes_pol_single(polytrode, par_input)
             end
         end       
     
-        [spikes, new_index] = amp_detect_pol(x,par); clear x;
+        [spikes, new_index,thr{n}] = amp_detect_pol(x,par); clear x;
         index = [index data_handler_ch{1}.index2ts(new_index)];
         if length(spikes)~=0
             for i=1:n_channels
@@ -146,13 +146,13 @@ function get_spikes_pol_single(polytrode, par_input)
     end
 
     spikes = spikes_all;
-
     current_par = par;
     par = struct;
     par = update_parameters(par, current_par, 'detect');
     par.detection_date =  datestr(now);
 	par.channels = n_channels;
-    save([out_filename '_spikes'], 'spikes', 'index','par')
+    thr = cell2mat(thr);
+    save([out_filename '_spikes'], 'spikes', 'index','par','thr')
 end
 
 function counter = count_new_sp_files(initial_date, polytrodes)

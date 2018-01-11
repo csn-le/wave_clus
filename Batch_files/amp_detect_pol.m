@@ -1,4 +1,4 @@
-function [spikes,index] = amp_detect_pol(x, par)
+function [spikes,index,thr] = amp_detect_pol(x, par)
 %detect spikes in a tetrode
 
 %PARAMETERS
@@ -21,6 +21,7 @@ awin = par.alignment_window;
 % probably belonged to the same spike at 
 % different channels. 
 index = [];
+thr = [];
 for i=1:size(x,1)
    [indexch,xf(i,:),thr(i)] = index_detect_pol(x(i,:),par); % spike times and filtered data
    index = [index indexch];
@@ -33,7 +34,7 @@ end
 % different spikes allowed by the detection algorithm 
 % is the refractory period 
 index = sort(index);
-index( find(abs(diff(index))<ref/2) ) = []; 
+index(abs(diff(index))<ref) = []; 
 
 % SPIKE CONCATENATION: POLY-SPIKE
 for i=1:length(index)
