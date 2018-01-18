@@ -288,7 +288,16 @@ for i = 0:nclusters
         permut = randperm(sup_spikes);
         permut = permut(1:max_spikes);
         if get(handles.spike_shapes_button,'value') ==1 && get(handles.plot_all_button,'value') ==1
-            eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''Parent'',handles.projections)']);
+            % this is quite slow:
+            %eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''Parent'',handles.projections)']);
+            % optimizing for speed:
+            tmpy=eval(['spikes(class' num2str(i) '(permut),:)']);
+            tmpn=size(tmpy,1);
+            tmpx=repmat([1:ls NaN]',1,tmpn);
+            tmpx=reshape(tmpx,prod(size(tmpx)),1);
+            tmpy=[tmpy'; repmat(NaN,1,tmpn)];
+            tmpy=reshape(tmpy,prod(size(tmpy)),1);
+            line(tmpx,tmpy,'color',num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)),'Parent',handles.projections);
             xlim(handles.projections, [1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
             eval(['av   = mean(spikes(class' num2str(i) ',:));']);
@@ -307,7 +316,16 @@ for i = 0:nclusters
             eval(['avdw = av - par.to_plot_std * std(spikes(class' num2str(i) '(:,permut),:));']); % JMG
             
             if get(handles.plot_all_button,'value') ==1
-                eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''Parent'',clus_ax)']);
+                % this is quite slow:
+                %eval(['line(1:ls,spikes(class' num2str(i) '(permut),:)'',''color'',[' num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)) '],''Parent'',clus_ax)']);
+                % optimizing for speed:
+                tmpy=eval(['spikes(class' num2str(i) '(permut),:)']);
+                tmpn=size(tmpy,1);
+                tmpx=repmat([1:ls NaN]',1,tmpn);
+                tmpx=reshape(tmpx,prod(size(tmpx)),1);
+                tmpy=[tmpy'; repmat(NaN,1,tmpn)];
+                tmpy=reshape(tmpy,prod(size(tmpy)),1);
+                line(tmpx,tmpy,'color',num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)),'Parent',clus_ax);
                 if i==0
                     plot(clus_ax,1:ls,av,'c','linewidth',2)
                     plot(clus_ax,1:ls,avup,'c','linewidth',.5)
