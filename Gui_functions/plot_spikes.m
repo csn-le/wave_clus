@@ -303,7 +303,16 @@ for i = 0:nclusters
         permut = permut(1:max_spikes);
         xlim(handles.projections,'manual');
         if get(handles.spike_shapes_button,'value') ==1 && (get(handles.plot_all_button,'value') ==1) && ~strcmp(par.all_classes_ax,'mean')
-            line(1:ls,spikes(class_i(permut),:),'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',handles.projections,'Visible','off'); %
+            % this is quite slow:
+            %line(1:ls,spikes(class_i(permut),:),'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',handles.projections,'Visible','off'); %
+            % optimizing for speed:
+            tmpy=spikes(class_i(permut),:);
+            tmpn=size(tmpy,1);
+            tmpx=repmat([1:ls NaN]',1,tmpn);
+            tmpx=reshape(tmpx,prod(size(tmpx)),1);
+            tmpy=[tmpy'; repmat(NaN,1,tmpn)];
+            tmpy=reshape(tmpy,prod(size(tmpy)),1);
+            line(tmpx,tmpy,'color',num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)),'Parent',handles.projections,'Visible','off');
             xlim(handles.projections, [1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
             av   = mean(spikes(class_i,:));
@@ -325,7 +334,16 @@ for i = 0:nclusters
             avdw = av - par.to_plot_std * std(spikes(class_i,:));
                       
             if get(handles.plot_all_button,'value') ==1
-                line(1:ls,spikes(class_i(permut),:),'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',clus_ax);
+                % this is quite slow:
+                %line(1:ls,spikes(class_i(permut),:),'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',clus_ax);
+                % optimizing for speed:
+                tmpy=spikes(class_i(permut),:);
+                tmpn=size(tmpy,1);
+                tmpx=repmat([1:ls NaN]',1,tmpn);
+                tmpx=reshape(tmpx,prod(size(tmpx)),1);
+                tmpy=[tmpy'; repmat(NaN,1,tmpn)];
+                tmpy=reshape(tmpy,prod(size(tmpy)),1);
+                line(tmpx,tmpy,'color',num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)),'Parent',clus_ax);
                 if i==0
                     line(1:ls,av,'color','c','linewidth',2,'Parent',clus_ax)
                     line(1:ls,avup,'color','c','linewidth',0.5,'Parent',clus_ax)
