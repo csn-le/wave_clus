@@ -28,7 +28,15 @@ ylim(sp_axes, 'manual');
 xlim(sp_axes, 'manual');
 if par.plot_all_button ==1
     permut = randperm(sup_spikes);
-    line(1:ls,spikes(class_to_plot(permut(1:max_spikes)),:)','color',colors(mod(axes_nr-2,maxc)+1,:),'Parent',sp_axes)
+    
+    tmpy=spikes(class_to_plot(permut(1:max_spikes)),:);
+    tmpn=size(tmpy,1);
+    tmpx=repmat([1:ls NaN]',1,tmpn);
+    tmpx=reshape(tmpx,numel(tmpx),1);
+    tmpy=[tmpy'; repmat(NaN,1,tmpn)];
+    tmpy=reshape(tmpy,numel(tmpy),1);
+    line(tmpx,tmpy,'color',colors(mod(axes_nr-2,maxc)+1,:),'Parent',sp_axes);    
+
     plot(sp_axes, 1:ls,av,'k','linewidth',2);
     plot(sp_axes, 1:ls,avup,1:ls,avdw,'color',[.4 .4 .4],'linewidth',.5)
 else

@@ -22,13 +22,10 @@ clustering_results = USER_DATA{10};
 
 % Closes aux figures
 h_figs = get(0,'children');
-h_fig1 = findobj(h_figs,'flat','tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'flat','tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'flat','tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'flat','tag','wave_clus_aux3');
-h_fig5 = findobj(h_figs,'flat','tag','wave_clus_aux4');
-h_fig6 = findobj(h_figs,'flat','tag','wave_clus_aux5');
-close(h_fig1); close(h_fig2); close(h_fig3); close(h_fig4); close(h_fig5); close(h_fig6);
+close(findobj(h_figs,'flat','tag','wave_clus_aux'));
+for w = 1:5
+    close(findobj(h_figs,'flat','tag',['wave_clus_aux' num2str(w)]));
+end
 if ishandle(10)
 	close(10)
 end
@@ -45,14 +42,14 @@ classes_names = sort(unique(classes));
 classes_names = classes_names(classes_names>0);
 
 % updates 'clustering_results_bk'
-clustering_results_bk = clustering_results;
+USER_DATA{11} = clustering_results; 
 
 % Forcing
 if handles.force==1
     for i = classes_names
-        ind = find(clustering_results_bk(:,2)==i); % get index of GUI class
-        oclass = clustering_results_bk(ind(1),4); % get original class
-        otemp = clustering_results_bk(ind(1),3); % get original temperature
+        ind = find(clustering_results(:,2)==i); % get index of GUI class
+        oclass = clustering_results(ind(1),4); % get original class
+        otemp = clustering_results(ind(1),3); % get original temperature
         ind2 = find(classes==i); % get index of forced class
         clustering_results(ind2,3) = otemp; % update original temperatures with forced class
         clustering_results(ind2,4) = oclass; % update original class with forced class
@@ -91,38 +88,17 @@ fix_class2 = [];
 nfix_class = [];
 
 if ~isfield(handles,'new_manual')
-	if get(handles.fix1_button,'value') ==1     
-		nclusters = nclusters +1;
-		fix_class = USER_DATA{20}';
-		classes(classes==nclusters)=0;
-		classes(fix_class)=nclusters;
-		ifixflag(nclusters)=1;
-		
-		fix_class2 = [fix_class2 fix_class]; 
-		nfix_class = [nfix_class 1];
-		clusn = [clusn nclusters];
-	end
-	if get(handles.fix2_button,'value') ==1     
-		nclusters = nclusters +1;
-		fix_class = USER_DATA{21}';
-		classes(classes==nclusters)=0;
-		classes(fix_class)=nclusters;
-		ifixflag(nclusters)=1;
-		
-		fix_class2 = [fix_class2 fix_class]; 
-		nfix_class = [nfix_class 2];
-		clusn = [clusn nclusters];
-	end
-	if get(handles.fix3_button,'value') ==1     
-		nclusters = nclusters +1;
-		fix_class = USER_DATA{22}';
-		classes(classes==nclusters)=0;
-		classes(fix_class)=nclusters;
-		ifixflag(nclusters)=1;
-		
-		fix_class2 = [fix_class2 fix_class]; 
-		nfix_class = [nfix_class 3];
-		clusn = [clusn nclusters];
+	for fi = 1:3
+        if get(eval(['handles.fix' num2str(fi) '_button']),'value') ==1
+            nclusters = nclusters +1;
+            fix_class = USER_DATA{19+fi}';
+            classes(classes==nclusters)=0;
+            classes(fix_class)=nclusters;
+            ifixflag(nclusters)=1;
+            fix_class2 = [fix_class2 fix_class]; 
+            nfix_class = [nfix_class fi];
+            clusn = [clusn nclusters];    
+        end
 	end
 	% Get fixed clusters from aux figures
 	for i=4:min(par.max_clus,33)
@@ -171,7 +147,7 @@ if ~isfield(handles,'unforce')
 end
 % Defines classes
 non_clustered = ones(1,size(spikes,1));
-cont = 0;
+nclusters = 0;
 for i = clusn
     class_temp = find(classes == i);
     if ((ifixflag(i)==1) && (~isempty(class_temp)))
@@ -180,12 +156,11 @@ for i = clusn
         ifixflagc = 0;
     end
     if ((length(class_temp) >= sizemin_clus) || (ifixflagc == 1))
-        cont = cont+1;
-        eval(['class' num2str(cont) '= class_temp;'])
+        nclusters = nclusters+1;
+        eval(['class' num2str(nclusters) '= class_temp;'])
         non_clustered(class_temp) = 0;
     end
 end
-nclusters = cont;
 rejected = USER_DATA{15};
 class0 = find(non_clustered & ~rejected);
 clear non_clustered rejected
@@ -222,8 +197,6 @@ if (~isempty(fix_class2)) && handles.merge==0 && handles.undo==0 && handles.forc
     ind_non_fix(fix_class2) = []; 
     if isfield(handles,'new_spc_classes')
             clustering_results(ind_non_fix,4) = handles.new_spc_classes(ind_non_fix);
-%     else
-%             clustering_results(ind_non_fix,4) = classes(ind_non_fix); % classes of the non-fixed spikes in the original clusters column
     end
     if handles.setclus == 0
         clustering_results(ind_non_fix,3) = temp; % temperature of the non-fixed spikes in the original temperature column
@@ -252,21 +225,14 @@ if isempty(fix_class2) && handles.undo==0 && handles.merge==0 && handles.force==
     end
 end
 
-
-
-
 clear classes
-% Updates clustering_results and clustering_results_bk in USER_DATA
+% Updates clustering_results in USER_DATA
 USER_DATA{10} = clustering_results; 
-USER_DATA{11} = clustering_results_bk; 
-clear clustering_results_bk; 
+
 for i=20:52
     USER_DATA{i} = [];
 end
 
-set(handles.fix1_button,'value',0);
-set(handles.fix2_button,'value',0);
-set(handles.fix3_button,'value',0);
 for i=4:par.max_clus
     eval(['par.fix' num2str(i) '=0;']);
 end
@@ -275,13 +241,14 @@ set(handles.wave_clus_figure,'userdata',USER_DATA)
 ax_v=[];
 % Clear plots
 for i=1:3
+    set(eval(['handles.fix' num2str(i) '_button']),'value',0);
     cla(eval(['handles.spikes' num2str(i)]),'reset');
 	ax_v(end+1)=eval(['handles.spikes' num2str(i)]);
     cla(eval(['handles.isi' num2str(i)]),'reset');
 end    
 % cla(handles.isi0);
 cla(handles.spikes0,'reset');
-delete(allchild(handles.projections))
+cla(handles.projections);
 hold(handles.projections,'on')
 
 % Plot clusters
@@ -294,26 +261,24 @@ forced = USER_DATA{13};
 figs_num = 6;
 opened_figs = cell(1,figs_num);
 for i = 0:nclusters
+    tmpy = []; %as a flag to don't make the same vector twice
     if ~ (isempty(class0) && i==0)
         %PLOTS SPIKES OR PROJECTIONS
         class_i = eval(['class' num2str(i)]);
         sup_spikes = length(class_i);
         max_spikes = min(sup_spikes, par.max_spikes_plot);
-        permut = randperm(sup_spikes);
-        permut = permut(1:max_spikes);
+        permut = randperm(sup_spikes,max_spikes);
         xlim(handles.projections,'manual');
         if get(handles.spike_shapes_button,'value') ==1 && (get(handles.plot_all_button,'value') ==1) && ~strcmp(par.all_classes_ax,'mean')
-            % this is quite slow:
-            %line(1:ls,spikes(class_i(permut),:),'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',handles.projections,'Visible','off'); %
             % optimizing for speed:
             tmpy=spikes(class_i(permut),:);
             tmpn=size(tmpy,1);
             tmpx=repmat([1:ls NaN]',1,tmpn);
-            tmpx=reshape(tmpx,prod(size(tmpx)),1);
+            tmpx=reshape(tmpx,numel(tmpx),1);
             tmpy=[tmpy'; repmat(NaN,1,tmpn)];
-            tmpy=reshape(tmpy,prod(size(tmpy)),1);
+            tmpy=reshape(tmpy,numel(tmpy),1);
             line(tmpx,tmpy,'color',num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)),'Parent',handles.projections,'Visible','off');
-            xlim(handles.projections, [1 ls])
+			xlim(handles.projections, [1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
             av   = mean(spikes(class_i,:));
             plot(handles.projections,1:ls,av,'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'linewidth',2);
@@ -334,17 +299,18 @@ for i = 0:nclusters
             avdw = av - par.to_plot_std * std(spikes(class_i,:));
                       
             if get(handles.plot_all_button,'value') ==1
-                % this is quite slow:
-                %line(1:ls,spikes(class_i(permut),:),'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',clus_ax);
                 % optimizing for speed:
-                tmpy=spikes(class_i(permut),:);
-                tmpn=size(tmpy,1);
-                tmpx=repmat([1:ls NaN]',1,tmpn);
-                tmpx=reshape(tmpx,prod(size(tmpx)),1);
-                tmpy=[tmpy'; repmat(NaN,1,tmpn)];
-                tmpy=reshape(tmpy,prod(size(tmpy)),1);
+                if isempty(tmpy)
+                    tmpy=spikes(class_i(permut),:);
+                    tmpn=size(tmpy,1);
+                    tmpx=repmat([1:ls NaN]',1,tmpn);
+                    tmpx=reshape(tmpx,numel(tmpx),1);
+                    tmpy=[tmpy'; repmat(NaN,1,tmpn)];
+                    tmpy=reshape(tmpy,numel(tmpy),1);
+                end
                 line(tmpx,tmpy,'color',num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)),'Parent',clus_ax);
-                if i==0
+				
+				if i==0
                     line(1:ls,av,'color','c','linewidth',2,'Parent',clus_ax)
                     line(1:ls,avup,'color','c','linewidth',0.5,'Parent',clus_ax)
                     line(1:ls,avdw,'color','c','linewidth',0.5,'Parent',clus_ax)
@@ -420,10 +386,6 @@ end
 
 for i =1:figs_num
     if ~isempty(opened_figs{i})  
-%         haux = guidata(opened_figs{i});
-%         for k = 5*(i-1)+4:min(nclusters,5*(i-1)+8)
-%             ylim(eval(['haux.spikes' num2str(k)]),[ymin ymax]);
-%         end
         set(opened_figs{i},'units','normalized','outerposition',[0 0 1 1])
         set(opened_figs{i},'Visible', 'on'); 
     end

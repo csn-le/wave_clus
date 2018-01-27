@@ -37,6 +37,7 @@ classdef readInData < handle
                 obj.with_results = true;
                 results_selected = true;
                 obj.nick_name = fnam(7:end);
+                obj.with_wc_spikes = true;
             end
             if length(fnam)>7 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat') %if a 'spikes' file was selected.
                 obj.with_wc_spikes = true;
