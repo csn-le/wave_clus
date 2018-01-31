@@ -87,7 +87,6 @@ set(handles.fix1_button,'value',0);
 set(handles.fix2_button,'value',0);
 set(handles.fix3_button,'value',0);
 
-
 % Update handles structure
 guidata(hObject, handles);
 
@@ -155,8 +154,6 @@ for i = 1:3
     set(eval(['handles.isi' si '_accept_button']),'value',1);
     set(eval(['handles.isi' si '_reject_button']),'value',0);
     set(eval(['handles.fix' si '_button']),'value',0);
-    
-   
     eval(['set(handles.isi' si '_nbins,''string'',handles.par.nbins);']);
     eval(['set(handles.isi' si '_bin_step,''string'',handles.par.bin_step);']);
 end
@@ -518,6 +515,7 @@ par.sorting_date = datestr(now);
 gui_status = struct();
 gui_status.current_temp =  gui_classes_data(1,1);
 gui_status.original_classes = gui_classes_data(1:end,4);
+gui_status.auto_sort_info = getappdata(handles.temperature_plot,'auto_sort_info');
 
 Temp = zeros(length(classes_names),1);
 for i = 1:length(classes_names)
@@ -553,43 +551,18 @@ if exist([handles.par.fnamespc '.dg_01.lab'],'file')
 end
 
 %Save figures
-h_figs = get(0,'children');
-h_fig = findobj(h_figs,'tag','wave_clus_figure');
-h_fig1 = findobj(h_figs,'tag','wave_clus_aux');
-h_fig2 = findobj(h_figs,'tag','wave_clus_aux1');
-h_fig3 = findobj(h_figs,'tag','wave_clus_aux2');
-h_fig4 = findobj(h_figs,'tag','wave_clus_aux3');
-h_fig5 = findobj(h_figs,'tag','wave_clus_aux4');
-h_fig6 = findobj(h_figs,'tag','wave_clus_aux5');
+fig_names = {'figure','aux','aux1','aux2','aux3','aux4','aux5'};
+file_names = {'','a','b','c','d','e','f'};
 
-if ~isempty(h_fig)
-    figure(h_fig); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig,''-dpng'',''fig2print_' outfile(7:end)  ''',''-r300'')' ]);
+h_figs = get(0,'children');
+for i=1:length(fig_names)
+	h_fig =  findobj(h_figs,'tag',['wave_clus_' fig_names{i}]);
+	if ~isempty(h_fig)
+        figure(h_fig); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
+        print(h_fig,'-dpng',['fig2print_' outfile(7:end) file_names{i}],'-r300');      
+	end
 end
-if ~isempty(h_fig1)
-    figure(h_fig1); set(gcf,'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig1,''-dpng'',''fig2print_' outfile(7:end) 'a' ''',''-r300'')' ]);
-end
-if ~isempty(h_fig2)
-    figure(h_fig2); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig2,''-dpng'',''fig2print_' outfile(7:end) 'b' ''',''-r300'')' ]);
-end
-if ~isempty(h_fig3)
-    figure(h_fig3); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig3,''-dpng'',''fig2print_' outfile(7:end) 'c' ''',''-r300'')' ]);
-end
-if ~isempty(h_fig4)
-    figure(h_fig4); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig4,''-dpng'',''fig2print_' outfile(7:end) 'd' ''',''-r300'')' ]);
-end
-if ~isempty(h_fig5)
-    figure(h_fig5); set(gcf,'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig5,''-dpng'',''fig2print_' outfile(7:end) 'e' ''',''-r300'')' ]);
-end
-if ~isempty(h_fig6)
-    figure(h_fig6); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-    eval(['print(h_fig6,''-dpng'',''fig2print_' outfile(7:end) 'f' ''',''-r300'')' ]);
-end
+
 set(hObject,'value',0);
 
 
@@ -599,9 +572,6 @@ function set_parameters_button_Callback(hObject, eventdata, handles)
     %Wave_clus\Parameters_files');
     set_parameters_ui()
 
-    
-%SETTING OF FORCE MEMBERSHIP
-% --------------------------------------------------------------------
     
 function force_unforce_button_Callback(hObject, eventdata, handles)    
     
@@ -666,10 +636,7 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
         handles.setclus = 1;
         set(hObject,'String','FORCED')
         %set(handles.change_temperature_button,'enable','off');
-    else
-%         clu = USER_DATA{4};
-%         temp = USER_DATA{8};
-%         classes = clu(temp,3:end)+1;       
+    else    
         
         new_forced = zeros(size(forced));
         % Fixed clusters are not considered for forcing
@@ -710,11 +677,9 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
     USER_DATA{6} = classes(:)';
     
     handles.merge = 0;
-    
     handles.undo = 0;
     set(handles.wave_clus_figure,'userdata',USER_DATA)
     plot_spikes(handles);
-
 
 
     
@@ -755,28 +720,31 @@ function manual_clus_button_Callback(hObject, eventdata,handles_local, cl)
             set(hObject,'value',0);
             return;
         end
-        
+        yborders = ylim(current_ax); 
+        if rect(2)<yborders(1)
+            ymin = -inf;
+        else
+            ymin = rect(2);
+        end    
+        if rect(2) + rect(4)>yborders(2)
+            ymax = inf;
+        else
+            ymax = rect(2) + rect(4);
+        end
+        xind = max(1, ceil(rect(1)));
+        xend = min(size(spikes,2),floor(rect(1) + rect(3)));            
         if(rect(3)<2)
             if rect(3)==0
                 set(hObject,'Enable','on');
                 set(hObject,'value',0);
                 return;
             end
-            xind = max(1, ceil(rect(1)));
-            xend = min(size(spikes,2),floor(rect(1) + rect(3)));
-            ymin = rect(2);
-            ymax = rect(2) + rect(4);
-            
             sp_selected = (max(spikes(valids,xind:xend),[],2)>ymin) &  (min(spikes(valids,xind:xend),[],2)<ymax);
             valids(valids==1) = sp_selected;
         else
-            xind = max(1, ceil(rect(1)));
-            xend = min(size(spikes,2),floor(rect(1) + rect(3)));
             xD = xend-xind;
-            ymin = rect(2);
-            ymax = rect(2) + rect(4);
             yD = ymin - ymax;
-            if xD==0 || yD == 0; 
+            if xD==0 || yD == 0
                 set(hObject,'Enable','on');
                 set(hObject,'value',0);
                 return;
@@ -1004,8 +972,6 @@ USER_DATA{6} = classes;
 
 clustering_results = USER_DATA{10};
 USER_DATA{11} = clustering_results; % Save backup
-%clustering_results(:,2) = classes;
-%USER_DATA{10} = clustering_results; 
 
 set(main_fig,'userdata',USER_DATA);
 
@@ -1229,10 +1195,7 @@ end
 % --- Executes on button press in Plot_polytrode_channels_button.
 function Plot_polytrode_button_Callback(hObject, eventdata, handles)
 USER_DATA = get(handles.wave_clus_figure,'userdata');
-par = USER_DATA{1};
-if par.channels > 1
-    Plot_polytrode(handles)
-end
+wc_polytrode_figs(USER_DATA,true)
 
 
 function  logo_axes_CreateFcn(hObject, eventdata, handles)
@@ -1301,5 +1264,4 @@ function fix_all_button_Callback(hobject,event,handles)
     end
     USER_DATA{1} = par;
     set(handles.wave_clus_figure,'userdata',USER_DATA);
-    
     

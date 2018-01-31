@@ -308,7 +308,7 @@ for i = 0:nclusters
                     tmpy=[tmpy'; repmat(NaN,1,tmpn)];
                     tmpy=reshape(tmpy,numel(tmpy),1);
                 end
-                line(tmpx,tmpy,'color',num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)),'Parent',clus_ax);
+                line(tmpx,tmpy,'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',clus_ax);
 				
 				if i==0
                     line(1:ls,av,'color','c','linewidth',2,'Parent',clus_ax)
