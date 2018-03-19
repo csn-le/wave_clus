@@ -151,17 +151,17 @@ function get_spikes_single(filename, par_input)
     par.filename = filename;
     par.reset_results = true;  %if true,  don't load times_ or _spikes files
     par.cont_segment = true;  %false doesn't save the segment of the continuous data in the spikes file
+    par = update_parameters(par,par_input,'relevant');
     try 
         data_handler = readInData(par);
     catch MExc
         warning(MExc.message);
         return
     end
-    
     par = data_handler.par;
     par = update_parameters(par,par_input,'detect');
     data_handler.par = par;
-    
+    threshold = [];
     if data_handler.with_spikes            %data have some type of _spikes files
         [spikes, index] = data_handler.load_spikes(); 
         if ~data_handler.with_wc_spikes
@@ -173,7 +173,7 @@ function get_spikes_single(filename, par_input)
     else    
         index = [];
         spikes = [];
-        threshold = [];
+        
         for n = 1:data_handler.max_segments
             x = data_handler.get_segment();
                 %<----  Add here extra processing of the signal (x)
@@ -193,15 +193,19 @@ function get_spikes_single(filename, par_input)
 
     if current_par.cont_segment && data_handler.with_raw
         [psegment, sr_psegment] = data_handler.get_signal_sample();
-        
-        save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par','psegment','sr_psegment')
+        try
+			save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par','psegment','sr_psegment','threshold')
+		catch
+			save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par','psegment','sr_psegment','threshold','-v7.3')
+		end
     else
-        save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par')
+		try
+			save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par')
+		catch
+			save([data_handler.nick_name '_spikes'], 'spikes', 'index', 'par','-v7.3')
+		end
     end
 
-    if ~data_handler.with_spikes
-        save([data_handler.nick_name '_spikes'],'threshold','-append')
-    end
 end
 
 function counter = count_new_sp_files(initial_date, filenames)
