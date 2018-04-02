@@ -91,7 +91,7 @@ set(handles.fix3_button,'value',0);
 guidata(hObject, handles);
 
 if nargin>3 && ischar(varargin{1})
-      load_data_button_Callback(varargin{1},'w_arg',handles)
+      load_data_button_Callback('w_arg',varargin{1},handles)
 end
 
 % UIWAIT makes wave_clus wait for user response (see UIRESUME)
@@ -120,12 +120,12 @@ set(0,'DefaultAxesColorOrder',clus_colors)
 function load_data_button_Callback(hObject, eventdata, handles)
 % select file
 
-if ischar(hObject) && strcmp(eventdata,'w_arg')
-    if isempty(fileparts(hObject))
-        filename = hObject;
+if ischar(eventdata)
+    if isempty(fileparts(eventdata))
+        filename = eventdata;
         pathname = [pwd filesep];
     else
-        [pathname filename ext]=fileparts(hObject);
+        [pathname filename ext]=fileparts(eventdata);
         pathname = [pathname filesep];
         filename = [filename ext];
     end
