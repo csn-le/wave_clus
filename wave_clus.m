@@ -544,7 +544,11 @@ currentver = version;
 if currentver(1) >= 7
     ver = ',''-v6''';
 end
-eval(['save( ''' outfile ''',''' var_list '' ver ');']);
+try
+	eval(['save( ''' outfile ''',''' var_list '' ver ');']);
+catch 
+	eval(['save( ''' outfile ''',''' var_list '' ver ',''-v7.3'');']);
+end
 if exist([handles.par.fnamespc '.dg_01.lab'],'file')
     copyfile([handles.par.fnamespc '.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab']);
     copyfile([handles.par.fnamespc '.dg_01'], [handles.par.fnamesave '.dg_01']);

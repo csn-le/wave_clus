@@ -388,7 +388,7 @@ if make_plots
 
 
 
-        if par.print2file;
+        if par.print2file
             print(curr_fig,'-dpng',['fig2print_' filename '.png'],resolution);
         else
             print
@@ -536,10 +536,17 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     cluster_class = zeros(nspk,2);
     cluster_class(:,2)= index';
     cluster_class(:,1)= classes';
-    save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'par','inspk','forced','Temp');
-    if exist('ipermut','var')
-        save(['times_' data_handler.nick_name],'ipermut','-append');
-    end
+	try
+		save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'par','inspk','forced','Temp');
+		if exist('ipermut','var')
+			save(['times_' data_handler.nick_name],'ipermut','-append');
+		end
+	catch
+		save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'par','inspk','forced','Temp','-v7.3');
+		if exist('ipermut','var')
+			save(['times_' data_handler.nick_name],'ipermut','-append','-v7.3');
+		end
+	end
 end
     
 function counter = count_new_times(initial_date, filenames)

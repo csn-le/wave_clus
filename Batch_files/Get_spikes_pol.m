@@ -152,7 +152,11 @@ function get_spikes_pol_single(polytrode, par_input)
     par.detection_date =  datestr(now);
 	par.channels = n_channels;
     thr = cell2mat(thr);
-    save([out_filename '_spikes'], 'spikes', 'index','par','thr')
+	try
+		save([out_filename '_spikes'], 'spikes', 'index','par','thr')
+	catch
+		save([out_filename '_spikes'], 'spikes', 'index','par','thr','-v7.3')
+	end
 end
 
 function counter = count_new_sp_files(initial_date, polytrodes)
