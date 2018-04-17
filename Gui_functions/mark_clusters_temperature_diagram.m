@@ -69,7 +69,10 @@ switch handles.par.temp_plot
             handles.par.mintemp+(1:num_temp)*handles.par.tempstep, ...
             tree(1:num_temp,5:size(tree,2)),[temperature temperature],[1 tree(1,5)],'k:')
         % mark clusters
-        for i=1:min(size(tree,2)-4,length(class_plot))
+        for i=1:length(class_plot)
+            if class_plot(i)+4>size(tree,2)
+                continue
+            end
             tree_clus = tree(temp_plot(i),4+class_plot(i));
             tree_temp = tree(temp_plot(i)+1,2);
             semilogy(handles.temperature_plot, tree_temp,tree_clus,'.','color',colors(mod(classgui_plot(i)-1,maxc)+1,:),'MarkerSize',20);
