@@ -22,22 +22,19 @@ catch
 	with_memory=false;
 end
 if with_memory
-	[uaux,aux] = memory;
-	memo_avaible = floor(aux.PhysicalMemory.Available*0.9);
-	if exist('max_memo_GB','var')
-		if max_memo_GB > memo_avaible
-			error('max_memo_GB > 90% of Physical Memory Available')
-		else
-			max_memo = max_memo_GB*(1024)^3;
+	[userview,systemview] = memory;
+	memo_avaible = floor(systemview.PhysicalMemory.Available*0.80);
+	if exist('max_memo_GB','var') && ~isempty(max_memo_GB)
+        max_memo = max_memo_GB*(1024)^3;
+		if max_memo > memo_avaible
+			error('max_memo_GB > 80% of Physical Memory Available')
 		end
 	else
-		max_memo = memo_avaible*(1024)^3;
+		max_memo = memo_avaible;
 	end
-	
 else
 	max_memo = max_memo_GB*(1024)^3;
 end
-
 
 
 fid = fopen(filename, 'r');
@@ -101,7 +98,7 @@ for j=1:num_segments
     data2((num_amps*4)+1:num_amps*4+1:end) = [];
     data2 = typecast(data2,'single');
     for ind = 1:num_amps
-        fwrite(outfile_handles{i},data2(ind:num_amps:end),'single');
+        fwrite(outfile_handles{ind},data2(ind:num_amps:end),'single');
     end
     fprintf('Segment %d out of %d processed.\n',j,num_segments);
 end

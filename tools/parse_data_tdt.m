@@ -16,18 +16,16 @@ catch
 	with_memory=false;
 end
 if with_memory
-	[uaux,aux] = memory;
-	memo_avaible = floor(aux.PhysicalMemory.Available*0.9);
-	if exist('max_memo_GB','var')
-		if max_memo_GB > memo_avaible
-			error('max_memo_GB > 90% of Physical Memory Available')
-		else
-			max_memo = max_memo_GB*(1024)^3;
+	[userview,systemview] = memory;
+	memo_avaible = floor(systemview.PhysicalMemory.Available*0.80);
+	if exist('max_memo_GB','var') && ~isempty(max_memo_GB)
+        max_memo = max_memo_GB*(1024)^3;
+		if max_memo > memo_avaible
+			error('max_memo_GB > 80% of Physical Memory Available')
 		end
 	else
-		max_memo = memo_avaible*(1024)^3;
+		max_memo = memo_avaible;
 	end
-	
 else
 	max_memo = max_memo_GB*(1024)^3;
 end
