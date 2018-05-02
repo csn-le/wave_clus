@@ -32,14 +32,14 @@ classdef readInData < handle
             obj.with_spc = false;
             with_par = false;
             results_selected = false;
-            
+
             if length(fnam)>6 && strcmp(fnam(1:6),'times_') && strcmp(ext,'.mat') %if a 'times' file was selected.
                 obj.with_results = true;
                 results_selected = true;
                 obj.nick_name = fnam(7:end);
                 obj.with_wc_spikes = true;
             end
-            if length(fnam)>7 && strcmp(fnam(end-6:end),'_spikes') && strcmp(ext,'.mat') %if a 'spikes' file was selected.
+            if length(fnam)>7 && strcmp(fnam(end-6:end),'_spikes') && (strcmp(ext,'.mat') || isempty(ext))%if a 'spikes' file was selected.
                 obj.with_wc_spikes = true;
                 results_selected =true;
                 obj.nick_name = fnam(1:end-7);
@@ -100,7 +100,7 @@ classdef readInData < handle
                 obj.with_spikes = obj.with_spikes || with_spikes;
                 if ~with_par                                                                                            %if didn't load sr from previous results 
                     if isempty(sr)
-                        disp('Wave_clus didn''t find a sampling rate in file. It will use the set in set_parameters.m')  %use default sr (from set_parameters) 
+                        disp('Wave_clus didn''t find a sampling rate in file. It will use the input parameter or set_parameters.m')  %use default sr (from set_parameters) 
                     else
                         obj.par.sr = sr;                                                                                %load sr from raw data
                     end
