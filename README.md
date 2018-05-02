@@ -42,7 +42,6 @@ The output of Wave_clus (obtained either using the *Save* clusters button in the
 
 Wave_clus can read MATLAB files (extension .mat) with continuous data or spikes for clustering spike shapes that have already been detected (e.g. detected on-line by the acquisition system). It should have either a vector named **data** (the continuous signal) or a matrix named **spikes** (nr. of spikes x length of the spike shape) plus a vector **index** with the spike times. If the variable **sr** is inside the file, it will set the sampling rate. Otherwise **par.sr** inside the file `set_parameters` will be use.
 
-All the supported formats (.mat, .int, .NSx, .pl2, .tdt and .ncs) use the codes in the folder `Raw_data_readers` to get the data from the files. Some of them require to run the codes in the folder `tools` before.
 
 
 Important links
