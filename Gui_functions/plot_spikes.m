@@ -2,11 +2,13 @@ function plot_spikes(handles)
 set(handles.file_name,'string','Plotting...'); 
 drawnow;
 if exist('groot','builtin')
-    set(groot,'defaultfiguregraphicssmoothing','off');
     if isprop(handles.wave_clus_figure,'GraphicsSmoothing')
         set(handles.wave_clus_figure,'GraphicsSmoothing','off');
     end
-    set(groot,'DefaultAxesFontSize',8)
+    try
+        set(groot,'defaultfiguregraphicssmoothing','off');
+        set(groot,'DefaultAxesFontSize',8)
+    end
 end
 
 USER_DATA = get(handles.wave_clus_figure,'userdata');
@@ -24,7 +26,12 @@ clustering_results = USER_DATA{10};
 h_figs = get(0,'children');
 close(findobj(h_figs,'flat','tag','wave_clus_aux'));
 for w = 1:5
-    close(findobj(h_figs,'flat','tag',['wave_clus_aux' num2str(w)]));
+    try
+        close(findobj(h_figs,'flat','tag',['wave_clus_aux' num2str(w)]));
+    catch
+        h_figs = get(0,'children'); %to fix Invalid handle in old Matlabs
+        close(findobj(h_figs,'flat','tag',['wave_clus_aux' num2str(w)]));
+    end
 end
 if ishandle(10)
 	close(10)
@@ -277,7 +284,7 @@ for i = 0:nclusters
             tmpx=reshape(tmpx,numel(tmpx),1);
             tmpy=[tmpy'; repmat(NaN,1,tmpn)];
             tmpy=reshape(tmpy,numel(tmpy),1);
-            line(tmpx,tmpy,'color',num2str(colors(mod(i-1,maxc)+1,:)*(i~=0)),'Parent',handles.projections,'Visible','off');
+            line(tmpx,tmpy,'color',colors(mod(i-1,maxc)+1,:)*(i~=0),'Parent',handles.projections,'Visible','off');
 			xlim(handles.projections, [1 ls])
         elseif get(handles.spike_shapes_button,'value') ==1
             av   = mean(spikes(class_i,:));

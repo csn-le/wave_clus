@@ -49,17 +49,17 @@ thr = stdmin * noise_std_detect;        %thr for detection is based on detect se
 thrmax = stdmax * noise_std_sorted;     %thrmax for artifact removal is based on sorted settings.
 
 index = [];
-
+sample_ref = floor(ref/2);
 % LOCATE SPIKE TIMES
 switch detect
     case 'pos'
         nspk = 0;
-        xaux = find(xf_detect(w_pre+2:end-w_post-2-floor(ref/2)) > thr) +w_pre+1;
+        xaux = find(xf_detect(w_pre+2:end-w_post-2-sample_ref) > thr) +w_pre+1;
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
-                [aux_unused, iaux]=max((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
-                if iaux == 1
+                [aux_unused, iaux] = max((xf(xaux(i):xaux(i)+sample_ref-1)));    %introduces alignment
+                if iaux == 1 && ~any((xf(xaux(i)+1:xaux(i)+sample_ref))>thr)
                     continue
                 end
                 nspk = nspk + 1;
@@ -69,12 +69,12 @@ switch detect
         end
     case 'neg'
         nspk = 0;
-        xaux = find(xf_detect(w_pre+2:end-w_post-2-floor(ref/2)) < -thr) +w_pre+1;
+        xaux = find(xf_detect(w_pre+2:end-w_post-2-sample_ref) < -thr) +w_pre+1;
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
-                [aux_unused, iaux]=min((xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
-                if iaux == 1
+                [aux_unused, iaux] = min((xf(xaux(i):xaux(i)+sample_ref-1)));    %introduces alignment
+                if iaux == 1 && ~any((xf(xaux(i)+1:xaux(i)+sample_ref))<thr)
                     continue
                 end
                 nspk = nspk + 1;
@@ -84,12 +84,12 @@ switch detect
         end
     case 'both'
         nspk = 0;
-        xaux = find(abs(xf_detect(w_pre+2:end-w_post-2-floor(ref/2))) > thr) +w_pre+1;
+        xaux = find(abs(xf_detect(w_pre+2:end-w_post-2-sample_ref)) > thr) +w_pre+1;
         xaux0 = 0;
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
-                [aux_unused, iaux]=max(abs(xf(xaux(i):xaux(i)+floor(ref/2)-1)));    %introduces alignment
-                if iaux == 1
+                [aux_unused, iaux] = max(abs(xf(xaux(i):xaux(i)+sample_ref-1)));    %introduces alignment
+                if iaux == 1 && ~any((abs(xf(xaux(i)+1:xaux(i)+sample_ref)))>thr)
                     continue
                 end
                 nspk = nspk + 1;
