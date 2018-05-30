@@ -63,6 +63,19 @@ else
     gui_mainfcn(gui_State, varargin{:});
 end
 % End initialization code - DO NOT EDIT
+function Close_requestFcn(hObject, handles)
+%wave_clus('Close_requestFcn',gcbo,guidata(gcbo))
+    aux =  findobj(0, 'type', 'figure','tag','wave_clus_aux');
+    if ~isempty(aux)
+        delete(aux)
+    end
+    for i=1:5
+        aux = findobj(0, 'type', 'figure','tag',['wave_clus_aux' num2str(i)]);
+        if ~isempty(aux)
+            delete(aux)
+        end
+    end
+    delete(hObject)
 
 
 % --- Executes just before wave_clus is made visible.
@@ -561,9 +574,14 @@ file_names = {'','a','b','c','d','e','f'};
 h_figs = get(0,'children');
 for i=1:length(fig_names)
 	h_fig =  findobj(h_figs,'tag',['wave_clus_' fig_names{i}]);
+    new_file_name = ['fig2print_' outfile(7:end) file_names{i}];
 	if ~isempty(h_fig)
         figure(h_fig); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
-        print(h_fig,'-dpng',['fig2print_' outfile(7:end) file_names{i}],'-r300');      
+        print(h_fig,'-dpng',new_file_name,'-r300');
+    else
+        if exist(new_file_name, 'file')==2
+            delete(new_file_name);
+        end 
 	end
 end
 

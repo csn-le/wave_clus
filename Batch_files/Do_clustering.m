@@ -224,8 +224,14 @@ if make_plots
             continue
         end
         filename = data_handler.nick_name;
-
         
+        file_pos_names = {'','a','b','c','d','e','f'};
+        for i=1:length(file_pos_names)
+            new_file_name = ['fig2print_' filename file_pos_names{i} '.png'];
+            if exist(new_file_name, 'file')==2
+                delete(new_file_name);
+            end 
+        end
         
         
         subplot(3,1,1)
@@ -385,8 +391,6 @@ if make_plots
             fprintf(fout,'%d\t',nnz(classes==ii));
         end
         fclose(fout);
-
-
 
         if par.print2file
             print(curr_fig,'-dpng',['fig2print_' filename '.png'],resolution);
