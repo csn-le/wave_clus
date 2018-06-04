@@ -134,18 +134,25 @@ for j=1:nchannels
   end
 end
 
+ fig_name = @(x) ['Pol_plot_' filename '_fig' num2str(x) '.png'];
+
 % SAVE FIGURE
  for h = 1:length(pp_figs)
 	set( pp_figs(h),'papertype','usletter','paperorientation','portrait','paperunits','inches')
     set( pp_figs(h),'paperposition',[.25 .25 10.5 7.8])
-    print( pp_figs(h),'-dpng',['Pol_plot_' filename '_fig' num2str(h)]);
+    print( pp_figs(h),'-dpng',fig_name(h));
 	 if ~show_figs
 		close( pp_figs(h))
      else
          set( pp_figs(h),'Visible','on')
+         set(pp_figs(h) ,'CloseRequestFcn',@(x,y) cellfun(@delete,num2cell(pp_figs)))
 	 end
  end
- 
+ h = length(pp_figs)+1;
+ while exist(fig_name(h), 'file')==2 
+     delete(fig_name(h))
+     h = h+1;
+ end
  if exist('groot','builtin')
     set(groot,'defaultfiguregraphicssmoothing','remove')
 end

@@ -574,7 +574,7 @@ file_names = {'','a','b','c','d','e','f'};
 h_figs = get(0,'children');
 for i=1:length(fig_names)
 	h_fig =  findobj(h_figs,'tag',['wave_clus_' fig_names{i}]);
-    new_file_name = ['fig2print_' outfile(7:end) file_names{i}];
+    new_file_name = ['fig2print_' outfile(7:end) file_names{i} '.png'];
 	if ~isempty(h_fig)
         figure(h_fig); set(gcf, 'PaperUnits', 'inches', 'PaperType', 'A4', 'PaperPositionMode', 'auto','PaperOrientation','portrait');
         print(h_fig,'-dpng',new_file_name,'-r300');
@@ -1255,6 +1255,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+
 function fix_all_button_Callback(hobject,event,handles)
     USER_DATA = get(handles.wave_clus_figure,'userdata');
     par = USER_DATA{1};
@@ -1270,19 +1271,41 @@ function fix_all_button_Callback(hobject,event,handles)
     for i=3:fmax
         opened_figs{i} =  guidata(findobj(0, 'type', 'figure','tag',['wave_clus_aux' num2str(i-2)]));
     end
+    status = nan(length(cls),1);
     for ci = 1:length(cls)
         c = cls(ci);
-        fix_class = find(classes==c);
-        USER_DATA{19+c} = fix_class;
-        
         if c<4
-            set(eval(['handles.fix' num2str(c) '_button']),'value',1)
+            status(ci)=get(eval(['handles.fix' num2str(c) '_button']),'value');
         else
-            handles_aux = opened_figs{ceil((c-3)/5)+1};
-            set(eval(['handles_aux.fix' num2str(c) '_button']),'value',1)
-            eval(['par.fix' num2str(c) '= 1;'])
+            eval(['status(ci)=par.fix' num2str(c) ';'])
         end
- 
+    end
+    if all(status==1)
+        for ci = 1:length(cls)
+            c = cls(ci);
+            fix_class = find(classes==c);
+            USER_DATA{19+c} = [];
+            if c<4
+                set(eval(['handles.fix' num2str(c) '_button']),'value',0)
+            else
+                handles_aux = opened_figs{ceil((c-3)/5)+1};
+                set(eval(['handles_aux.fix' num2str(c) '_button']),'value',0)
+                eval(['par.fix' num2str(c) '= 0;'])
+            end
+        end  
+    else
+        for ci = 1:length(cls)
+            c = cls(ci);
+            fix_class = find(classes==c);
+            USER_DATA{19+c} = fix_class;
+            if c<4
+                set(eval(['handles.fix' num2str(c) '_button']),'value',1)
+            else
+                handles_aux = opened_figs{ceil((c-3)/5)+1};
+                set(eval(['handles_aux.fix' num2str(c) '_button']),'value',1)
+                eval(['par.fix' num2str(c) '= 1;'])
+            end
+        end  
     end
     USER_DATA{1} = par;
     set(handles.wave_clus_figure,'userdata',USER_DATA);
