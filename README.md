@@ -8,7 +8,7 @@ Wave_clus is a fast and unsupervised algorithm for spike detection and sorting u
 the experimenters’ preference (semi-automatic sorting). Wave_clus is free (and therefore without any warranty) for any non commercial applications. For any commercial application please contact Rodrigo Quian Quiroga.
 
 #### Requirements
-Wave_clus runs under Windows, Linux and Mac. It requires MATLAB 7.6 (R2008a) or higher. It uses the functions clusterXX.exe, provided by Eytan Domani, which is an executable that does the superparamagnetic clustering of the data. The wavelet and the signal processing toolboxes are not necessary.
+Wave_clus runs under Windows, Linux and Mac. It requires MATLAB 7.9 (R2009b) or higher. It uses the functions clusterXX.exe, provided by Eytan Domani, which is an executable that does the superparamagnetic clustering of the data. The wavelet and the signal processing toolboxes are not necessary.
 
 How-to
 ------
@@ -24,10 +24,9 @@ In MATLAB go to the menu File/Set Path and add the directory wave\_clus with sub
 4. Explore the clustering output at different temperatures (you will select a minimun cluster size with the same click). Remember to fix clear classes before move to another temperature.
 * (Optional) Select spikes manually to create new classes.
 * (Optional) Merge split classes (select classes with *fix* button and press *Merge*).
-5. (Optional) Reject spurious classes.
-6. Force the rest of the spikes.
+5. Force the rest of the spikes.
 * Remove non-spike events from classes, selecting them manually and rejecting the new class.
-7. Press *Save* to save the current result.
+6. Press *Save* to save the current result.
 
 #### Batch_files
 The automatic detection and clustering can be performed by the functions Get\_spikes and Do\_clustering respectively (see the .m files in batch_files/ for more instructions).
@@ -42,7 +41,7 @@ The output of Wave_clus (obtained either using the *Save* clusters button in the
 
 Wave_clus can read MATLAB files (extension .mat) with continuous data or spikes for clustering spike shapes that have already been detected (e.g. detected on-line by the acquisition system). It should have either a vector named **data** (the continuous signal) or a matrix named **spikes** (nr. of spikes x length of the spike shape) plus a vector **index** with the spike times. If the variable **sr** is inside the file, it will set the sampling rate. Otherwise **par.sr** inside the file `set_parameters` will be use.
 
-All the supported formats (.mat, .int, intan_RHD2000, .NSx, .pl2, .tdt and .ncs) use the codes in the folder `Raw_data_readers` to get the data from the files. If the extension of the file doesn't have a `Raw_data_readers/X_wc_reader`, is required to run the codes in the folder `tools` before.
+All the supported formats (.mat, .int, intan_RHD2000, .NSx, .pl2, dat, .tdt and .ncs) use the codes in the folder `Raw_data_readers` to get the data from the files. If the extension of the file doesn't have a `Raw_data_readers/X_wc_reader`, is required to run the codes in the folder `tools` before.
 
 
 Important links

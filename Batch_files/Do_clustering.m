@@ -421,7 +421,7 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     data_handler = readInData(par);
     par = data_handler.par;
     
-    if isfield(par,'channels')
+    if isfield(par,'channels') && ~isnan(par.channels)
         par.inputs = par.inputs * par.channels;
     end
     
