@@ -40,8 +40,8 @@ classdef mat_wc_reader < handle
                     obj.min_index = 0;
                     obj.max_index = max(data_info.size);
                 else
-                    obj.min_index = floor(par.tmin * obj.sr);                   %min time to read (in micro-sec)
-                    obj.max_index = ceil(par.tmax * obj.sr); 
+                    obj.min_index = floor(par.tmin * obj.sr);         %min time to read (in micro-sec)
+                    obj.max_index = ceil(par.tmax * obj.sr);
                     t0 = (obj.min_index-1)/obj.sr*1000;
                 end
                 n = obj.max_index -  obj.min_index;

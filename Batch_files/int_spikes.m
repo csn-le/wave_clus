@@ -11,7 +11,6 @@ extra = (size(spikes,2)-ls)/2;
 
 s = 1:size(spikes,2);
 ints = 1/int_factor:1/int_factor:size(spikes,2);
-
 if nspk>0
     intspikes=spline(s,spikes,ints);
 else

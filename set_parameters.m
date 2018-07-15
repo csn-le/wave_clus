@@ -10,8 +10,10 @@ par.cont_segment = true;
 par.max_spikes_plot = 1000;          % max. number of spikes to be plotted
 par.print2file = true;               % If is not true, print the figure (only for batch scripts).
 par.cont_plot_samples = 100000;      % number of samples used in the one-minute (maximum) sample of continuous data to plot.
-par.to_plot_std = 1;                 % # of std from mean to plot.
+par.to_plot_std = 1;                 % # of std from mean to plot
 par.all_classes_ax = 'mean';         % 'mean'/'all'. If it's 'mean' only the mean waveforms will be ploted in the axes with all the classes
+par.plot_feature_stats = false;
+
 
 % SPC PARAMETERS
 par.mintemp = 0.00;                  % minimum temperature for SPC
@@ -19,13 +21,15 @@ par.maxtemp = 0.251;                 % maximum temperature for SPC
 par.tempstep = 0.01;                 % temperature steps
 par.SWCycles = 100;                  % SPC iterations for each temperature (default 100)
 par.KNearNeighb = 11;                % number of nearest neighbors for SPC
-par.min_clus = 60;                   % minimum size of a cluster (default 60)
-par.min_clus_rel = 0.005;            % minimum cluster size, relative to the total nr. of spikes (only for batch scripts).
-par.max_clus = 33;                   % maximum number of clusters allowed (default 13)
+par.min_clus =20;                   % minimum size of a cluster (default 60)
+par.max_clus = 200;                   % maximum number of clusters allowed (default 13)
 par.randomseed = 0;                  % if 0, random seed is taken as the clock value (default 0)
 %par.randomseed = 147;               % If not 0, random seed
 %par.temp_plot = 'lin';              % temperature plot in linear scale
 par.temp_plot = 'log';               % temperature plot in log scale
+
+par.c_ov = 0.7;                      % Overlapping coefficient to use for the inclusion criterion.
+par.elbow_min  = 0.4;                %Thr_border parameter for regime border detection.
 
 % DETECTION PARAMETERS
 par.tmax = 'all';                    % maximum time to load
@@ -43,21 +47,23 @@ par.sort_fmin = 300;                 % high pass filter for sorting
 par.sort_fmax = 3000;                % low pass filter for sorting (default 3000)
 par.sort_order = 2;                  % filter order for sorting
 par.ref_ms = 1.5;                    % detector dead time, minimum refractory period (in ms)
-% par.detection = 'pos';             % type of threshold
-par.detection = 'neg';
-%par.detection = 'both';
-par.channels = 1;
+par.detection = 'pos';               % type of threshold ('pos','neg','both')
+% par.detection = 'neg';
+% par.detection = 'both';
 
 % INTERPOLATION PARAMETERS
 par.int_factor = 5;                  % interpolation factor
 par.interpolation = 'y';             % interpolation with cubic splines (default)
 % par.interpolation = 'n';
 
+
 % FEATURES PARAMETERS
-par.inputs = 10;                       % number of inputs to the clustering (per channel)
+par.min_inputs = 10;         % number of inputs to the clustering
+par.max_inputs = 0.75;       % number of inputs to the clustering. if < 1 it will the that proportion of the maximum.
 par.scales = 4;                        % number of scales for the wavelet decomposition
 par.features = 'wav';                % type of feature ('wav' or 'pca')
 %par.features = 'pca'
+
 
 % FORCE MEMBERSHIP PARAMETERS
 par.template_sdnum = 3;             % max radius of cluster in std devs.

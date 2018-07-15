@@ -25,7 +25,11 @@ switch par.template_type
             nn = nearest_neighbor(f_out(i,:),f_in,sdnum*sd,Inf*ones(size(f_in)),Inf,k);
             if( nn )
                 winner = mode(class_in(nn));
-                class_out(i) = winner;
+                if nnz(class_in(nn)==winner)<k_min
+                    class_out(i) = 0;
+                else
+                    class_out(i) = winner;
+                end
             else
                 class_out(i) = 0;
             end
