@@ -14,22 +14,36 @@ end
 % CALCULATES FEATURES
 switch feature
     case 'wav'
-        cc=zeros(nspk,ls);
-        spikes_l = reshape(spikes',numel(spikes),1);
-
-        if exist('wavedec')
-            [c_l,l_wc] = wavedec(spikes_l,scales,'haar');
-        else
-            [c_l,l_wc] = fix_wavedec(spikes_l,scales);
-        end
-        wv_c = [0;l_wc(1:end-1)];
-        nc = wv_c/nspk;
-        wccum = cumsum(wv_c);
-        nccum = cumsum(nc);
-        for cf = 2:length(nc)
-            cc(:,nccum(cf-1)+1:nccum(cf)) = reshape(c_l(wccum(cf-1)+1:wccum(cf)),nc(cf),nspk)';
-        end
-
+		cc=zeros(nspk,ls);
+		try
+			spikes_l = reshape(spikes',numel(spikes),1);
+			if exist('wavedec')
+				[c_l,l_wc] = wavedec(spikes_l,scales,'haar');
+			else
+				[c_l,l_wc] = fix_wavedec(spikes_l,scales);
+			end
+			wv_c = [0;l_wc(1:end-1)];
+			nc = wv_c/nspk;
+			wccum = cumsum(wv_c);
+			nccum = cumsum(nc);
+			for cf = 2:length(nc)
+				cc(:,nccum(cf-1)+1:nccum(cf)) = reshape(c_l(wccum(cf-1)+1:wccum(cf)),nc(cf),nspk)';
+			end
+		catch
+		    if exist('wavedec')                             % Looks for Wavelets Toolbox
+				for i=1:nspk                                % Wavelet decomposition
+					[c,l] = wavedec(spikes(i,:),scales,'haar');
+					cc(i,1:ls) = c(1:ls);
+				end
+			else
+				for i=1:nspk                                % Replaces Wavelets Toolbox, if not available
+					[c,l] = fix_wavedec(spikes(i,:),scales);
+					cc(i,1:ls) = c(1:ls);
+				end
+			end
+		
+		end
+		
         for i=1:ls
             thr_dist = std(cc(:,i)) * 3;
             thr_dist_min = mean(cc(:,i)) - thr_dist;
