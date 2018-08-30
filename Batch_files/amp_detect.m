@@ -22,16 +22,19 @@ fmax_sort = par.sort_fmax;
 if exist('ellip','file')                         %Checks for the signal processing toolbox
     [b_detect,a_detect] = ellip(par.detect_order,0.1,40,[fmin_detect fmax_detect]*2/sr);
     [b,a] = ellip(par.sort_order,0.1,40,[fmin_sort fmax_sort]*2/sr);
+    [b_notch,a_notch] = butter(par.detect_order,[55 65]*2/sr, 'stop');
 %     [z_det,p_det,k_det] = ellip(par.detect_order,0.1,40,[fmin_detect fmax_detect]*2/sr);
 %     [z,p,k] = ellip(par.sort_order,0.1,40,[fmin_sort fmax_sort]*2/sr);
 %     
 %     [SOS,G] = zp2sos(z,p,k);
 %     [SOS_det,G_det] = zp2sos(z_det,p_det,k_det);
     if exist('FiltFiltM','file')
-    	xf_detect = FiltFiltM(b_detect, a_detect, x);
+        xf_detect = FiltFiltM(b_notch, a_notch, x);
+    	xf_detect = FiltFiltM(b_detect, a_detect, xf_detect);
         xf = FiltFiltM(b, a, x); 
     else
-        xf_detect = filtfilt(b_detect, a_detect, x);
+        xf_detect = filtfilt(b_notch, a_notch, x);
+        xf_detect = filtfilt(b_detect, a_detect, xf_detect);
         xf = filtfilt(b, a, x);
 %         xf_detect = filtfilt(SOS_det, G_det, x);
 %         xf = filtfilt(SOS,G, x);
