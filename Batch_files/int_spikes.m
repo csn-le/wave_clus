@@ -11,26 +11,20 @@ extra = (size(spikes,2)-ls)/2;
 
 s = 1:size(spikes,2);
 ints = 1/int_factor:1/int_factor:size(spikes,2);
+spikes1 = zeros(nspk,ls);
 if nspk>0
     intspikes=spline(s,spikes,ints);
-else
-    iaux = [];
-end
-switch detect
-    case 'pos'
-        for i=1:nspk
-            [maxi iaux] = max(intspikes(:,(w_pre+extra-1)*int_factor:(w_pre+extra+1)*int_factor),[],2); 
-        end
-    case 'neg'
-        for i=1:nspk
-            [maxi iaux] = min(intspikes(:,(w_pre+extra-1)*int_factor:(w_pre+extra+1)*int_factor),[],2); 
-        end
-    case 'both'
-            [maxi iaux] = max(abs(intspikes(:,(w_pre+extra-1)*int_factor:(w_pre+extra+1)*int_factor)),[],2); 
-end
+    switch detect
+        case 'pos'
+                [maxi iaux] = max(intspikes(:,(w_pre+extra-1)*int_factor:(w_pre+extra+1)*int_factor),[],2);
+        case 'neg'
+                [maxi iaux] = min(intspikes(:,(w_pre+extra-1)*int_factor:(w_pre+extra+1)*int_factor),[],2);
+        case 'both'
+                [maxi iaux] = max(abs(intspikes(:,(w_pre+extra-1)*int_factor:(w_pre+extra+1)*int_factor)),[],2);
+    end
+    iaux = iaux + (w_pre+extra-1)*int_factor -1;
 
-iaux = iaux + (w_pre+extra-1)*int_factor -1;
-spikes1 = zeros(nspk,ls);
-for i=1:nspk
-    spikes1(i,:)= intspikes(i,iaux(i)-w_pre*int_factor+int_factor:int_factor:iaux(i)+w_post*int_factor);
+    for i=1:nspk
+        spikes1(i,:)= intspikes(i,iaux(i)-w_pre*int_factor+int_factor:int_factor:iaux(i)+w_post*int_factor);
+    end
 end
