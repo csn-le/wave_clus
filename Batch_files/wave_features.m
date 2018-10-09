@@ -64,7 +64,13 @@ switch feature
         nd = 10;
         d = (A(nd:end)-A(1:end-nd+1))/maxA*ncoeff/nd;
         all_above1 = find(d>=1);
-        temp_bla = smooth(diff(all_above1),3);
+        %temp_bla = smooth(diff(all_above1),3);
+		aux2 = diff(all_above1);
+		temp_bla = conv(aux2(:),[1 1 1]/3);
+		temp_bla = temp_bla(2:end-1);
+		temp_bla(1) = aux2(1);
+		temp_bla(end) = aux2(end);
+
         thr_knee_diff = all_above1(find(temp_bla(2:end)==1,1))+(nd/2); %ask to be above 1 for 3 consecutive coefficients
         inputs = par.max_inputs-thr_knee_diff+1;
 
