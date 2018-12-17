@@ -28,13 +28,14 @@ end
 
 tcum=0;
 
-if length(filename)<3 || (~strcmpi(filename(3),'\') && ...
+if length(filename)<3 || (~strcmpi(filename(2:3),':\') && ...
                  ~strcmpi(filename(1),'/') && ...
                  ~strcmpi(filename(2),'/') && ...
-                 ~strcmpi(filename(1:2), '\\'))
+                 ~strcmpi(filename(1:2), '\\')&& ~strcmpi(filename(2:3),':/'))
 
 	filename= [pwd filesep filename];
 end
+
 NSx = openNSx(filename, 'report','noread');
 nchan = NSx.MetaTags.ChannelCount;   % number of channels
 sr = NSx.MetaTags.SamplingFreq;   % sampling rate

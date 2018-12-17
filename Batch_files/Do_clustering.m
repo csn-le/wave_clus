@@ -499,7 +499,6 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
         [spikes, index] = data_handler.load_spikes();
     else
         warning('MyComponent:noValidInput', 'File: %s doesn''t include spikes', filename);
-        throw(ME)
         return
     end
 
