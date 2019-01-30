@@ -17,6 +17,8 @@ Wave_clus can read raw data or already detected spikes generated with electrophy
 Intan, etc) or saved as matlab files (.mat). It can also deal with tetrodes and high-
 density probes.
 
+Wave_clus is free (and therefore without any warranty) for any non-commercial applications. For any commercial application please contact Prof. Rodrigo Quian Quiroga.
+
 Important links
 ---------------
 
