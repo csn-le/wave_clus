@@ -131,9 +131,10 @@ function get_spikes_pol_single(polytrode, par_input)
                 x = x(1:end,1:x_len);
                 x(i,:) = xaux;
             end
-        end       
-    
-        [spikes, new_index,thr{n}] = amp_detect_pol(x,par); clear x;
+        end
+
+        [spikes, new_index,thr{n}] = amp_detect_pol(x,par_ch{1}); %all the channels should have the same parameters
+        clear x;
         index = [index data_handler_ch{1}.index2ts(new_index)];
         if length(spikes)~=0
             for i=1:n_channels

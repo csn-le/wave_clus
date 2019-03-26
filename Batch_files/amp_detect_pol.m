@@ -36,21 +36,25 @@ end
 index = sort(index);
 index(abs(diff(index))<ref) = []; 
 
-% SPIKE CONCATENATION: POLY-SPIKE
-for i=1:length(index)
-    for j=1:size(x,1)
-        spikes(i,1+(j-1)*(w_pre+w_post+2*awin):j*(w_pre+w_post+2*awin)) = xf(j,index(i)-w_pre-awin+1:index(i)+w_post+awin);
-    end
-end
 
 % POLY-SPIKE INTERPOLATION
 % interpolation and downsampling is done separately in every channel within
 % each poly-spike which does the interchannel alignment
 switch par.interpolation
     case 'n'
-        spikes(:,end-1:end)=[];       %eliminates borders that were introduced for interpolation 
-        spikes(:,1:2)=[];
+        % SPIKE CONCATENATION: POLY-SPIKE
+        for i=1:length(index)
+            for j=1:size(x,1)
+                spikes(i,1+(j-1)*(w_pre+w_post):j*(w_pre+w_post)) = xf(j,index(i)-w_pre+1:index(i)+w_post);
+            end
+        end
     case 'y'
+        % SPIKE CONCATENATION: POLY-SPIKE
+        for i=1:length(index)
+            for j=1:size(x,1)
+                spikes(i,1+(j-1)*(w_pre+w_post+2*awin):j*(w_pre+w_post+2*awin)) = xf(j,index(i)-w_pre-awin+1:index(i)+w_post+awin);
+            end
+        end
         %Does interpolation
         spikes = int_spikes_pol(spikes,size(x,1),thr,par);   
 end   
