@@ -32,7 +32,7 @@ classdef mat_wc_reader < handle
             if ismember('spikes',{finfo.name}) && ismember('index',{finfo.name})
                obj.spikes_file = true;
             end
-            if ismember('data',{finfo.name})
+            if isfield(par,'tmax') && ismember('data',{finfo.name})
                 
                 data_info = whos('-file',raw_filename,'data');
                 if strcmp(par.tmax,'all')

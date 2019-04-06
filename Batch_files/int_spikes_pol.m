@@ -8,7 +8,6 @@ int_factor = par.int_factor;
 nspk = size(spikes,1);
 s = 1:size(spikes,2)/nch; % length of the single spike
 ints = 1/int_factor:1/int_factor:size(spikes,2)/nch; 
-intspikes = zeros(1,length(ints));
 lspk = w_pre + w_post; % length of a spike
 awin = par.alignment_window;  
 lsa = w_pre + w_post + 2*awin; % spike length with extra samples for alignment

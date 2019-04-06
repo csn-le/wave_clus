@@ -110,7 +110,7 @@ if isnumeric(input) || any(strcmp(input,'all'))  %cases for numeric or 'all' inp
             filenames = [filenames {fname}];
         else
             aux = regexp(fname, '\d+', 'match');
-            if ismember(str2num(aux{1}),input)
+            if ~isempty(aux) && ismember(str2num(aux{1}),input)
                 filenames = [filenames {fname}];
             end
         end
