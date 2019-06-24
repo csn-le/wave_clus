@@ -2,7 +2,7 @@ function Do_clustering(input, varargin)
 
 % PROGRAM Do_clustering.
 % Does clustering on all files in Files.txt
-% Runs after Get_spikes.
+% Runs after Get_spikes, which prepares '*_spikes.mat' files.
 %
 % function Do_clustering(input, par_input)
 % Saves spikes, spike times (in ms), coefficients used (inspk), used
@@ -10,13 +10,13 @@ function Do_clustering(input, varargin)
 % results (cluster_class).
 %
 %input must be:
-%               A .txt file with the names of the _spikes files to use.
-%               A matlab cell with the names of the _spikesfiles to use.
+%               A .txt file with the names of the '*_spikes.mat' files to use.
+%               A matlab cell with the names of the '*_spikes.mat' files to use.
 %               A vector with channel numbers. In this case the function will proccess all the
-%                   '_spikes.mat' files located in the folder with those
+%                   '*_spikes.mat' files located in the folder with those
 %                   channel numbers (e.g., CSC1_spikes.mat or NSX4_spikes.mat)
 %               'all', in this case the functions will process all the
-%                   '_spikes.mat' files in the folder.
+%                   '*_spikes.mat' files in the folder.
 % optional argument 'par' and the next input must be a struct with some of
 %       the SPC parameters (the detection parameters are taken from the
 %       XXX_spikes file or the set_parameters file. All the parameters included
@@ -25,6 +25,9 @@ function Do_clustering(input, varargin)
 % optional argument 'make_times': true for computing the sorting from the XXX_spikes files.
 % optional argument 'make_plots': true for plotting the results based on the save XXX_times files.
 % optional argument 'resolution': resolution string used by the plots (default: '-r150').
+%
+% See also
+% Get_spikes
 
 
 % Example
