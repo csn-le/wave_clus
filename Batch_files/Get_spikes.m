@@ -5,6 +5,7 @@ function Get_spikes(input, varargin)
 %
 % Saves spikes, spike times (in ms), used parameters and a sample segment 
 % of the continuous data (optional) in filename_spikes.mat.
+%
 % input must be: 
 %               A .txt file with the names of the files to use.
 %               A matlab cell with the names of the files to use.
@@ -17,6 +18,9 @@ function Get_spikes(input, varargin)
 %       the detecction parameters. All the parameters included in the structure 
 %       par will overwrite the parameters loaded from set_parameters()
 % optional argument 'parallel' : true for use parallel computing
+%
+% See also
+% Do_clustering
 
 % Example
 % param.stdmin = 4;
