@@ -56,5 +56,9 @@ switch par.interpolation
             end
         end
         %Does interpolation
-        spikes = int_spikes_pol(spikes,size(x,1),thr,par);   
+        if exist('spikes','var')
+            spikes = int_spikes_pol(spikes,size(x,1),thr,par);
+        else
+            spikes = [];
+        end
 end   

@@ -27,8 +27,12 @@ classdef nc5_wc_reader < handle
     end 
 	methods 
         function obj = nc5_wc_reader(par, raw_filename)
-            load('NSX_TimeStamps','lts', 'sr');
-
+            stamps_name = [raw_filename(1:regexp(raw_filename,'_\d*.NC5')) '_TimeStamps.mat'];
+            if exist(stamps_name,'file')
+                load(stamps_name ,'lts', 'sr');
+            else
+                load('NSX_TimeStamps','lts', 'sr');
+            end
             obj.sr = sr;
             
             if strcmp(par.tmax,'all')

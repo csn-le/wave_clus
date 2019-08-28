@@ -73,7 +73,7 @@ end
 
 
 if isfield(par,'ref')
-    new_par.ref_ms = par.ref /par.sr *1000;
+    new_par.ref_ms = double(par.ref) /par.sr *1000;
 end
 
 end
