@@ -175,7 +175,7 @@ set(handles.isi0_nbins,'string',handles.par.nbins);
 set(handles.isi0_bin_step,'string',handles.par.bin_step);
 
 % Sets to zero fix buttons from aux figures
-for i=4:min(handles.par.max_clus,33)
+for i=4:33
     eval(['handles.par.fix' num2str(i) '=0;'])
 end
 
