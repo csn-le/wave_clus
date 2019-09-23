@@ -179,7 +179,7 @@ for i=4:33
     eval(['handles.par.fix' num2str(i) '=0;'])
 end
 
-for i =0:handles.par.max_clus
+for i =0:33
     si = num2str(i);
     eval(['handles.par.nbins' si ' = handles.par.nbins;']);  % # of bins for the ISI histograms
     eval(['handles.par.bin_step' si ' = handles.par.bin_step;']);  % percentage number of bins to plot
