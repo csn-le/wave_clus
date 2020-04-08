@@ -2,17 +2,9 @@ function [spikes,index,thr] = amp_detect_pol(x, par)
 %detect spikes in a tetrode
 
 %PARAMETERS
-sr =  par.sr;
 w_pre = par.w_pre;
 w_post = par.w_post;
 ref = ceil(par.ref_ms/1000 * par.sr);
-detect = par.detection;
-stdmin = par.stdmin;
-stdmax = par.stdmax;
-fmin_detect = par.detect_fmin;
-fmax_detect = par.detect_fmax;
-fmin_sort = par.sort_fmin;
-fmax_sort = par.sort_fmax;
 awin = par.alignment_window;  
 
 % SPIKE DETECTION FOR EACH CHANNEL

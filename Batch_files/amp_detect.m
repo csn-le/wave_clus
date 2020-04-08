@@ -8,39 +8,27 @@ function [spikes,thr,index] = amp_detect(x, par)
 sr = par.sr;
 w_pre = par.w_pre;
 w_post = par.w_post;
-ref = par.ref;
+
+
+if isfield(par,'ref_ms')
+    ref = floor(par.ref_ms * par.sr/1000);
+else
+    ref = par.ref; %for retrocompatibility
+end
+
 detect = par.detection;
 stdmin = par.stdmin;
 stdmax = par.stdmax;
-fmin_detect = par.detect_fmin;
-fmax_detect = par.detect_fmax;
-fmin_sort = par.sort_fmin;
-fmax_sort = par.sort_fmax;
 
-
-%HIGH-PASS FILTER OF THE DATA
-if exist('ellip','file')                         %Checks for the signal processing toolbox
-    [b_detect,a_detect] = ellip(par.detect_order,0.1,40,[fmin_detect fmax_detect]*2/sr);
-    [b,a] = ellip(par.sort_order,0.1,40,[fmin_sort fmax_sort]*2/sr);
-%     [z_det,p_det,k_det] = ellip(par.detect_order,0.1,40,[fmin_detect fmax_detect]*2/sr);
-%     [z,p,k] = ellip(par.sort_order,0.1,40,[fmin_sort fmax_sort]*2/sr);
-%     
-%     [SOS,G] = zp2sos(z,p,k);
-%     [SOS_det,G_det] = zp2sos(z_det,p_det,k_det);
-    if exist('FiltFiltM','file')
-    	xf_detect = FiltFiltM(b_detect, a_detect, x);
-        xf = FiltFiltM(b, a, x); 
-    else
-        xf_detect = filtfilt(b_detect, a_detect, x);
-        xf = filtfilt(b, a, x);
-%         xf_detect = filtfilt(SOS_det, G_det, x);
-%         xf = filtfilt(SOS,G, x);
-        
-    end
-    
+if par.sort_order > 0
+    xf = filt_signal(x,par.sort_order,par.sort_fmin,par.sort_fmax,par.sr);
 else
-    xf = fix_filter(x);                   %Does a bandpass filtering between [300 3000] without the toolbox.
-    xf_detect = xf;
+    xf = x;
+end
+if par.detect_order > 0
+    xf_detect = filt_signal(x,par.detect_order,par.detect_fmin,par.detect_fmax,par.sr);
+else
+    xf_detect = x;
 end
 
 noise_std_detect = median(abs(xf_detect))/0.6745;
@@ -122,5 +110,18 @@ switch par.interpolation
         %Does interpolation
         spikes = int_spikes(spikes,par);
 end
+end
 
-
+function filtered = filt_signal(x,order,fmin,fmax,sr)
+    %HIGH-PASS FILTER OF THE DATA
+    if exist('ellip','file')                         %Checks for the signal processing toolbox
+        [b,a] = ellip(order,0.1,40,[fmin fmax]*2/sr);
+        if exist('FiltFiltM','file')
+            filtered = FiltFiltM(b, a, x); 
+        else
+            filtered = filtfilt(b, a, x);      
+        end
+    else
+        filtered = fix_filter(x);    %Does a bandpass filtering between [300 3000] without the toolbox.
+    end
+end
