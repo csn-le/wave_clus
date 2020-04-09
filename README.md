@@ -38,6 +38,18 @@ __A novel and fully automatic spike sorting implementation with variable number 
 F. J. Chaure, H. G. Rey and R. Quian Quiroga. Journal of Neurophysiology; 2018. 
 [https://doi.org/10.1152/jn.00339.2018](https://www.physiology.org/doi/full/10.1152/jn.00339.2018)
 
+```bibtex
+@article{chaure2020novel,
+  title={A novel and fully automatic spike sorting implementation with variable number of features},
+  author={Chaure, F. J. and Rey, H. G. and Quian Quiroga, R.},
+  journal={Journal of Neurophysiology},
+  year={2018},
+  volume={120}, 
+  number={4}, 
+  pages={1859-1871}, 
+}
+```
+
 ###### For a non technical reference about spike sorting see:
 
 Quick guide: [Spike Sorting](http://www2.le.ac.uk/departments/engineering/research/bioengineering/neuroengineering-lab/Publications/spike%20sorting%20quick%20guide.pdf "quick guide")<br/>
