@@ -47,9 +47,6 @@ switch detect
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
                 [aux_unused, iaux] = max((xf(xaux(i):xaux(i)+sample_ref-1)));    %introduces alignment
-                if iaux == 1 && ~any((xf(xaux(i)+1:xaux(i)+sample_ref))>thr)
-                    continue
-                end
                 nspk = nspk + 1;
                 index(nspk) = iaux + xaux(i) -1;
                 xaux0 = index(nspk);
@@ -62,9 +59,6 @@ switch detect
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
                 [aux_unused, iaux] = min((xf(xaux(i):xaux(i)+sample_ref-1)));    %introduces alignment
-                if iaux == 1 && ~any((xf(xaux(i)+1:xaux(i)+sample_ref))<thr)
-                    continue
-                end
                 nspk = nspk + 1;
                 index(nspk) = iaux + xaux(i) -1;
                 xaux0 = index(nspk);
@@ -77,9 +71,6 @@ switch detect
         for i=1:length(xaux)
             if xaux(i) >= xaux0 + ref
                 [aux_unused, iaux] = max(abs(xf(xaux(i):xaux(i)+sample_ref-1)));    %introduces alignment
-                if iaux == 1 && ~any((abs(xf(xaux(i)+1:xaux(i)+sample_ref)))>thr)
-                    continue
-                end
                 nspk = nspk + 1;
                 index(nspk) = iaux + xaux(i) -1;
                 xaux0 = index(nspk);
