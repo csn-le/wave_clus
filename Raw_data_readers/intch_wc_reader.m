@@ -13,27 +13,27 @@ classdef intch_wc_reader < handle
             load('intan_meta_data.mat','sr','lts','channels');
             obj.sr = sr;
             
-            
+            initial_index = floor(par.tmin * obj.sr);      
             if strcmp(par.tmax,'all')
-                initial_index = 0;
-                obj.max_segments = ceil(lts/(par.segments_length  * sr * 60)); %number of segments in which data is cut
+                tmax = lts/sr;
             else
-                initial_index = floor(par.tmin * obj.sr);                   %min time to read (in micro-sec)
-                tsmax = min(par.tsmax,lts/sr);
-                obj.max_segments = ceil((tsmax - par.tsmin)/ ...
-                    (par.segments_length *60));         %number of segments in which data is cutted
+                tmax = min(par.tmax,lts/sr);
             end
-            
+            obj.max_segments = ceil((tmax - par.tmin)/ ...
+                    (par.segments_length *60));         %number of segments in which data is cutted
             obj.opened_file = fopen(raw_filename,'r','l');
 			fseek(obj.opened_file,initial_index*4,'bof');
             
-            obj.segmentLength = floor (lts/obj.max_segments);
-             
+            obj.segmentLength = zeros(1,obj.max_segments);
+            slen = floor(par.segments_length * 60 * sr);
+            obj.segmentLength(1) = min(floor((tmax - par.tmin) * sr),slen);
             obj.t0_segments = zeros(1,obj.max_segments);
-            obj.t0_segments(1) = initial_index*obj.sr;
+            obj.t0_segments(1) = initial_index / obj.sr *1e3;
             for i = 2:obj.max_segments
-            	obj.t0_segments(i) = obj.t0_segments(i-1) + obj.segmentLength/obj.sr*1000;
+            	obj.t0_segments(i) = obj.t0_segments(i-1) + obj.segmentLength(i-1)/obj.sr*1000;
+                obj.segmentLength(i) = min(floor((tmax - obj.t0_segments(i)/1000) * sr),slen);
             end
+            
         end     
         function [sr,max_segments,with_raw,with_spikes] = get_info(obj)
         	sr = obj.sr;
@@ -47,7 +47,7 @@ classdef intch_wc_reader < handle
         end
       
         function x = get_segment(obj,i)
-            x=fread(obj.opened_file,obj.segmentLength,'single=>double')';
+            x=fread(obj.opened_file,obj.segmentLength(i),'single=>double')';
             if i == obj.max_segments
                 fclose(obj.opened_file);
             end

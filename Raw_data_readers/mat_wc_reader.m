@@ -35,14 +35,11 @@ classdef mat_wc_reader < handle
             if isfield(par,'tmax') && ismember('data',{finfo.name})
                 
                 data_info = whos('-file',raw_filename,'data');
+                obj.min_index = floor(par.tmin * obj.sr);
                 if strcmp(par.tmax,'all')
-                    t0 = 0;
-                    obj.min_index = 0;
                     obj.max_index = max(data_info.size);
                 else
-                    obj.min_index = floor(par.tmin * obj.sr);         %min time to read (in micro-sec)
                     obj.max_index = ceil(par.tmax * obj.sr);
-                    t0 = (obj.min_index-1)/obj.sr*1000;
                 end
                 n = obj.max_index -  obj.min_index;
 
@@ -54,7 +51,7 @@ classdef mat_wc_reader < handle
                 obj.segmentLength = floor (n/obj.max_segments);
 
                 obj.t0_segments = ones(1,obj.max_segments);
-                obj.t0_segments(1) = t0;
+                obj.t0_segments(1) = (obj.min_index-1)/obj.sr*1000;
                 for i = 2:obj.max_segments
                     obj.t0_segments(i) = obj.t0_segments(i-1) + obj.segmentLength/obj.sr*1000;
                 end
