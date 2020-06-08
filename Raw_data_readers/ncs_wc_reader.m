@@ -76,12 +76,15 @@ classdef ncs_wc_reader < handle
             obj.TimeStamps = TimeStamps;
             scale_factor = textread(obj.raw_filename,'%s',43);
 
-            if(str2num(scale_factor{41})*1e6 > 0.5)
-                obj.num_scale_factor = 1e6 * str2num(scale_factor{43}); %for the new CSC format
-            else
-                obj.num_scale_factor = 1e6 * str2num(scale_factor{41}); %for the old CSC format
-            end
-            
+            header = textread(obj.raw_filename,'%s',50);
+			obj.num_scale_factor = 1e6 * str2num(header{find(strcmp('-ADBitVolts', header))+1});
+			%for older versions:
+			%if(str2num(scale_factor{41})*1e6 > 0.5)
+            %    obj.num_scale_factor = 1e6 * str2num(scale_factor{43}); %for the new CSC format
+            %else
+            %    obj.num_scale_factor = 1e6 * str2num(scale_factor{41}); %for the old CSC format
+            %end
+			
         end
         
         function [sr,max_segments,with_raw,with_spikes] = get_info(obj)
