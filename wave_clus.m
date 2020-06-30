@@ -640,7 +640,7 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
             classes(fix_class )= -1;
         end
         % Get fixed clusters from aux figures
-        for i=4:min(par.max_clus,33)
+        for i=4:33
             eval(['fixx = par.fix' num2str(i) ';']);
             if fixx == 1
                 fix_class = USER_DATA{22+i-3}';
@@ -679,30 +679,10 @@ function force_unforce_button_Callback(hObject, eventdata, handles)
 
         new_forced = zeros(size(forced));
         % Fixed clusters are not considered for forcing
-%         if get(handles.fix1_button,'value') ==1
-%             fix_class = USER_DATA{20}';
-%             new_forced(fix_class) =forced(fix_class);
-%         end
-%         if get(handles.fix2_button,'value') ==1
-%             fix_class = USER_DATA{21}';
-%             new_forced(fix_class) =forced(fix_class);
-%         end
-%         if get(handles.fix3_button,'value') ==1
-%             fix_class = USER_DATA{22}';
-%             new_forced(fix_class) =forced(fix_class);
-%         end
-%         % Get fixed clusters from aux figures
-%         for i=4:par.max_clus
-%             eval(['fixx = par.fix' num2str(i) ';']);
-%             if fixx == 1
-%                 fix_class = USER_DATA{22+i-3}';
-%                 new_forced(fix_class) =forced(fix_class);
-%             end
-%         end
         set(handles.fix1_button,'value',0);
         set(handles.fix2_button,'value',0);
         set(handles.fix3_button,'value',0);
-        for i=4:min(par.max_clus,33)
+        for i=4:33
             eval(['par.fix' num2str(i) '=0;']);
         end
         classes(forced(:) & (~new_forced(:)) & (~rejected(:))) = 0;  %the elements that before were forced but it isn't force any more, pass to class 0
@@ -1107,7 +1087,7 @@ if get(handles.fix3_button,'value') ==1
     classes(fix_class )= -1;
 end
 % Get fixed clusters from aux figures
-for i=4:min(par.max_clus,33)
+for i=4:33
     eval(['fixx = par.fix' num2str(i) ';']);
     if fixx == 1
         fix_class = USER_DATA{22+i-3}';
@@ -1170,7 +1150,7 @@ function unforce_button_Callback(hObject, eventdata, handles)
         new_forced(fix_class) =forced(fix_class);
     end
     % Get fixed clusters from aux figures
-    for i=4:min(par.max_clus,33)
+    for i=4:33
         eval(['fixx = par.fix' num2str(i) ';']);
         if fixx == 1
             fix_class = USER_DATA{22+i-3}';

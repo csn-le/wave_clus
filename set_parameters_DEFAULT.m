@@ -22,7 +22,6 @@ par.tempstep = 0.01;                 % temperature steps
 par.SWCycles = 100;                  % SPC iterations for each temperature (default 100)
 par.KNearNeighb = 11;                % number of nearest neighbors for SPC
 par.min_clus = 20;                   % minimum size of a cluster (default 20)
-par.max_clus = 200;                   % maximum number of clusters allowed (default 200)
 par.randomseed = 0;                  % if 0, random seed is taken as the clock value (default 0)
 %par.randomseed = 147;               % If not 0, random seed
 %par.temp_plot = 'lin';              % temperature plot in linear scale

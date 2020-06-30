@@ -12,11 +12,12 @@ function Do_clustering(input, varargin)
 %input must be:
 %               A .txt file with the names of the '*_spikes.mat' files to use.
 %               A matlab cell with the names of the '*_spikes.mat' files to use.
-%               A vector with channel numbers. In this case the function will proccess all the
-%                   '*_spikes.mat' files located in the folder with those
-%                   channel numbers (e.g., CSC1_spikes.mat or NSX4_spikes.mat)
+%               A vector with channel numbers. In this case the function 
+%                   will proccess all the '*_spikes.mat' files located in 
+%                   the folder with those channel numbers (e.g., CSC1_spikes.mat or NSX4_spikes.mat)
 %               'all', in this case the functions will process all the
 %                   '*_spikes.mat' files in the folder.
+%               A string with a filename ended in '_spikes.mat'
 % optional argument 'par' and the next input must be a struct with some of
 %       the SPC parameters (the detection parameters are taken from the
 %       XXX_spikes file or the set_parameters file. All the parameters included

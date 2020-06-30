@@ -65,7 +65,7 @@ end
 
 
 
-for i = 1:min(length(classes_names),par.max_clus)
+for i = 1:length(classes_names)
    c = classes_names(i);
    if c~= i
        classes(classes == c) = i;
@@ -73,9 +73,9 @@ for i = 1:min(length(classes_names),par.max_clus)
 end
 
 % Defines nclusters
-cluster_sizes = zeros(1,par.max_clus);
-ifixflag = zeros(1,par.max_clus);
-for i=1:par.max_clus
+cluster_sizes = zeros(1,33);
+ifixflag = zeros(1,33);
+for i=1:size(cluster_sizes,2)
     cluster_sizes(i) = nnz(classes==i);
 end
 
@@ -240,7 +240,7 @@ for i=20:52
     USER_DATA{i} = [];
 end
 
-for i=4:par.max_clus
+for i=4:33
     eval(['par.fix' num2str(i) '=0;']);
 end
 
