@@ -26,7 +26,8 @@ function Do_clustering(input, varargin)
 % optional argument 'make_times': true for computing the sorting from the XXX_spikes files.
 % optional argument 'make_plots': true for plotting the results based on the save XXX_times files.
 % optional argument 'resolution': resolution string used by the plots (default: '-r150').
-%
+% optional argument 'save_spikes': false for disable saving all the spikes
+% waveforms on the times* file.
 % See also
 % Get_spikes
 
@@ -54,7 +55,7 @@ parallel = false;
 make_times = true;
 make_plots = true;
 resolution = '-r150';
-
+save_spikes = true;
 %search for optional inputs
 nvar = length(varargin);
 for v = 1:nvar
@@ -86,9 +87,14 @@ for v = 1:nvar
         if (nvar>=v+1) && ischar(varargin{v+1})
             resolution = varargin{v+1};
         else
-            error('Error in ''make_plots'' optional input.')
+            error('Error in ''resolution'' optional input.')
         end
-
+    elseif strcmp(varargin{v},'save_spikes')
+        if (nvar>=v+1) && islogical(varargin{v+1})
+            save_spikes = varargin{v+1};
+        else
+            error('Error in ''save_spikes'' optional input.')
+        end
 
     end
 end
@@ -162,13 +168,13 @@ if make_times
     if run_par_for == true
         parfor fnum = 1:Nfiles
             filename = filenames{fnum};
-            do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum);
+            do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum,save_spikes);
             disp(sprintf('%d of %d ''times'' files finished.',count_new_times(initial_date, filenames),Nfiles))
         end
     else
         for fnum = 1:length(filenames)
             filename = filenames{fnum};
-            do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum);
+            do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum,save_spikes);
             disp(sprintf('%d of %d ''times'' files finished.',count_new_times(initial_date, filenames),Nfiles))
         end
     end
@@ -474,7 +480,7 @@ toc
 
 end
 
-function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
+function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum,save_spikes)
 
     par = struct;
     par = update_parameters(par,par_file,'clus');
@@ -615,16 +621,22 @@ function do_clustering_single(filename,min_spikes4SPC, par_file, par_input,fnum)
     cluster_class = zeros(nspk,2);
     cluster_class(:,2)= index';
     cluster_class(:,1)= classes';
+    
+    vars = {'cluster_class', 'par','inspk','forced','Temp','gui_status'};
+    if exist('ipermut','var')
+        vars{end+1} = 'ipermut';
+    end
+    if save_spikes
+        vars{end+1} = 'spikes';
+    else
+        spikes_file = filename;
+        vars{end+1} = 'spikes_file';
+    end
+    
     try
-      save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'par','inspk','forced','Temp','gui_status');
-      if exist('ipermut','var')
-          save(['times_' data_handler.nick_name],'ipermut','-append');
-      end
+      save(['times_' data_handler.nick_name],vars{:});
     catch
-      save(['times_' data_handler.nick_name], 'cluster_class','spikes', 'par','inspk','forced','Temp','gui_status','-v7.3');
-      if exist('ipermut','var')
-          save(['times_' data_handler.nick_name],'ipermut','-append','-v7.3');
-      end
+      save(['times_' data_handler.nick_name],vars{:},'-v7.3');
     end
 
 

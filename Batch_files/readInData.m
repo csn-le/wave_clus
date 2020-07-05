@@ -15,6 +15,7 @@ classdef readInData < handle
         with_wc_spikes  % boolean flag. True if '_spikes' file was found.
         with_psegment   % boolean flag. True if the continuous segment was found in the '_spikes' file.
         with_spc        % boolean flag. True if the '.dg_01' files created for the SPC algorithm were found.
+        spikes_file     % string. *_spikes file when the times_* file doesn't include the spikes variable.
     end 
 	methods 
         function obj = readInData(par_ui)
@@ -30,6 +31,7 @@ classdef readInData < handle
             obj.with_psegment = false;
             obj.with_gui_status = false;
             obj.with_spc = false;
+            obj.spikes_file = '';
             with_par = false;
             results_selected = false;
 
@@ -37,7 +39,6 @@ classdef readInData < handle
                 obj.with_results = true;
                 results_selected = true;
                 obj.nick_name = fnam(7:end);
-                obj.with_wc_spikes = true;
             end
             if length(fnam)>7 && strcmp(fnam(end-6:end),'_spikes') && (strcmp(ext,'.mat') || isempty(ext))%if a 'spikes' file was selected.
                 obj.with_wc_spikes = true;
@@ -45,14 +46,16 @@ classdef readInData < handle
                 obj.nick_name = fnam(1:end-7);
             end
             
-            
-            if (~isfield(par_ui,'reset_results')) || (~ par_ui.reset_results) ||  obj.with_results
+            reset_results = (~isfield(par_ui,'reset_results')) || (~ par_ui.reset_results);
+            if  reset_results ||  obj.with_results
                 %Search for previous results
                 if exist(['times_' obj.nick_name '.mat'],'file')
                     finfo = whos('-file',['times_' obj.nick_name '.mat']);
-                    if ~ismember('spikes',{finfo.name})
-                        ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_times'' file');
-                        throw(ME)
+                    if ismember('spikes',{finfo.name})
+                        obj.with_wc_spikes = True;
+                    elseif ismember('spikes_file',{finfo.name})
+                        load(['times_' obj.nick_name '.mat'],'spikes_file');
+                        obj.spikes_file = spikes_file;
                     end
                    
                     if exist(['data_' obj.nick_name '.dg_01.lab'],'file') && exist(['data_' obj.nick_name '.dg_01'],'file')
@@ -71,8 +74,7 @@ classdef readInData < handle
                     end
                 end
             end
-            if (~isfield(par_ui,'reset_results')) || (~ par_ui.reset_results) || obj.with_wc_spikes
-
+            if reset_results || obj.with_wc_spikes
                 %Search for previously detected spikes
                 if exist([obj.nick_name '_spikes.mat'],'file')
                     obj.with_wc_spikes = true;
@@ -92,6 +94,10 @@ classdef readInData < handle
                     end
                     
                 end
+            end
+            if obj.with_results && ~obj.with_wc_spikes
+                ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_times'' file');
+                throw(ME)
             end
             % Search raw data
             if exist([ext(2:end) '_wc_reader'],'file')
@@ -143,7 +149,7 @@ classdef readInData < handle
             end
             
             if obj.with_wc_spikes                               %wc data have priority
-                load([obj.nick_name '_spikes.mat']);
+                load([obj.nick_name '_spikes.mat'],'spikes','index');
                 if ~ exist('index_ts','var')                    %for retrocompatibility
                     index_ts = index;
                 end
@@ -167,7 +173,9 @@ classdef readInData < handle
             if ~exist('forced','var')
             	forced = false(size(spikes,1), 1);
             end
-           
+            if ~exist('spikes','var')
+                load(obj.spikes_file,'spikes')
+            end
             
             % cluster_class(:,1);
             index = cluster_class(1:end,2);
@@ -192,15 +200,15 @@ classdef readInData < handle
             	ME = MException('MyComponent:noClusFound', 'This file don''t have a associated ''times_%s.mat'' file',obj.nick_name);
             	throw(ME)
             end
-            load(['times_' obj.nick_name '.mat']);
-            if ~exist('rejected','var')
-            	rejected = false(1,size(spikes,1));
+            finfo = whos('-file', ['times_' obj.nick_name '.mat'],'rejected','cluster_class');
+            if ~ismember('rejected',{finfo.name})
+            	rejected = false(1,finfo.size(1));
             end
         end
         
 
         function [original_classes, current_temp,auto_sort_info] = get_gui_status(obj)
-            load(['times_' obj.nick_name '.mat'],'gui_status','cluster_class');
+            load(['times_' obj.nick_name '.mat'],'gui_status');
             current_temp = gui_status.current_temp;
             if isempty(current_temp) || (current_temp == -1 && obj.with_spc)
                 current_temp=1;
