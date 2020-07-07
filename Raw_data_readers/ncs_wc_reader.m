@@ -35,6 +35,11 @@ classdef ncs_wc_reader < handle
                 end
             end
             
+            %remove the following if statement to keep unix time in new
+            %versions
+            if TimeStamps(1) > 1e+15 %reset time to the beggining of the file
+                TimeStamps = TimeStamps - TimeStamps(1); 
+            end
             obj.sr = 512*1e6/obj.dt;            % sampling rate (in Hz).
             time0 = TimeStamps(1); 
             
@@ -74,11 +79,10 @@ classdef ncs_wc_reader < handle
             obj.recmax = tmax;
             obj.recmin = tmin;
             obj.TimeStamps = TimeStamps;
-            scale_factor = textread(obj.raw_filename,'%s',43);
-
             header = textread(obj.raw_filename,'%s',50);
 			obj.num_scale_factor = 1e6 * str2num(header{find(strcmp('-ADBitVolts', header))+1});
 			%for older versions:
+            %scale_factor = textread(obj.raw_filename,'%s',43);
 			%if(str2num(scale_factor{41})*1e6 > 0.5)
             %    obj.num_scale_factor = 1e6 * str2num(scale_factor{43}); %for the new CSC format
             %else
