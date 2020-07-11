@@ -13,6 +13,13 @@ maxdiff(maxdiff<0)=0;
 prop = (y(2:end)+maxdiff.*(maxdiff>0))./y(1:end-1);
 aux = find(prop<elbow_min,1,'first')+1; %percentaje of the rest
 
+% The next if removes the particular case where just a class is found at the 
+% lowest temperature and with just a small change the rest appears
+% all together at the next temperature
+if par.tmin==0 && aux==2
+    aux = find(prop(2:end)<elbow_min,1,'first')+2; %percentaje of the rest
+end
+
 tree = tree(1:end-1,5:end);
 clus = zeros(size(tree));
 clus(tree(:,:) >= min_clus)=1; %only check the ones that cross the thr
