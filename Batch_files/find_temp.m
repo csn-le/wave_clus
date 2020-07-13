@@ -16,7 +16,7 @@ aux = find(prop<elbow_min,1,'first')+1; %percentaje of the rest
 % The next if removes the particular case where just a class is found at the 
 % lowest temperature and with just a small change the rest appears
 % all together at the next temperature
-if par.tmin==0 && aux==2
+if ~isempty(aux) && par.tmin==0 && aux==2
     aux = find(prop(2:end)<elbow_min,1,'first')+2; %percentaje of the rest
 end
 
