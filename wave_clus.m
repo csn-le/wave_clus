@@ -193,7 +193,7 @@ handles.par.fname = ['data_' data_handler.nick_name];
 handles.par.nick_name = data_handler.nick_name;
 handles.par.fnamesave = handles.par.fname;                  %filename if "save clusters" button is pressed
 handles.par.fnamespc = 'data_wc';
-
+handles.par.spikes_file = data_handler.spikes_file;  
 handles.par = data_handler.update_par(handles.par);
 check_WC_params(handles.par)
 
@@ -553,7 +553,7 @@ for i = 1:length(classes_names)
 end
 forced = USER_DATA{13};
 
-var_list = 'cluster_class'',''par'',''spikes'',''gui_status'', ''forced'', ''Temp''';
+var_list = 'cluster_class'',''par'',''gui_status'', ''forced'', ''Temp''';
 
 if ~isempty(USER_DATA{7})
     inspk = USER_DATA{7};
@@ -567,6 +567,13 @@ end
 
 if developer_mode
 	var_list = strcat(var_list , ' ,''rejected''');
+end
+
+if isempty(handles.par.spikes_file)
+    var_list = strcat(var_list , ' ,''spikes''');
+else
+    spikes_file = handles.par.spikes_file;
+    var_list = strcat(var_list , ' ,''spikes_file''');
 end
 
 ver = '';

@@ -76,16 +76,21 @@ classdef readInData < handle
             end
             if reset_results || obj.with_wc_spikes
                 %Search for previously detected spikes
-                if exist([obj.nick_name '_spikes.mat'],'file')
+                if isempty(obj.spikes_file)
+                    spikes_file = [obj.nick_name '_spikes.mat'];
+                else
+                    spikes_file = obj.spikes_file;
+                end
+                if exist(spikes_file,'file')
                     obj.with_wc_spikes = true;
                     obj.with_spikes = true;
-                    finfo = whos('-file', [obj.nick_name '_spikes.mat']);
+                    finfo = whos('-file', spikes_file);
                     if ~ismember('spikes',{finfo.name})
                         ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_spikes'' file');
                         throw(ME)
                     end
                     if ismember('par',{finfo.name}) && ~ with_par 
-                        load([obj.nick_name '_spikes.mat'],'par'); 
+                        load(spikes_file,'par'); 
                         obj.par = update_parameters(obj.par,par,'detect',true);
                         with_par = true;
                     end
@@ -96,7 +101,7 @@ classdef readInData < handle
                 end
             end
             if obj.with_results && ~obj.with_wc_spikes
-                ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''_times'' file');
+                ME = MException('MyComponent:FileError', 'Coultn''t find spikes variable in ''times_'' file');
                 throw(ME)
             end
             % Search raw data
@@ -149,7 +154,12 @@ classdef readInData < handle
             end
             
             if obj.with_wc_spikes                               %wc data have priority
-                load([obj.nick_name '_spikes.mat'],'spikes','index');
+                if isempty(obj.spikes_file)
+                    spikes_file = [obj.nick_name '_spikes.mat'];
+                else
+                    spikes_file = obj.spikes_file;
+                end
+                load(spikes_file,'spikes','index');
                 if ~ exist('index_ts','var')                    %for retrocompatibility
                     index_ts = index;
                 end
@@ -258,8 +268,13 @@ classdef readInData < handle
         
         
         function [xd_sub, sr_sub] = get_signal_sample(obj)
+            if isempty(obj.spikes_file)
+            	spikes_file = [obj.nick_name '_spikes.mat'];
+            else
+                spikes_file = obj.spikes_file;
+            end
             if obj.with_psegment
-                load([obj.nick_name '_spikes.mat'],'psegment','sr_psegment');
+                load(spikes_file,'psegment','sr_psegment');
                 xd_sub = psegment;
                 sr_sub = sr_psegment;
             else
