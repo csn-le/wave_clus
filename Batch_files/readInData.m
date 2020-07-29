@@ -52,7 +52,7 @@ classdef readInData < handle
                 if exist(['times_' obj.nick_name '.mat'],'file')
                     finfo = whos('-file',['times_' obj.nick_name '.mat']);
                     if ismember('spikes',{finfo.name})
-                        obj.with_wc_spikes = True;
+                        obj.with_wc_spikes = true;
                     elseif ismember('spikes_file',{finfo.name})
                         load(['times_' obj.nick_name '.mat'],'spikes_file');
                         obj.spikes_file = spikes_file;
