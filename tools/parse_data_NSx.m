@@ -1,4 +1,4 @@
-function parse_data_NSx(filename,max_memo_GB,output_name,channels)
+function parsed_chs = parse_data_NSx(filename,max_memo_GB,output_name,channels)
 % Code only valid for recordings without pauses or data loss (Nsx.Data field can't be a cell)
 % This code requires the file openNSx.m, from the NPMK, in the path. You can download the download NPMK from https://github.com/BlackrockMicrosystems/NPMK/releases
 % max_memo_GB is an idea of the number of GB allocated for the data to be
@@ -40,41 +40,44 @@ if length(filename)<3 || (~strcmpi(filename(2:3),':\') && ...
 	filename= [pwd filesep filename];
 end
 
+[~,~,fext] = fileparts(filename);
+fext = lower(fext(2:end));
+nsx_ext = fext(end);
+
 NSx = openNSx(filename, 'report','noread');
 nchan = NSx.MetaTags.ChannelCount;   % number of channels
 sr = NSx.MetaTags.SamplingFreq;   % sampling rate
 lts = sum(NSx.MetaTags.DataPoints);   % total data points 
-% NSx.MetaTags.ChannelID;   % ChannelID
-% NSx.MetaTags.FileSpec   % Version 
-% NSx.MetaTags.DataDurationSec   % total length in secs 
 outfile_handles = cell(1,nchan); %some will be empty
 
 if ~exist('channels','var') || isempty(channels)
     channels = NSx.MetaTags.ChannelID;
 end
+parsed_chs = [];
 for i = 1:nchan
     c = NSx.MetaTags.ChannelID(i);
     if ismember(c,channels)
-        outfile_handles{i} = fopen([output_name '_' num2str(c) '.NC5'],'w');
+        parsed_chs(end+1) = c;
+        outfile_handles{i} = fopen([output_name '_' num2str(c) '.NC' nsx_ext],'w');
     end
 end
 
-save([output_name '_TimeStamps'],'lts','nchan','sr');
 DataPoints = NSx.MetaTags.DataPoints;
 
 DataPoints = [0 DataPoints]; %added for use as starting index
 samples_per_channel = ceil(max_memo/(nchan*length(NSx.MetaTags.DataPoints))/2);
 for part = 2:length(DataPoints)
-    lts = DataPoints(part);   % total data points 
-    num_segments = ceil(lts/samples_per_channel);
-    fprintf('TimeStamps generated. Data will be processed in %d segments of %d samples each.\n',num_segments,min(samples_per_channel,lts))
+    N = DataPoints(part);   % total data points 
+    num_segments = ceil(N/samples_per_channel);
+    fprintf('TimeStamps generated. Data will be processed in %d segments of %d samples each.\n',num_segments,min(samples_per_channel,N))
     for j=1:num_segments
         ini = (j-1)*samples_per_channel+1+DataPoints(part-1);
-        fin = min(j*samples_per_channel,lts)+DataPoints(part-1);
+        fin = min(j*samples_per_channel,N)+DataPoints(part-1);
         tcum = tcum + toc;  % this is because openNSx has a tic at the beginning
         NSx = openNSx('read',filename,['t:' num2str(ini) ':' num2str(fin)]);
         for i = 1:nchan
             if ~isempty(outfile_handles{i})
+                %BE AWARE THAT THE RAW DATA IN THE NS5 AND NC5 IS SCALED UP BY A FACTOR OF 4
             	fwrite(outfile_handles{i},NSx.Data(i,:),'int16');
             end
         end
@@ -84,5 +87,26 @@ end
 fclose('all');
 tcum = tcum + toc;
 fprintf('Total time spent in parsing the data was %s secs.\n',num2str(tcum, '%0.1f')); 
-%fprintf('BE AWARE THAT THE RAW DATA IN THE NS5 AND NC5 IS SCALED UP BY A FACTOR OF 4.\n'); 
 
+metadata_file = fullfile(pwd, [output_name '_TimeStamps.mat']);
+metadata = struct;
+if exist(metadata_file,'file')
+    metadata = load(metadata_file);
+end
+
+if strcmp(nsx_ext,'5')
+    if isfield(metadata,'parsed_chs')
+        parsed_chs = union(parsed_chs,metadata.parsed_chs);
+    end
+    save(metadata_file,'lts','nchan','sr','parsed_chs');
+    save(metadata_file, '-struct', 'metadata','-append')
+else
+    if isfield(metadata,fext) && isfield(metadata.(fext),'sr')
+        parsed_chs = union(parsed_chs,metadata.(fext).parsed_chs);
+    end
+    metadata.(fext).parsed_chs = parsed_chs;
+    metadata.(fext).lts = lts;
+    metadata.(fext).nchan = nchan;
+    metadata.(fext).sr = sr;
+    save(metadata_file, '-struct', 'metadata')
+end
