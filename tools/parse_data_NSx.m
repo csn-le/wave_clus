@@ -43,6 +43,7 @@ end
 [~,~,fext] = fileparts(filename);
 fext = lower(fext(2:end));
 nsx_ext = fext(end);
+chext = ['.NC' nsx_ext];
 
 NSx = openNSx(filename, 'report','noread');
 nchan = NSx.MetaTags.ChannelCount;   % number of channels
@@ -58,10 +59,9 @@ for i = 1:nchan
     c = NSx.MetaTags.ChannelID(i);
     if ismember(c,channels)
         parsed_chs(end+1) = c;
-        outfile_handles{i} = fopen([output_name '_' num2str(c) '.NC' nsx_ext],'w');
+        outfile_handles{i} = fopen([output_name '_' num2str(c) chext],'w');
     end
 end
-
 DataPoints = NSx.MetaTags.DataPoints;
 
 DataPoints = [0 DataPoints]; %added for use as starting index
@@ -98,7 +98,8 @@ if strcmp(nsx_ext,'5')
     if isfield(metadata,'parsed_chs')
         parsed_chs = union(parsed_chs,metadata.parsed_chs);
     end
-    save(metadata_file,'lts','nchan','sr','parsed_chs');
+    
+    save(metadata_file,'lts','nchan','sr','parsed_chs','chext');
     save(metadata_file, '-struct', 'metadata','-append')
 else
     if isfield(metadata,fext) && isfield(metadata.(fext),'sr')
@@ -108,5 +109,6 @@ else
     metadata.(fext).lts = lts;
     metadata.(fext).nchan = nchan;
     metadata.(fext).sr = sr;
+    metadata.(fext).chext = chext;
     save(metadata_file, '-struct', 'metadata')
 end
