@@ -98,9 +98,12 @@ if strcmp(nsx_ext,'5')
     if isfield(metadata,'parsed_chs')
         parsed_chs = union(parsed_chs,metadata.parsed_chs);
     end
-    
-    save(metadata_file,'lts','nchan','sr','parsed_chs','chext');
-    save(metadata_file, '-struct', 'metadata','-append')
+    metadata.parsed_chs = parsed_chs;
+    metadata.lts = lts;
+    metadata.nchan = nchan;
+    metadata.sr = sr;
+    metadata.chext = chext;
+    save(metadata_file, '-struct', 'metadata')
 else
     if isfield(metadata,fext) && isfield(metadata.(fext),'sr')
         parsed_chs = union(parsed_chs,metadata.(fext).parsed_chs);
