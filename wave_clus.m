@@ -584,7 +584,7 @@ end
 try
 	eval(['save( ''' outfile ''',''' var_list '' ver ');']);
 catch
-	eval(['save( ''' outfile ''',''' var_list '' ver ',''-v7.3'');']);
+	eval(['save( ''' outfile ''',''' var_list ''',''-v7.3'');']);
 end
 if exist([handles.par.fnamespc '.dg_01.lab'],'file')
     movefile([handles.par.fnamespc '.dg_01.lab'], [handles.par.fnamesave '.dg_01.lab'], 'f');
