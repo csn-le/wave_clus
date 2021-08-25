@@ -108,7 +108,7 @@ if ~isfield(handles,'new_manual')
         end
 	end
 	% Get fixed clusters from aux figures
-	for i=4:min(length(classes_names),33)
+	for i=4:33
 		eval(['fixx = par.fix' num2str(i) ';']);
 		if fixx == 1 && ~isempty(USER_DATA{22+i-3})
 			nclusters = nclusters +1;
