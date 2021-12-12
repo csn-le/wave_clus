@@ -81,7 +81,6 @@ function get_spikes_pol_single(polytrode, par_input)
     par = set_parameters();
     par = update_parameters(par,par_input,'detect');
 
-
     sr = par.sr;
     ls = par.w_pre + par.w_post; % length of the spike
     par.reset_results = true;
@@ -102,6 +101,9 @@ function get_spikes_pol_single(polytrode, par_input)
         par_ch{i} = par;
         par_ch{i}.filename = electrodes{i};
         data_handler_ch{i} = readInData(par_ch{i});
+		if i==1
+			par.sr = data_handler_ch{i}.par.sr;
+		end
         if ~data_handler_ch{i}.with_raw
         	ME = MException('MyComponent:FileError', 'The file %s doesn''t have raw data',electrodes{i});
             throw(ME)
