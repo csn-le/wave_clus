@@ -90,7 +90,7 @@ function get_spikes_pol_single(polytrode, par_input)
     % LOAD POLYTRODE CHANNELS
     pol = strcat('polytrode',num2str(polytrode),'.txt');
     out_filename = pol(1:end-4);
-    electrodes = textread(pol,'%s');
+    electrodes = textread(pol,'%s', 'delimiter', '\n', 'whitespace', '');
     n_channels = length(electrodes);
     
     data_handler_ch{n_channels} = [];
