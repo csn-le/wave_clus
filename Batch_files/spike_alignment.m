@@ -27,8 +27,11 @@ if (size(spikes,2) < (ls + align_window)+2)
     spikes1(:,1+align_window:align_window+size(spikes,2)) = spikes;
     spikes1(:,1+align_window+size(spikes,2)+2:end) = -spikes(:,end:-1:end-diff_size+1);
 else
-    spikes1(:,1:align_window+2) = -spikes(:,align_window:-1:1);
-    spikes1(:,1+align_window:(2*align_window+ls)) = spikes(1:align_window+ls);
+    % spikes1(:,1:align_window+2) = -spikes(:,align_window:-1:1);
+    % spikes1(:,1+align_window:(2*align_window+ls)) = spikes(1:align_window+ls);
+    rm_borders = floor((size(spikes,2)-ls-2*align_window-4)/2);
+    rm_odd_spike = rem(size(spikes,2), 2) == 1;
+    spikes1 = spikes(:,(1+rm_borders ):end-(rm_borders+rm_odd_spike ) );
 end
 
 %sr = par.sr;
